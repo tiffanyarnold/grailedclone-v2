@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Script from "next/script";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import ClientProviders from "@/components/providers/ClientProviders";
 
-const inter = Inter({ subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
-  title: "Tempo - Modern SaaS Starter",
-  description: "A modern full-stack starter template powered by Next.js",
+  title: "GRAILED - Buy & Sell Designer, Streetwear & Vintage Fashion",
+  description: "Grailed is the peer-to-peer marketplace for luxury and streetwear fashion.",
 };
 
 export default function RootLayout({
@@ -17,8 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        {children}
+      <body className={`${spaceGrotesk.variable} font-sans bg-[#F7F7F7] text-[#1A1A1A] antialiased`}>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

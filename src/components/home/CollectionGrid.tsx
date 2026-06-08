@@ -8,10 +8,17 @@ export default function CollectionGrid() {
   const { listings } = useStore();
 
   return (
-    <section className="max-w-[1440px] mx-auto px-6 py-12">
-      {/* 3-column collection grid */}
+    <section className="max-w-[1440px] mx-auto px-6 py-12 space-y-12">
+      {/* First row: 3 collections */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {collections.slice(0, 3).map((col) => (
+          <CollectionCard key={col.id} collection={col} listings={listings} />
+        ))}
+      </div>
+
+      {/* Second row: 3 collections */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {collections.slice(3, 6).map((col) => (
           <CollectionCard key={col.id} collection={col} listings={listings} />
         ))}
       </div>

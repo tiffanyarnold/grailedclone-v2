@@ -53,6 +53,7 @@ export interface Favorite {
 export const users: User[] = [
   { id: "admin-1", name: "Jillian Krebsbach", email: "jillian.krebsbach@pursuit.org", role: "admin", password: "Password123!" },
   { id: "admin-2", name: "Tiffany Arnold", email: "tiffanyarnold@pursuit.org", role: "admin", password: "Password123!" },
+  { id: "admin-3", name: "Tiffany Arnold", email: "tiffanyoarnold@gmail.com", role: "admin", password: "Password123!" },
   { id: "seller-1", name: "Marcus Chen", email: "marcus@seller.com", role: "seller", password: "Password123!" },
   { id: "seller-2", name: "Elena Rodriguez", email: "elena@seller.com", role: "seller", password: "Password123!" },
   { id: "buyer-1", name: "Jordan Williams", email: "jordan@buyer.com", role: "buyer", password: "Password123!" },
