@@ -89,8 +89,7 @@ export default function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-black select-none"
-      style={{ height: "560px" }}
+      className="relative w-full overflow-hidden bg-black select-none h-[380px] sm:h-[460px] lg:h-[560px]"
     >
       {/* Slides */}
       {activeSlides.map((s, i) => (
@@ -142,7 +141,7 @@ export default function HeroCarousel() {
         <h2
           style={{
             fontFamily: "var(--font-syne), 'Arial Black', sans-serif",
-            fontSize: "clamp(40px, 4.8vw, 66px)",
+            fontSize: "clamp(30px, 7vw, 66px)",
             fontWeight: 800,
             letterSpacing: "-0.02em",
             lineHeight: 1.05,

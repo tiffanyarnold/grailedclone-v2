@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Syne } from "next/font/google";
 import "./globals.css";
 import ClientProviders from "@/components/providers/ClientProviders";
@@ -18,6 +18,12 @@ const syne = Syne({
 export const metadata: Metadata = {
   title: "GRAILED - Buy & Sell Designer, Streetwear & Vintage Fashion",
   description: "Grailed is the peer-to-peer marketplace for luxury and streetwear fashion.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

@@ -49,8 +49,8 @@ export default function SellerDashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Seller Dashboard</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Seller Dashboard</h1>
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab("listings")}
@@ -224,7 +224,7 @@ export default function SellerDashboardPage() {
                 return (
                   <div
                     key={offer.id}
-                    className={`flex items-center justify-between p-4 border-b border-[#F0F0F0] last:border-0 ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-[#F0F0F0] last:border-0 ${
                       offer.status === "declined" ? "opacity-50" : ""
                     }`}
                   >

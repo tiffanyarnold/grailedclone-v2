@@ -8,11 +8,11 @@ export default function AdminOffersPage() {
   const { getProfileById } = useProfiles();
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6">All Offers</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A] mb-6">All Offers</h1>
 
-      <div className="bg-white border border-[#E8E8E8] overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
+        <table className="w-full min-w-[760px]">
           <thead>
             <tr className="border-b border-[#E8E8E8]">
               <th className="text-left text-[10px] uppercase tracking-wide font-medium text-gray-500 px-4 py-3">Listing</th>
