@@ -28,7 +28,7 @@ export default function EditorialSectionTwo() {
   });
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-10">
+    <section className="max-w-[1440px] mx-auto px-4 sm:px-8 py-8 sm:py-10">
       {/*
         Layout: left column (label + title + grid) is shorter,
         right image is taller — they align at the top of the flex row
@@ -36,10 +36,10 @@ export default function EditorialSectionTwo() {
         We achieve this by: outer div has NO fixed height,
         left col is natural height, right image has a fixed min-height.
       */}
-      <div className="flex gap-6 items-end">
+      <div className="flex flex-col lg:flex-row gap-6 lg:items-end">
 
         {/* Left — label + title above 2x2 grid */}
-        <div className="w-[36%] flex-shrink-0">
+        <div className="w-full lg:w-[36%] flex-shrink-0">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
@@ -81,13 +81,13 @@ export default function EditorialSectionTwo() {
         </div>
 
         {/* Right — tall editorial image, taller than the grid */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "620px" }}>
+        <div className="w-full lg:flex-1 relative overflow-hidden h-[360px] sm:h-[480px] lg:h-[620px]">
           <img
             src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1400&q=90"
             alt="Trending in Seoul"
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-8 left-8 bg-white rounded-xl p-6 max-w-[340px] shadow-sm">
+          <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-auto bg-white rounded-xl p-4 sm:p-6 sm:max-w-[340px] shadow-sm">
             <p
               className="text-[11px] tracking-[0.05em] text-[#888] mb-2"
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}

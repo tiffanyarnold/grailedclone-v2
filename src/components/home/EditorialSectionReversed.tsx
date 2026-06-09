@@ -40,18 +40,18 @@ export default function EditorialSectionReversed() {
   );
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-10">
+    <section className="max-w-[1440px] mx-auto px-4 sm:px-8 py-8 sm:py-10">
       {/* Row: tall image on left, label+title+grid on right — items-start */}
-      <div className="flex gap-6 items-end">
+      <div className="flex flex-col-reverse lg:flex-row gap-6 lg:items-end">
 
         {/* Left — tall editorial image */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "620px" }}>
+        <div className="w-full lg:flex-1 relative overflow-hidden h-[360px] sm:h-[480px] lg:h-[620px]">
           <img
             src={SECTION.editorial.image}
             alt={SECTION.editorial.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-8 left-8 bg-white rounded-xl p-6 max-w-[340px] shadow-sm">
+          <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-auto bg-white rounded-xl p-4 sm:p-6 sm:max-w-[340px] shadow-sm">
             <p
               className="text-[11px] tracking-[0.05em] text-[#888] mb-2"
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
@@ -74,7 +74,7 @@ export default function EditorialSectionReversed() {
         </div>
 
         {/* Right — brand label + title above 2x2 natural-height grid */}
-        <div className="w-[36%] flex-shrink-0">
+        <div className="w-full lg:w-[36%] flex-shrink-0">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}

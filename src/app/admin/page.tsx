@@ -18,8 +18,8 @@ export default function AdminDashboardPage() {
   const recentOffers = offers.slice(-5).reverse();
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-[#1A1A1A] mb-8">Dashboard</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A] mb-8">Dashboard</h1>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

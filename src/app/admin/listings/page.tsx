@@ -63,8 +63,8 @@ export default function AdminListingsPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A1A]">Listings</h1>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -189,8 +189,8 @@ export default function AdminListingsPage() {
       )}
 
       {/* Listings Table */}
-      <div className="bg-white border border-[#E8E8E8] overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
+        <table className="w-full min-w-[720px]">
           <thead>
             <tr className="border-b border-[#E8E8E8]">
               <th className="text-left text-[10px] uppercase tracking-wide font-medium text-gray-500 px-4 py-3">Image</th>

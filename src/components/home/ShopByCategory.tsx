@@ -37,17 +37,17 @@ export default function ShopByCategory() {
   );
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-10 space-y-10">
+    <section className="max-w-[1440px] mx-auto px-4 sm:px-8 py-8 sm:py-10 space-y-10">
 
       {/* Shop Menswear */}
       <div>
         <h2
-          className="text-[22px] font-bold text-[#1A1A1A] mb-5"
+          className="text-[18px] sm:text-[22px] font-bold text-[#1A1A1A] mb-4 sm:mb-5"
           style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 700 }}
         >
           Shop Menswear
         </h2>
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
           {mensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
@@ -65,12 +65,12 @@ export default function ShopByCategory() {
       {/* Shop Womenswear */}
       <div>
         <h2
-          className="text-[22px] font-bold text-[#1A1A1A] mb-5"
+          className="text-[18px] sm:text-[22px] font-bold text-[#1A1A1A] mb-4 sm:mb-5"
           style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 700 }}
         >
           Shop Womenswear
         </h2>
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
           {womensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">

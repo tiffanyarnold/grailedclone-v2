@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
-import { Heart } from "lucide-react";
+import { Heart, SlidersHorizontal } from "lucide-react";
 
 export default function BrowsePageWrapper() {
   return (
@@ -29,6 +29,7 @@ function BrowsePage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [sortBy, setSortBy] = useState("newest");
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [showFilters, setShowFilters] = useState(false);
 
   const brands = useMemo(() => Array.from(new Set(listings.map((l) => l.brand))).sort(), [listings]);
   const categories = useMemo(() => Array.from(new Set(listings.map((l) => l.category))).sort(), [listings]);
@@ -83,10 +84,19 @@ function BrowsePage() {
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       <Navbar />
-      <main className="max-w-[1440px] mx-auto px-6 py-8">
-        <div className="flex gap-8">
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Mobile filter toggle */}
+        <button
+          onClick={() => setShowFilters((v) => !v)}
+          className="lg:hidden flex items-center gap-2 px-4 py-2 mb-4 text-xs font-bold uppercase tracking-wide border border-[#1A1A1A]"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          {showFilters ? "Hide Filters" : "Filters"}
+        </button>
+
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters */}
-          <aside className="w-[220px] flex-shrink-0 hidden lg:block">
+          <aside className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-[220px] flex-shrink-0`}>
             <h2 className="text-sm font-bold mb-4 uppercase tracking-wide">Filters</h2>
 
             {/* Brand Filter */}
@@ -181,21 +191,21 @@ function BrowsePage() {
           {/* Main Content */}
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div className="flex items-center gap-2 flex-1">
                 <input
                   type="text"
                   placeholder="Search listings..."
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 outline-none w-[240px]"
+                  className="px-3 py-2 text-sm border border-gray-300 outline-none flex-1 sm:flex-none sm:w-[240px]"
                 />
-                <span className="text-xs text-gray-500">{filteredListings.length} results</span>
+                <span className="text-xs text-gray-500 whitespace-nowrap">{filteredListings.length} results</span>
               </div>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 text-xs border border-gray-300 outline-none bg-white"
+                className="px-3 py-2 text-xs border border-gray-300 outline-none bg-white w-full sm:w-auto"
               >
                 <option value="newest">Newest</option>
                 <option value="price-low">Price: Low–High</option>
@@ -227,7 +237,7 @@ function BrowsePage() {
             )}
 
             {/* Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
               {filteredListings.map((listing) => (
                 <div key={listing.id} className="group relative">
                   <Link href={`/listing/${listing.id}`}>
