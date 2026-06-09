@@ -5,6 +5,9 @@ import Footer from "@/components/layout/Footer";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import CollectionGrid from "@/components/home/CollectionGrid";
 import EditorialSection from "@/components/home/EditorialSection";
+import SecondaryCollections from "@/components/home/SecondaryCollections";
+import EditorialSectionReversed from "@/components/home/EditorialSectionReversed";
+import EditorialSectionTwo from "@/components/home/EditorialSectionTwo";
 import ShopByCategory from "@/components/home/ShopByCategory";
 
 export default function Page() {
@@ -15,6 +18,9 @@ export default function Page() {
         <HeroCarousel />
         <CollectionGrid />
         <EditorialSection />
+        <SecondaryCollections />
+        <EditorialSectionReversed />
+        <EditorialSectionTwo />
         <ShopByCategory />
       </main>
       <Footer />

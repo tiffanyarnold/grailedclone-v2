@@ -20,6 +20,7 @@ const config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+        syne: ["var(--font-syne)", "Arial Black", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

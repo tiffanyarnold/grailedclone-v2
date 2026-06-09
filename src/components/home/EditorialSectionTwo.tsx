@@ -2,61 +2,59 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store-context";
-import { editorialSections } from "@/lib/data";
 
-const SECTION_CONFIG = {
-  brands: "CHROME HEARTS, LOUIS VUITTON, SUPREME +MORE",
-  title: "Trending: Accessories",
-  categories: ["Accessories"],
-};
-
-// Guaranteed fallback images for accessories grid
-const ACCESSORY_FALLBACKS = [
-  "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
-  "https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=800&q=80",
-  "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80",
-  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80",
+// Hardcoded hat images so grid is always filled
+const HAT_IMAGES = [
+  "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80",
+  "https://images.unsplash.com/photo-1534215754734-18e55d13e346?w=800&q=80",
+  "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=800&q=80",
+  "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=800&q=80",
 ];
 
-export default function EditorialSection() {
+const HAT_IDS = ["listing-21", "listing-22", "listing-23", "listing-24"];
+
+export default function EditorialSectionTwo() {
   const { listings } = useStore();
-  const section = editorialSections[0];
 
-  const colListings = listings
-    .filter((l) => SECTION_CONFIG.categories.includes(l.category))
-    .slice(0, 4);
-
-  // Always fill to 4 with fallback image objects
-  const slots = Array.from({ length: 4 }, (_, i) =>
-    colListings[i] ?? {
-      id: `acc-fallback-${i}`,
-      title: "Accessories",
-      images: [ACCESSORY_FALLBACKS[i]],
-    }
-  );
+  // Get hat listings, guaranteed 4 with fallback images
+  const hatListings = HAT_IDS.map((id, i) => {
+    const found = listings.find((l) => l.id === id);
+    return found ?? {
+      id: `hat-fallback-${i}`,
+      title: "Hat",
+      images: [HAT_IMAGES[i]],
+      category: "Hats",
+    };
+  });
 
   return (
     <section className="max-w-[1440px] mx-auto px-8 py-10">
+      {/*
+        Layout: left column (label + title + grid) is shorter,
+        right image is taller — they align at the top of the flex row
+        but the image extends further down.
+        We achieve this by: outer div has NO fixed height,
+        left col is natural height, right image has a fixed min-height.
+      */}
       <div className="flex gap-6 items-end">
 
-        {/* Left — labels + title directly above 2x2 grid */}
-        <div className="w-[36%] flex-shrink-0 flex flex-col">
+        {/* Left — label + title above 2x2 grid */}
+        <div className="w-[36%] flex-shrink-0">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
           >
-            {SECTION_CONFIG.brands}
+            From Grailed
           </p>
           <h3
             className="text-[17px] font-bold text-[#1A1A1A] mb-3"
             style={{ fontFamily: "var(--font-syne), 'Arial Black', sans-serif", fontWeight: 700 }}
           >
-            {SECTION_CONFIG.title}
+            Hats Under $100
           </h3>
-
-          {/* 2x2 equal grid */}
+          {/* 2x2 grid — natural square aspect ratio */}
           <div className="grid grid-cols-2 gap-[3px]">
-            {slots.map((listing, i) => (
+            {hatListings.map((listing, i) => (
               <Link
                 key={listing.id}
                 href={i === 3 ? "/browse" : `/listing/${listing.id}`}
@@ -82,11 +80,11 @@ export default function EditorialSection() {
           </div>
         </div>
 
-        {/* Right — tall editorial image */}
+        {/* Right — tall editorial image, taller than the grid */}
         <div className="flex-1 relative overflow-hidden" style={{ height: "620px" }}>
           <img
-            src={section.image}
-            alt={section.title}
+            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1400&q=90"
+            alt="Trending in Seoul"
             className="w-full h-full object-cover"
           />
           <div className="absolute bottom-8 left-8 bg-white rounded-xl p-6 max-w-[340px] shadow-sm">
@@ -94,19 +92,19 @@ export default function EditorialSection() {
               className="text-[11px] tracking-[0.05em] text-[#888] mb-2"
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
             >
-              {section.categoryLabel}
+              Street Style
             </p>
             <h3
               className="text-[24px] font-bold text-[#1A1A1A] mb-2 leading-tight"
               style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}
             >
-              {section.title}
+              Trending in Seoul
             </h3>
             <p
               className="text-sm text-[#555] leading-relaxed"
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
             >
-              {section.description}
+              See the best looks from Seoul and shop a curated collection of trending Korean designers.
             </p>
           </div>
         </div>
