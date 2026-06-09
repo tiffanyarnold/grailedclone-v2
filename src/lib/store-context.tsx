@@ -1,71 +1,156 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
-import { Listing, Offer, HeroSlide, Favorite, listings as initialListings, offers as initialOffers, heroSlides as initialHeroSlides, favorites as initialFavorites } from "@/lib/data";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+
+export interface Listing {
+  id: string;
+  seller_id: string;
+  title: string;
+  brand: string;
+  description: string;
+  category: string;
+  size: string;
+  condition: string;
+  price: number;
+  created_at: string;
+  images: string[];
+}
+
+export interface Offer {
+  id: string;
+  listing_id: string;
+  buyer_id: string;
+  amount: number;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+}
+
+export interface HeroSlide {
+  id: string;
+  listing_id: string;
+  headline: string;
+  subheadline: string;
+  button_text: string;
+  position: number;
+  active: boolean;
+  image: string;
+}
+
+export interface Favorite {
+  id: string;
+  user_id: string;
+  listing_id: string;
+}
 
 interface StoreContextType {
   listings: Listing[];
   offers: Offer[];
   heroSlides: HeroSlide[];
   favorites: Favorite[];
-  addListing: (listing: Listing) => void;
-  updateListing: (id: string, data: Partial<Listing>) => void;
-  deleteListing: (id: string) => void;
-  addOffer: (offer: Offer) => void;
-  updateOfferStatus: (id: string, status: "accepted" | "declined") => void;
-  addHeroSlide: (slide: HeroSlide) => void;
-  removeHeroSlide: (id: string) => void;
-  updateHeroSlide: (id: string, data: Partial<HeroSlide>) => void;
-  toggleFavorite: (userId: string, listingId: string) => void;
+  isLoading: boolean;
+  addListing: (listing: Omit<Listing, "id" | "created_at">) => Promise<void>;
+  updateListing: (id: string, data: Partial<Listing>) => Promise<void>;
+  deleteListing: (id: string) => Promise<void>;
+  addOffer: (offer: Omit<Offer, "id" | "created_at">) => Promise<void>;
+  updateOfferStatus: (id: string, status: "accepted" | "declined") => Promise<void>;
+  addHeroSlide: (slide: Omit<HeroSlide, "id">) => Promise<void>;
+  removeHeroSlide: (id: string) => Promise<void>;
+  updateHeroSlide: (id: string, data: Partial<HeroSlide>) => Promise<void>;
+  toggleFavorite: (userId: string, listingId: string) => Promise<void>;
   isFavorited: (userId: string, listingId: string) => boolean;
+  refreshData: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType>({} as StoreContextType);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [listings, setListings] = useState<Listing[]>(initialListings);
-  const [offers, setOffers] = useState<Offer[]>(initialOffers);
-  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(initialHeroSlides);
-  const [favorites, setFavorites] = useState<Favorite[]>(initialFavorites);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addListing = (listing: Listing) => {
-    setListings((prev) => [...prev, listing]);
+  const fetchListings = async () => {
+    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
+    if (data) setListings(data as Listing[]);
   };
 
-  const updateListing = (id: string, data: Partial<Listing>) => {
-    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...data } : l)));
+  const fetchOffers = async () => {
+    const { data } = await supabase.from("offers").select("*").order("created_at", { ascending: false });
+    if (data) setOffers(data as Offer[]);
   };
 
-  const deleteListing = (id: string) => {
-    setListings((prev) => prev.filter((l) => l.id !== id));
+  const fetchHeroSlides = async () => {
+    const { data } = await supabase.from("hero_slides").select("*").order("position");
+    if (data) setHeroSlides(data as HeroSlide[]);
   };
 
-  const addOffer = (offer: Offer) => {
-    setOffers((prev) => [...prev, offer]);
+  const fetchFavorites = async () => {
+    const { data } = await supabase.from("favorites").select("*");
+    if (data) setFavorites(data as Favorite[]);
   };
 
-  const updateOfferStatus = (id: string, status: "accepted" | "declined") => {
-    setOffers((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+  const refreshData = useCallback(async () => {
+    await Promise.all([fetchListings(), fetchOffers(), fetchHeroSlides(), fetchFavorites()]);
+  }, []);
+
+  useEffect(() => {
+    refreshData().finally(() => setIsLoading(false));
+  }, [refreshData]);
+
+  const addListing = async (listing: Omit<Listing, "id" | "created_at">) => {
+    const { data, error } = await supabase.from("listings").insert(listing).select().single();
+    if (!error && data) setListings((prev) => [data as Listing, ...prev]);
   };
 
-  const addHeroSlide = (slide: HeroSlide) => {
-    setHeroSlides((prev) => [...prev, slide]);
+  const updateListing = async (id: string, data: Partial<Listing>) => {
+    const { error } = await supabase.from("listings").update(data).eq("id", id);
+    if (!error) setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...data } : l)));
   };
 
-  const removeHeroSlide = (id: string) => {
-    setHeroSlides((prev) => prev.filter((s) => s.id !== id));
+  const deleteListing = async (id: string) => {
+    const { error } = await supabase.from("listings").delete().eq("id", id);
+    if (!error) setListings((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const updateHeroSlide = (id: string, data: Partial<HeroSlide>) => {
-    setHeroSlides((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
+  const addOffer = async (offer: Omit<Offer, "id" | "created_at">) => {
+    const { data, error } = await supabase.from("offers").insert(offer).select().single();
+    if (!error && data) setOffers((prev) => [data as Offer, ...prev]);
   };
 
-  const toggleFavorite = (userId: string, listingId: string) => {
+  const updateOfferStatus = async (id: string, status: "accepted" | "declined") => {
+    const { error } = await supabase.from("offers").update({ status }).eq("id", id);
+    if (!error) setOffers((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+  };
+
+  const addHeroSlide = async (slide: Omit<HeroSlide, "id">) => {
+    const { data, error } = await supabase.from("hero_slides").insert(slide).select().single();
+    if (!error && data) setHeroSlides((prev) => [...prev, data as HeroSlide]);
+  };
+
+  const removeHeroSlide = async (id: string) => {
+    const { error } = await supabase.from("hero_slides").delete().eq("id", id);
+    if (!error) setHeroSlides((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const updateHeroSlide = async (id: string, data: Partial<HeroSlide>) => {
+    const { error } = await supabase.from("hero_slides").update(data).eq("id", id);
+    if (!error) setHeroSlides((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
+  };
+
+  const toggleFavorite = async (userId: string, listingId: string) => {
     const exists = favorites.find((f) => f.user_id === userId && f.listing_id === listingId);
     if (exists) {
-      setFavorites((prev) => prev.filter((f) => f.id !== exists.id));
+      const { error } = await supabase.from("favorites").delete().eq("id", exists.id);
+      if (!error) setFavorites((prev) => prev.filter((f) => f.id !== exists.id));
     } else {
-      setFavorites((prev) => [...prev, { id: `fav-${Date.now()}`, user_id: userId, listing_id: listingId }]);
+      const { data, error } = await supabase
+        .from("favorites")
+        .insert({ user_id: userId, listing_id: listingId })
+        .select()
+        .single();
+      if (!error && data) setFavorites((prev) => [...prev, data as Favorite]);
     }
   };
 
@@ -80,6 +165,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         offers,
         heroSlides,
         favorites,
+        isLoading,
         addListing,
         updateListing,
         deleteListing,
@@ -90,6 +176,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         updateHeroSlide,
         toggleFavorite,
         isFavorited,
+        refreshData,
       }}
     >
       {children}

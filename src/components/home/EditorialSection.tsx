@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store-context";
-import { editorialSections, collections } from "@/lib/data";
+import { editorialSections } from "@/lib/data";
+
+const SECTION_CATEGORIES = [
+  ["Tops"],
+  ["Accessories"],
+  ["Outerwear"],
+];
 
 export default function EditorialSection() {
   const { listings } = useStore();
@@ -10,10 +16,8 @@ export default function EditorialSection() {
   return (
     <section className="max-w-[1440px] mx-auto px-6 py-12 space-y-16">
       {editorialSections.map((section, index) => {
-        const col = collections.find((c) => c.id === section.collection);
-        const colListings = col
-          ? col.listings.map((id) => listings.find((l) => l.id === id)).filter(Boolean).slice(0, 4)
-          : [];
+        const cats = SECTION_CATEGORIES[index] ?? ["Tops"];
+        const colListings = listings.filter((l) => cats.includes(l.category)).slice(0, 4);
 
         const isReversed = index % 2 !== 0;
 

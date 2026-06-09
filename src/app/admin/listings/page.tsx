@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store-context";
-import { getUserById } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function AdminListingsPage() {
   const { listings, addListing, updateListing, deleteListing } = useStore();
+  const { profiles, getProfileById } = useProfiles();
+  const sellers = profiles.filter((p) => p.role === "seller");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -17,30 +19,28 @@ export default function AdminListingsPage() {
     size: "",
     condition: "Gently Used",
     price: "",
-    seller_id: "seller-1",
+    seller_id: "",
     images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
   });
 
   const resetForm = () => {
     setForm({
       title: "", brand: "", description: "", category: "Tops", size: "",
-      condition: "Gently Used", price: "", seller_id: "seller-1",
+      condition: "Gently Used", price: "", seller_id: sellers[0]?.id || "",
       images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
     });
     setEditId(null);
     setShowForm(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editId) {
-      updateListing(editId, { ...form, price: parseFloat(form.price) });
+      await updateListing(editId, { ...form, price: parseFloat(form.price) });
     } else {
-      addListing({
-        id: `listing-${Date.now()}`,
+      await addListing({
         ...form,
         price: parseFloat(form.price),
-        created_at: new Date().toISOString().split("T")[0],
       });
     }
     resetForm();
@@ -116,6 +116,20 @@ export default function AdminListingsPage() {
                 className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
                 required
               />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Seller</label>
+              <select
+                value={form.seller_id}
+                onChange={(e) => setForm({ ...form, seller_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 text-sm outline-none bg-white"
+                required
+              >
+                <option value="">Select seller...</option>
+                {sellers.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Category</label>
@@ -196,7 +210,7 @@ export default function AdminListingsPage() {
                 <td className="px-4 py-3 text-xs">{listing.title}</td>
                 <td className="px-4 py-3 text-xs text-gray-500">{listing.brand}</td>
                 <td className="px-4 py-3 text-xs font-medium">${listing.price.toLocaleString()}</td>
-                <td className="px-4 py-3 text-xs text-gray-500">{getUserById(listing.seller_id)?.name}</td>
+                <td className="px-4 py-3 text-xs text-gray-500">{getProfileById(listing.seller_id)?.name}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <button

@@ -1,17 +1,18 @@
 "use client";
 
 import { useStore } from "@/lib/store-context";
-import { users } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 import { Package, Tag, Users, TrendingUp } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { listings, offers, heroSlides } = useStore();
+  const { profiles } = useProfiles();
 
   const stats = [
     { label: "Total Listings", value: listings.length, icon: Package },
     { label: "Total Offers", value: offers.length, icon: Tag },
     { label: "Active Hero Slides", value: heroSlides.filter((s) => s.active).length, icon: TrendingUp },
-    { label: "Total Users", value: users.length, icon: Users },
+    { label: "Total Users", value: profiles.length, icon: Users },
   ];
 
   const recentOffers = offers.slice(-5).reverse();

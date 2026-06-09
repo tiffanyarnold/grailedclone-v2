@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
-import { getUserById } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
 
 export default function SellerDashboardPage() {
   const { user } = useAuth();
   const { listings, offers, updateOfferStatus, addListing, deleteListing } = useStore();
+  const { getProfileById } = useProfiles();
   const [activeTab, setActiveTab] = useState<"listings" | "offers">("listings");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -29,10 +30,9 @@ export default function SellerDashboardPage() {
   const myListingIds = myListings.map((l) => l.id);
   const myOffers = offers.filter((o) => myListingIds.includes(o.listing_id));
 
-  const handleCreateListing = (e: React.FormEvent) => {
+  const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();
-    addListing({
-      id: `listing-${Date.now()}`,
+    await addListing({
       seller_id: user.id,
       title: form.title,
       brand: form.brand,
@@ -41,7 +41,6 @@ export default function SellerDashboardPage() {
       size: form.size,
       condition: form.condition,
       price: parseFloat(form.price),
-      created_at: new Date().toISOString().split("T")[0],
       images: form.images,
     });
     setForm({ title: "", brand: "", description: "", category: "Tops", size: "", condition: "Gently Used", price: "", images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"] });
@@ -219,7 +218,7 @@ export default function SellerDashboardPage() {
             <div className="bg-white border border-[#E8E8E8]">
               {myOffers.map((offer) => {
                 const listing = listings.find((l) => l.id === offer.listing_id);
-                const buyer = getUserById(offer.buyer_id);
+                const buyer = getProfileById(offer.buyer_id);
                 const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
 
                 return (

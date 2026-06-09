@@ -3,13 +3,25 @@
 import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (!user || user.role !== "seller") {
+  React.useEffect(() => {
+    if (!isLoading && (!user || (user.role !== "seller" && user.role !== "admin"))) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user) {
+    return <div className="min-h-screen bg-[#F7F7F7]" />;
+  }
+
+  if (user.role !== "seller" && user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F7F7]">
         <div className="text-center">

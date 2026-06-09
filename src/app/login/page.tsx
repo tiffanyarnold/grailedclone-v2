@@ -17,32 +17,42 @@ function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
-  const { login } = useAuth();
+  const { login, signup, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // If already logged in, redirect
+  React.useEffect(() => {
+    if (user) {
+      if (user.role === "admin") router.push("/admin");
+      else if (user.role === "seller") router.push("/seller/dashboard");
+      else router.push("/");
+    }
+  }, [user, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    const result = login(email, password);
-    if (result.success) {
-      // Redirect based on role
-      const stored = localStorage.getItem("grailed_user");
-      if (stored) {
-        const user = JSON.parse(stored);
-        if (user.role === "admin") {
-          router.push("/admin");
-        } else if (user.role === "seller") {
-          router.push("/seller/dashboard");
-        } else {
-          router.push("/");
-        }
+    if (isSignup) {
+      const result = await signup(email, password, name);
+      setLoading(false);
+      if (result.success) {
+        router.push("/");
+      } else {
+        setError(result.error || "Sign up failed");
       }
     } else {
-      setError(result.error || "Invalid credentials");
+      const result = await login(email, password);
+      setLoading(false);
+      if (!result.success) {
+        setError(result.error || "Invalid credentials");
+      }
+      // redirect handled by useEffect above
     }
   };
 
@@ -101,9 +111,10 @@ function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#1A1A1A] text-white text-xs font-bold tracking-wide hover:bg-black transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-[#1A1A1A] text-white text-xs font-bold tracking-wide hover:bg-black transition-colors disabled:opacity-60"
           >
-            {isSignup ? "SIGN UP" : "LOG IN"}
+            {loading ? "..." : isSignup ? "SIGN UP" : "LOG IN"}
           </button>
         </form>
 

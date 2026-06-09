@@ -2,24 +2,23 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { LayoutDashboard, Package, Image, Tag, Users, Settings, LogOut } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
 
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F7F7]">
-        <div className="text-center">
-          <h1 className="text-xl font-bold mb-2">Access Denied</h1>
-          <p className="text-sm text-gray-500 mb-4">You need admin privileges to access this page.</p>
-          <Link href="/login" className="text-sm underline">Go to Login</Link>
-        </div>
-      </div>
-    );
+  React.useEffect(() => {
+    if (!isLoading && (!user || user.role !== "admin")) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user || user.role !== "admin") {
+    return <div className="min-h-screen bg-[#F7F7F7]" />;
   }
 
   const navItems = [
@@ -42,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <nav className="flex-1 py-4">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

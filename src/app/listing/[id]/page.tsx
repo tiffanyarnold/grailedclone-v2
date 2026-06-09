@@ -6,7 +6,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
-import { getUserById, isOfferCompetitive } from "@/lib/data";
+import { isOfferCompetitive } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 import { Heart, Lock } from "lucide-react";
 
 export default function ListingDetailPage() {
@@ -14,6 +15,7 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const { listings, addOffer, toggleFavorite, isFavorited } = useStore();
   const { user } = useAuth();
+  const { getProfileById } = useProfiles();
   const [selectedImage, setSelectedImage] = useState(0);
   const [offerAmount, setOfferAmount] = useState("");
   const [offerSubmitted, setOfferSubmitted] = useState(false);
@@ -32,7 +34,7 @@ export default function ListingDetailPage() {
     );
   }
 
-  const seller = getUserById(listing.seller_id);
+  const seller = getProfileById(listing.seller_id);
   const offerNum = parseFloat(offerAmount);
   const isValidOffer = !isNaN(offerNum) && offerNum >= 1 && offerNum <= 9999;
   const competitive = isValidOffer ? isOfferCompetitive(offerNum, listing.price) : null;
@@ -42,15 +44,13 @@ export default function ListingDetailPage() {
   const lastSold = Math.round(listing.price * 0.9);
   const acceptanceRate = 67;
 
-  const handleSubmitOffer = () => {
+  const handleSubmitOffer = async () => {
     if (!user || !isValidOffer) return;
-    addOffer({
-      id: `offer-${Date.now()}`,
+    await addOffer({
       listing_id: listing.id,
       buyer_id: user.id,
       amount: offerNum,
       status: "pending",
-      created_at: new Date().toISOString().split("T")[0],
     });
     setOfferSubmitted(true);
     setTimeout(() => setOfferSubmitted(false), 3000);

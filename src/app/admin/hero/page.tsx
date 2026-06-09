@@ -17,12 +17,14 @@ export default function AdminHeroPage() {
 
   const sortedSlides = [...heroSlides].sort((a, b) => a.position - b.position);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const listing = listings.find((l) => l.id === form.listing_id);
-    addHeroSlide({
-      id: `hero-${Date.now()}`,
-      ...form,
+    await addHeroSlide({
+      listing_id: form.listing_id,
+      headline: form.headline,
+      subheadline: form.subheadline,
+      button_text: form.button_text,
       image: form.image || listing?.images[0] || "",
       position: heroSlides.length + 1,
       active: true,
@@ -31,15 +33,15 @@ export default function AdminHeroPage() {
     setShowForm(false);
   };
 
-  const moveSlide = (id: string, direction: "up" | "down") => {
+  const moveSlide = async (id: string, direction: "up" | "down") => {
     const idx = sortedSlides.findIndex((s) => s.id === id);
     if (direction === "up" && idx > 0) {
-      updateHeroSlide(sortedSlides[idx].id, { position: sortedSlides[idx].position - 1 });
-      updateHeroSlide(sortedSlides[idx - 1].id, { position: sortedSlides[idx - 1].position + 1 });
+      await updateHeroSlide(sortedSlides[idx].id, { position: sortedSlides[idx].position - 1 });
+      await updateHeroSlide(sortedSlides[idx - 1].id, { position: sortedSlides[idx - 1].position + 1 });
     }
     if (direction === "down" && idx < sortedSlides.length - 1) {
-      updateHeroSlide(sortedSlides[idx].id, { position: sortedSlides[idx].position + 1 });
-      updateHeroSlide(sortedSlides[idx + 1].id, { position: sortedSlides[idx + 1].position - 1 });
+      await updateHeroSlide(sortedSlides[idx].id, { position: sortedSlides[idx].position + 1 });
+      await updateHeroSlide(sortedSlides[idx + 1].id, { position: sortedSlides[idx + 1].position - 1 });
     }
   };
 

@@ -1,10 +1,11 @@
 "use client";
 
 import { useStore } from "@/lib/store-context";
-import { getUserById } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 
 export default function AdminOffersPage() {
   const { offers, listings } = useStore();
+  const { getProfileById } = useProfiles();
 
   return (
     <div className="p-8">
@@ -26,8 +27,8 @@ export default function AdminOffersPage() {
           <tbody>
             {offers.map((offer) => {
               const listing = listings.find((l) => l.id === offer.listing_id);
-              const buyer = getUserById(offer.buyer_id);
-              const seller = listing ? getUserById(listing.seller_id) : null;
+              const buyer = getProfileById(offer.buyer_id);
+              const seller = listing ? getProfileById(listing.seller_id) : null;
               const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
 
               return (
@@ -58,7 +59,7 @@ export default function AdminOffersPage() {
                       {offer.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{offer.created_at}</td>
+                  <td className="px-4 py-3 text-xs text-gray-500">{new Date(offer.created_at).toLocaleDateString()}</td>
                 </tr>
               );
             })}

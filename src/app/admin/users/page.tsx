@@ -1,8 +1,10 @@
 "use client";
 
-import { users } from "@/lib/data";
+import { useProfiles } from "@/lib/use-profiles";
 
 export default function AdminUsersPage() {
+  const { profiles } = useProfiles();
+
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6">Users</h1>
@@ -17,21 +19,21 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
-                <td className="px-4 py-3 text-xs font-medium">{user.name}</td>
-                <td className="px-4 py-3 text-xs text-gray-500">{user.email}</td>
+            {profiles.map((profile) => (
+              <tr key={profile.id} className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
+                <td className="px-4 py-3 text-xs font-medium">{profile.name}</td>
+                <td className="px-4 py-3 text-xs text-gray-500">{profile.email}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-0.5 text-[10px] font-bold rounded-sm uppercase ${
-                      user.role === "admin"
+                      profile.role === "admin"
                         ? "bg-purple-100 text-purple-700"
-                        : user.role === "seller"
+                        : profile.role === "seller"
                         ? "bg-blue-100 text-blue-700"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {user.role}
+                    {profile.role}
                   </span>
                 </td>
               </tr>
