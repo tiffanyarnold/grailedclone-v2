@@ -228,43 +228,84 @@ function BrowsePage() {
             )}
 
             {/* Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {filteredListings.map((listing) => (
-                <div key={listing.id} className="group relative">
-                  <Link href={`/listing/${listing.id}`}>
-                    <div className="relative aspect-square overflow-hidden bg-white mb-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-150">
-                      <img
-                        src={listing.image_url[0]}
-                        alt={listing.title}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
-                      />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+              {filteredListings.map((listing) => {
+                const favorited = user ? isFavorited(user.id, listing.id) : false;
+                const hasDiscount = listing.original_price && listing.original_price > listing.listed_price;
+                const discountPct = hasDiscount
+                  ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
+                  : null;
+
+                return (
+                  <div key={listing.id} className="group flex flex-col cursor-pointer">
+                    {/* Image */}
+                    <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden aspect-square bg-[#F0F0F0]">
+                      {listing.image_url[0] && (
+                        <img
+                          src={listing.image_url[0]}
+                          alt={listing.title}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                        />
+                      )}
+                    </Link>
+
+                    {/* Card info — Grailed style */}
+                    <div className="mt-[6px] flex flex-col gap-0">
+                      {/* Brand row: brand left, size right */}
+                      <div className="flex items-baseline justify-between gap-1">
+                        <p className="text-[11px] font-bold tracking-[0.07em] text-[#1A1A1A] uppercase truncate leading-tight">
+                          {listing.brand}
+                        </p>
+                        <span className="text-[10px] text-[#888] font-normal flex-shrink-0 uppercase tracking-[0.05em]">
+                          {listing.size}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <p className="text-[12px] text-[#1A1A1A] leading-snug line-clamp-1 mt-[1px]">
+                        {listing.title}
+                      </p>
+
+                      {/* Price row + heart */}
+                      <div className="flex items-center justify-between mt-[3px]">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {hasDiscount ? (
+                            <>
+                              <span className="text-[12px] font-bold text-[#C62828]">${listing.listed_price.toLocaleString()}</span>
+                              <span className="text-[11px] text-[#888] line-through">${listing.original_price!.toLocaleString()}</span>
+                              <span className="text-[10px] text-[#888]">{discountPct}% off</span>
+                            </>
+                          ) : (
+                            <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
+                          )}
+                        </div>
+                        {/* Heart button */}
+                        {user && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleFavorite(user.id, listing.id);
+                            }}
+                            className="flex-shrink-0 ml-1 p-0.5 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                            aria-label="Save"
+                          >
+                            <Heart
+                              className="w-[15px] h-[15px]"
+                              fill={favorited ? "#1A1A1A" : "none"}
+                              stroke={favorited ? "#1A1A1A" : "#888"}
+                              strokeWidth={1.5}
+                            />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Location */}
+                      <p className="text-[10px] text-[#888] mt-[2px]">Located in United States</p>
                     </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 truncate">{listing.brand}</p>
-                      <p className="text-xs text-[#1A1A1A] truncate">{listing.title}</p>
-                      <p className="text-xs text-gray-500">Size: {listing.size}</p>
-                      <p className="text-sm font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</p>
-                    </div>
-                  </Link>
-                  {user && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toggleFavorite(user.id, listing.id);
-                      }}
-                      className="absolute top-2 right-2 z-10"
-                    >
-                      <Heart
-                        className={`w-5 h-5 transition-colors ${
-                          isFavorited(user.id, listing.id)
-                            ? "fill-red-500 text-red-500"
-                            : "text-gray-400 hover:text-red-400"
-                        }`}
-                      />
-                    </button>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

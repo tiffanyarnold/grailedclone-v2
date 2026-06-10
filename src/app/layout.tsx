@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Syne } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import ClientProviders from "@/components/providers/ClientProviders";
 
-const spaceGrotesk = Space_Grotesk({
+// Grailed uses a system/Helvetica-like sans-serif for body text.
+// Inter is the closest Google Font match.
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-syne",
-  weight: ["700", "800"],
+  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} ${syne.variable} bg-[#F7F7F7] text-[#1A1A1A] antialiased`} style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+      <body
+        className={`${inter.variable} bg-[#F7F7F7] text-[#1A1A1A] antialiased`}
+        style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
+      >
         <ClientProviders>
           {children}
         </ClientProviders>

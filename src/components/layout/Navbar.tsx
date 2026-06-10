@@ -66,14 +66,15 @@ export default function Navbar() {
           <Menu className="w-6 h-6" />
         </button>
 
-        {/* Logo */}
+        {/* Logo — matches Grailed's bold condensed all-caps wordmark */}
         <Link href="/" className="flex-shrink-0">
           <h1
-            className="text-[22px] lg:text-[26px] leading-none text-[#1A1A1A]"
+            className="text-[20px] lg:text-[22px] leading-none text-[#1A1A1A] select-none"
             style={{
-              fontFamily: "var(--font-space-grotesk), sans-serif",
-              fontWeight: 800,
-              letterSpacing: "0.04em",
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              fontWeight: 900,
+              letterSpacing: "0.03em",
+              fontStretch: "condensed",
             }}
           >
             GRAILED
@@ -93,13 +94,11 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 px-3 text-sm outline-none bg-transparent placeholder:text-[#999] h-full"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              />
+                             />
               <button
                 type="submit"
                 className="h-full px-5 text-[11px] font-bold tracking-[0.12em] text-[#1A1A1A] border-l border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap flex-shrink-0"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 SEARCH
               </button>
             </div>
@@ -114,8 +113,7 @@ export default function Navbar() {
               <Link
                 href={user.role === "admin" ? "/admin" : "/sell"}
                 className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 {user.role === "admin" ? "ADMIN" : "SELL"}
               </Link>
 
@@ -123,8 +121,7 @@ export default function Navbar() {
               <button
                 onClick={handleFeedClick}
                 className="hidden lg:inline-flex text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 MY FEED
               </button>
 
@@ -152,8 +149,7 @@ export default function Navbar() {
 
                 {avatarOpen && (
                   <div className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#E8E8E8] shadow-lg rounded-sm z-50 py-1"
-                    style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-                  >
+                                     >
                     <div className="px-4 py-3 border-b border-[#E8E8E8]">
                       <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{user.name}</p>
                       <p className="text-[11px] text-[#888] truncate">{user.email}</p>
@@ -189,30 +185,26 @@ export default function Navbar() {
               <button
                 onClick={() => openLoginModal("login")}
                 className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-70 transition-opacity"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 SELL
               </button>
               <button
                 onClick={() => openLoginModal("signup")}
                 className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 SIGN UP
               </button>
               <button
                 onClick={() => openLoginModal("login")}
                 className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 LOG IN
               </button>
               {/* Mobile: just LOG IN button */}
               <button
                 onClick={() => openLoginModal("login")}
                 className="lg:hidden px-4 py-[6px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              >
+                             >
                 LOG IN
               </button>
             </>
@@ -244,11 +236,13 @@ export default function Navbar() {
           {/* Drawer */}
           <div
             className="absolute left-0 top-0 h-full w-[300px] bg-white flex flex-col overflow-y-auto"
-            style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
           >
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E8E8]">
-              <span className="text-[20px] font-bold tracking-[0.04em]" style={{ fontWeight: 800 }}>GRAILED</span>
+              <span
+                className="text-[20px] leading-none text-[#1A1A1A] select-none"
+                style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
+              >GRAILED</span>
               <button onClick={() => setMobileOpen(false)} className="text-[#1A1A1A] hover:opacity-60">
                 <X className="w-6 h-6" />
               </button>
@@ -362,7 +356,6 @@ function NavLink({ href, children, hasChevron }: { href: string; children: React
     <Link
       href={href}
       className="flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.12em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
-      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
     >
       {children}
       {hasChevron && <ChevronDown className="w-3 h-3 ml-0.5" />}

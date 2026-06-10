@@ -6,6 +6,8 @@ import { Heart } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useStore } from "@/lib/store-context";
 import DesignerPickerModal from "@/components/feed/DesignerPickerModal";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 // Calculate discount % between original and current price (mock 10-15% off for demo)
 function getDiscountPct(price: number): number {
@@ -43,10 +45,12 @@ export default function FeedPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-[#888] text-sm" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
-          Please log in to view your feed.
-        </p>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="flex items-center justify-center py-20">
+          <p className="text-[#888] text-sm">Please log in to view your feed.</p>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -57,19 +61,18 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
-      <div className="max-w-[1440px] mx-auto px-8 py-10">
+      <Navbar />
+
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8">
 
         {/* Page title */}
-        <h1
-          className="text-[32px] font-bold text-[#1A1A1A] mb-6"
-          style={{ fontFamily: "var(--font-syne), sans-serif" }}
-        >
+        <h1 className="text-[28px] font-bold text-[#1A1A1A] mb-5 tracking-[-0.01em]">
           My Feed
         </h1>
 
         {/* Follow designers banner */}
-        <div className="w-full bg-[#F5F5F5] px-5 py-4 mb-8 flex items-center">
-          <p className="text-sm text-[#1A1A1A]">
+        <div className="w-full bg-[#F5F5F5] px-5 py-4 mb-8">
+          <p className="text-[13px] text-[#1A1A1A]">
             Customize your recommendations by following designers that you&apos;re into.{" "}
             <button
               onClick={() => setDesignerPickerOpen(true)}
@@ -80,68 +83,81 @@ export default function FeedPage() {
           </p>
         </div>
 
-        {/* Feed grid */}
+        {/* Feed grid — 5 columns like Grailed */}
         {hasListings ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
             {feedListings.map((listing) => {
               const favorited = isFavorited(user.id, listing.id);
-              const wasPrice = getWasPrice(listing.listed_price);
-              const discountPct = getDiscountPct(listing.listed_price);
+              const wasPrice = listing.original_price ?? getWasPrice(listing.listed_price);
+              const discountPct = listing.original_price
+                ? Math.round((1 - listing.listed_price / listing.original_price) * 100)
+                : getDiscountPct(listing.listed_price);
+              const showDiscount = wasPrice > listing.listed_price;
 
               return (
-                <div key={listing.id} className="group flex flex-col">
+                <div key={listing.id} className="group flex flex-col cursor-pointer">
                   {/* Image */}
-                  <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden aspect-square bg-[#F5F5F5]">
-                    <img
-                      src={listing.image_url[0]}
-                      alt={listing.title}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
-                    />
-                    {/* Heart button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleFavorite(user.id, listing.id);
-                      }}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors"
-                    >
-                      <Heart
-                        className="w-4 h-4"
-                        fill={favorited ? "#1A1A1A" : "none"}
-                        stroke="#1A1A1A"
-                        strokeWidth={1.5}
+                  <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden aspect-square bg-[#F0F0F0]">
+                    {listing.image_url[0] && (
+                      <img
+                        src={listing.image_url[0]}
+                        alt={listing.title}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                       />
-                    </button>
+                    )}
                   </Link>
 
-                  {/* Card info */}
-                  <div className="mt-2 flex flex-col gap-[2px]">
-                    {/* Time ago */}
-                    <p className="text-[10px] text-[#888]">{timeAgo(listing.created_at)}</p>
-
-                    {/* Brand */}
-                    <p className="text-[11px] font-bold tracking-[0.06em] text-[#1A1A1A] uppercase truncate">
-                      {listing.brand}
-                    </p>
+                  {/* Card info — matches Grailed exactly */}
+                  <div className="mt-[6px] flex flex-col gap-0">
+                    {/* Brand row: brand left, size right */}
+                    <div className="flex items-baseline justify-between gap-1">
+                      <p className="text-[11px] font-bold tracking-[0.07em] text-[#1A1A1A] uppercase truncate leading-tight">
+                        {listing.brand}
+                      </p>
+                      <span className="text-[10px] text-[#888] font-normal flex-shrink-0 uppercase tracking-[0.05em]">
+                        {listing.size}
+                      </span>
+                    </div>
 
                     {/* Title */}
-                    <p className="text-[12px] text-[#1A1A1A] leading-snug line-clamp-2">
+                    <p className="text-[12px] text-[#1A1A1A] leading-snug line-clamp-1 mt-[1px]">
                       {listing.title}
                     </p>
 
-                    {/* Size */}
-                    <p className="text-[11px] text-[#888]">{listing.size}</p>
-
-                    {/* Price row */}
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[13px] font-bold text-[#C62828]">${listing.listed_price.toLocaleString()}</span>
-                      <span className="text-[12px] text-[#888] line-through">${wasPrice.toLocaleString()}</span>
-                      <span className="text-[11px] text-[#888]">{discountPct}% off</span>
+                    {/* Price row + heart */}
+                    <div className="flex items-center justify-between mt-[3px]">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {showDiscount ? (
+                          <>
+                            <span className="text-[12px] font-bold text-[#C62828]">${listing.listed_price.toLocaleString()}</span>
+                            <span className="text-[11px] text-[#888] line-through">${wasPrice.toLocaleString()}</span>
+                            <span className="text-[10px] text-[#888]">{discountPct}% off</span>
+                          </>
+                        ) : (
+                          <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
+                        )}
+                      </div>
+                      {/* Heart button — bottom right of info row, matching Grailed */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFavorite(user.id, listing.id);
+                        }}
+                        className="flex-shrink-0 ml-1 p-0.5 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                        aria-label="Save"
+                      >
+                        <Heart
+                          className="w-[15px] h-[15px]"
+                          fill={favorited ? "#1A1A1A" : "none"}
+                          stroke={favorited ? "#1A1A1A" : "#888"}
+                          strokeWidth={1.5}
+                        />
+                      </button>
                     </div>
 
                     {/* Location */}
-                    <p className="text-[11px] text-[#888]">Located in United States</p>
+                    <p className="text-[10px] text-[#888] mt-[2px]">Located in United States</p>
                   </div>
                 </div>
               );
@@ -160,6 +176,8 @@ export default function FeedPage() {
         )}
 
       </div>
+
+      <Footer />
 
       <DesignerPickerModal
         open={designerPickerOpen}
