@@ -89,8 +89,7 @@ export default function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-black select-none"
-      style={{ height: "560px" }}
+      className="relative w-full overflow-hidden bg-black select-none h-[380px] sm:h-[460px] lg:h-[560px]"
     >
       {/* Slides */}
       {activeSlides.map((s, i) => (
@@ -120,7 +119,7 @@ export default function HeroCarousel() {
 
       {/* Center content — exactly like Grailed */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center text-white text-center"
+        className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4"
         style={{ zIndex: 2 }}
       >
         {/* Subheadline / brand tags */}
@@ -142,7 +141,7 @@ export default function HeroCarousel() {
         <h2
           style={{
             fontFamily: "var(--font-syne), 'Arial Black', sans-serif",
-            fontSize: "clamp(40px, 4.8vw, 66px)",
+            fontSize: "clamp(28px, 5vw, 66px)",
             fontWeight: 800,
             letterSpacing: "-0.02em",
             lineHeight: 1.05,
@@ -166,7 +165,7 @@ export default function HeroCarousel() {
             fontSize: "12px",
             fontWeight: 700,
             letterSpacing: "0.16em",
-            padding: "12px 52px",
+            padding: "10px 40px",
             textTransform: "uppercase",
             textDecoration: "none",
             transition: "background 0.18s ease, color 0.18s ease",
@@ -182,7 +181,7 @@ export default function HeroCarousel() {
         onClick={prev}
         aria-label="Previous slide"
         style={{ zIndex: 3 }}
-        className="absolute left-0 top-0 h-full w-14 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-150"
+        className="absolute left-0 top-0 h-full w-10 lg:w-14 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-150"
       >
         <ChevronLeft style={{ width: "26px", height: "26px", strokeWidth: 2 }} />
       </button>
@@ -192,7 +191,7 @@ export default function HeroCarousel() {
         onClick={next}
         aria-label="Next slide"
         style={{ zIndex: 3 }}
-        className="absolute right-0 top-0 h-full w-14 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-150"
+        className="absolute right-0 top-0 h-full w-10 lg:w-14 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-150"
       >
         <ChevronRight style={{ width: "26px", height: "26px", strokeWidth: 2 }} />
       </button>

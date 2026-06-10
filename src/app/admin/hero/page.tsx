@@ -46,7 +46,7 @@ export default function AdminHeroPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A1A]">Hero Carousel</h1>
         <button
@@ -121,7 +121,7 @@ export default function AdminHeroPage() {
       )}
 
       {/* Slides Table */}
-      <div className="bg-white border border-[#E8E8E8] overflow-hidden">
+      <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#E8E8E8]">

@@ -20,7 +20,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6">Settings</h1>
 
       <div className="bg-white border border-[#E8E8E8] p-6 max-w-[600px] mb-6">

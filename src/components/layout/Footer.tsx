@@ -7,8 +7,8 @@ export default function Footer() {
   return (
     <footer className="border-t border-[#D4D4D4] mt-16">
       <div className="max-w-[1440px] mx-auto px-6 py-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6">
             <FooterLink href="#">ABOUT</FooterLink>
             <FooterLink href="#">YOUR PRIVACY CHOICES</FooterLink>
             <FooterLink href="#">HELP & FAQ</FooterLink>

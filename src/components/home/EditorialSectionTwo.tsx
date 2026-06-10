@@ -36,10 +36,10 @@ export default function EditorialSectionTwo() {
         We achieve this by: outer div has NO fixed height,
         left col is natural height, right image has a fixed min-height.
       */}
-      <div className="flex gap-6 items-end">
+      <div className="flex flex-col lg:flex-row gap-6 items-end">
 
         {/* Left — label + title above 2x2 grid */}
-        <div className="w-[36%] flex-shrink-0">
+        <div className="w-full lg:w-[36%] flex-shrink-0">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
@@ -81,7 +81,7 @@ export default function EditorialSectionTwo() {
         </div>
 
         {/* Right — tall editorial image, taller than the grid */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "620px" }}>
+        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(300px, 50vw, 620px)" }}>
           <img
             src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1400&q=90"
             alt="Trending in Seoul"

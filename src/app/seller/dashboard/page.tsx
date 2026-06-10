@@ -48,8 +48,8 @@ export default function SellerDashboardPage() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A1A]">Seller Dashboard</h1>
         <div className="flex gap-2">
           <button
@@ -215,7 +215,7 @@ export default function SellerDashboardPage() {
           {myOffers.length === 0 ? (
             <p className="text-sm text-gray-500">No offers yet.</p>
           ) : (
-            <div className="bg-white border border-[#E8E8E8]">
+            <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
               {myOffers.map((offer) => {
                 const listing = listings.find((l) => l.id === offer.listing_id);
                 const buyer = getProfileById(offer.buyer_id);

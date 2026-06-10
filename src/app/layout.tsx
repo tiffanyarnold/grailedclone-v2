@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   description: "Grailed is the peer-to-peer marketplace for luxury and streetwear fashion.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

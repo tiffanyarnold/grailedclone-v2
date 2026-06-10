@@ -59,7 +59,7 @@ export default function ListingDetailPage() {
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       <Navbar />
-      <main className="max-w-[1440px] mx-auto px-6 py-8">
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10">
           {/* Left: Image Gallery */}
           <div>
@@ -70,7 +70,7 @@ export default function ListingDetailPage() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {listing.images.map((img, i) => (
                 <button
                   key={i}

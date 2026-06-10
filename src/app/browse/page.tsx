@@ -29,6 +29,7 @@ function BrowsePage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [sortBy, setSortBy] = useState("newest");
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [showFilters, setShowFilters] = useState(false);
 
   const brands = useMemo(() => Array.from(new Set(listings.map((l) => l.brand))).sort(), [listings]);
   const categories = useMemo(() => Array.from(new Set(listings.map((l) => l.category))).sort(), [listings]);
@@ -86,7 +87,7 @@ function BrowsePage() {
       <main className="max-w-[1440px] mx-auto px-6 py-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <aside className="w-[220px] flex-shrink-0 hidden lg:block">
+          <aside className={"w-[220px] flex-shrink-0 " + (showFilters ? "block" : "hidden lg:block")}>
             <h2 className="text-sm font-bold mb-4 uppercase tracking-wide">Filters</h2>
 
             {/* Brand Filter */}
@@ -181,14 +182,14 @@ function BrowsePage() {
           {/* Main Content */}
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   placeholder="Search listings..."
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 outline-none w-[240px]"
+                  className="px-3 py-2 text-sm border border-gray-300 outline-none w-full sm:w-[240px]"
                 />
                 <span className="text-xs text-gray-500">{filteredListings.length} results</span>
               </div>

@@ -47,7 +47,7 @@ export default function ShopByCategory() {
         >
           Shop Menswear
         </h2>
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {mensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
@@ -70,7 +70,7 @@ export default function ShopByCategory() {
         >
           Shop Womenswear
         </h2>
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {womensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">

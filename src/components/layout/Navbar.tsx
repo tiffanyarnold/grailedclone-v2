@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Search, ChevronDown, MessageCircle, Heart, User } from "lucide-react";
+import { Search, ChevronDown, MessageCircle, Heart, User, Menu, X } from "lucide-react";
 import DesignerPickerModal, { getFollowedDesigners } from "@/components/feed/DesignerPickerModal";
 
 export default function Navbar() {
@@ -13,6 +13,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
   const handleFeedClick = (e: React.MouseEvent) => {
@@ -23,6 +24,7 @@ export default function Navbar() {
     } else {
       router.push("/feed");
     }
+    setMobileOpen(false);
   };
 
   // Close dropdown when clicking outside
@@ -36,22 +38,38 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/browse?search=${encodeURIComponent(searchQuery.trim())}`);
+      setMobileOpen(false);
     }
   };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-8 py-3 max-w-[1440px] mx-auto h-[64px]">
+      <div className="relative flex items-center px-4 lg:px-8 py-3 max-w-[1440px] mx-auto h-[56px] lg:h-[64px]">
 
-        {/* Logo — far left */}
+        {/* Hamburger — mobile only, far left */}
+        <button
+          className="lg:hidden mr-3 flex-shrink-0 text-[#1A1A1A] hover:opacity-60 transition-opacity"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        {/* Logo */}
         <Link href="/" className="flex-shrink-0">
           <h1
-            className="text-[26px] leading-none text-[#1A1A1A]"
+            className="text-[22px] lg:text-[26px] leading-none text-[#1A1A1A]"
             style={{
               fontFamily: "var(--font-space-grotesk), sans-serif",
               fontWeight: 800,
@@ -62,8 +80,8 @@ export default function Navbar() {
           </h1>
         </Link>
 
-        {/* Search — absolutely centered on the full navbar width */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-[460px]">
+        {/* Search — absolutely centered on desktop, hidden on mobile */}
+        <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 w-[460px]">
           <form onSubmit={handleSearch}>
             <div className="flex items-center border border-[#1A1A1A] overflow-hidden h-[40px]">
               <div className="flex items-center pl-3 flex-shrink-0">
@@ -88,23 +106,23 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* Right Actions — far right */}
-        <div className="ml-auto flex items-center gap-4 flex-shrink-0">
+        {/* Right Actions */}
+        <div className="ml-auto flex items-center gap-3 lg:gap-4 flex-shrink-0">
           {user ? (
             <>
-              {/* SELL / ADMIN link */}
+              {/* SELL / ADMIN — desktop only */}
               <Link
                 href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
-                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 {user.role === "admin" ? "ADMIN" : "SELL"}
               </Link>
 
-              {/* MY FEED */}
+              {/* MY FEED — desktop only */}
               <button
                 onClick={handleFeedClick}
-                className="text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
+                className="hidden lg:inline-flex text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 MY FEED
@@ -112,7 +130,7 @@ export default function Navbar() {
 
               {/* Messages icon */}
               <button
-                onClick={() => router.push("/messages")}
+                onClick={() => { router.push("/messages"); setMobileOpen(false); }}
                 className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity"
               >
                 <MessageCircle className="w-[22px] h-[22px]" strokeWidth={1.5} />
@@ -127,9 +145,9 @@ export default function Navbar() {
               <div className="relative" ref={avatarRef}>
                 <button
                   onClick={() => setAvatarOpen((o) => !o)}
-                  className="w-[34px] h-[34px] rounded-full bg-[#1A1A1A] flex items-center justify-center text-white hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0"
+                  className="w-[32px] h-[32px] lg:w-[34px] lg:h-[34px] rounded-full bg-[#1A1A1A] flex items-center justify-center text-white hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0"
                 >
-                  <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                  <User className="w-[16px] h-[16px] lg:w-[18px] lg:h-[18px]" strokeWidth={1.5} />
                 </button>
 
                 {avatarOpen && (
@@ -167,23 +185,32 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              {/* Desktop auth buttons */}
               <button
                 onClick={() => openLoginModal("login")}
-                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-70 transition-opacity"
+                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-70 transition-opacity"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 SELL
               </button>
               <button
                 onClick={() => openLoginModal("signup")}
-                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 SIGN UP
               </button>
               <button
                 onClick={() => openLoginModal("login")}
-                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              >
+                LOG IN
+              </button>
+              {/* Mobile: just LOG IN button */}
+              <button
+                onClick={() => openLoginModal("login")}
+                className="lg:hidden px-4 py-[6px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 LOG IN
@@ -193,8 +220,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Secondary Nav */}
-      <nav className="border-t border-[#E8E8E8]">
+      {/* Secondary Nav — desktop only */}
+      <nav className="hidden lg:block border-t border-[#E8E8E8]">
         <div className="flex items-center justify-between px-8 py-3 max-w-[1440px] mx-auto">
           <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
@@ -205,6 +232,121 @@ export default function Navbar() {
           <NavLink href="/browse">EDITORIAL</NavLink>
         </div>
       </nav>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[100] lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer */}
+          <div
+            className="absolute left-0 top-0 h-full w-[300px] bg-white flex flex-col overflow-y-auto"
+            style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+          >
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E8E8]">
+              <span className="text-[20px] font-bold tracking-[0.04em]" style={{ fontWeight: 800 }}>GRAILED</span>
+              <button onClick={() => setMobileOpen(false)} className="text-[#1A1A1A] hover:opacity-60">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Mobile search */}
+            <div className="px-5 py-4 border-b border-[#E8E8E8]">
+              <form onSubmit={handleSearch}>
+                <div className="flex items-center border border-[#1A1A1A] overflow-hidden h-[40px]">
+                  <div className="flex items-center pl-3 flex-shrink-0">
+                    <Search className="w-4 h-4 text-[#888]" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for anything"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 px-3 text-sm outline-none bg-transparent placeholder:text-[#999] h-full"
+                  />
+                </div>
+              </form>
+            </div>
+
+            {/* Nav links */}
+            <nav className="flex-1 px-5 py-4">
+              <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-3 uppercase">Browse</p>
+              {[
+                { label: "DESIGNERS", href: "/browse?category=designers" },
+                { label: "MENSWEAR", href: "/browse?category=menswear" },
+                { label: "WOMENSWEAR", href: "/browse?category=womenswear" },
+                { label: "SNEAKERS", href: "/browse?category=footwear" },
+                { label: "STAFF PICKS", href: "/browse" },
+                { label: "COLLECTIONS", href: "/browse" },
+                { label: "EDITORIAL", href: "/browse" },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="block py-3 text-[13px] font-semibold tracking-[0.08em] text-[#1A1A1A] border-b border-[#F0F0F0] hover:opacity-60 transition-opacity"
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              {user && (
+                <div className="mt-6">
+                  <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-3 uppercase">Account</p>
+                  <button
+                    onClick={handleFeedClick}
+                    className="block w-full text-left py-3 text-[13px] font-semibold tracking-[0.08em] text-[#1A1A1A] border-b border-[#F0F0F0] hover:opacity-60"
+                  >
+                    MY FEED
+                  </button>
+                  <Link
+                    href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
+                    onClick={() => setMobileOpen(false)}
+                    className="block py-3 text-[13px] font-semibold tracking-[0.08em] text-[#1A1A1A] border-b border-[#F0F0F0] hover:opacity-60"
+                  >
+                    {user.role === "admin" ? "ADMIN" : "SELL"}
+                  </Link>
+                </div>
+              )}
+            </nav>
+
+            {/* Bottom auth buttons */}
+            {!user && (
+              <div className="px-5 py-5 border-t border-[#E8E8E8] space-y-2">
+                <button
+                  onClick={() => { openLoginModal("signup"); setMobileOpen(false); }}
+                  className="w-full py-3 text-[12px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                >
+                  SIGN UP
+                </button>
+                <button
+                  onClick={() => { openLoginModal("login"); setMobileOpen(false); }}
+                  className="w-full py-3 text-[12px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+                >
+                  LOG IN
+                </button>
+              </div>
+            )}
+
+            {user && (
+              <div className="px-5 py-5 border-t border-[#E8E8E8]">
+                <p className="text-[13px] font-semibold text-[#1A1A1A] truncate mb-0.5">{user.name}</p>
+                <p className="text-[11px] text-[#888] truncate mb-3">{user.email}</p>
+                <button
+                  onClick={() => { logout(); setMobileOpen(false); }}
+                  className="text-[12px] font-bold tracking-[0.08em] text-[#888] hover:text-[#1A1A1A] transition-colors"
+                >
+                  LOG OUT
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Designer Picker Modal */}
       <DesignerPickerModal

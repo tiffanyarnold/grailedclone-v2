@@ -37,10 +37,10 @@ export default function EditorialSection() {
 
   return (
     <section className="max-w-[1440px] mx-auto px-8 py-10">
-      <div className="flex gap-6 items-end">
+      <div className="flex flex-col lg:flex-row gap-6 items-end">
 
         {/* Left — labels + title directly above 2x2 grid */}
-        <div className="w-[36%] flex-shrink-0 flex flex-col">
+        <div className="w-full lg:w-[36%] flex-shrink-0 flex flex-col">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
@@ -83,7 +83,7 @@ export default function EditorialSection() {
         </div>
 
         {/* Right — tall editorial image */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "620px" }}>
+        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(300px, 50vw, 620px)" }}>
           <img
             src={section.image}
             alt={section.title}

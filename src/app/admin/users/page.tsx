@@ -6,10 +6,10 @@ export default function AdminUsersPage() {
   const { profiles } = useProfiles();
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6">Users</h1>
 
-      <div className="bg-white border border-[#E8E8E8] overflow-hidden">
+      <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#E8E8E8]">
