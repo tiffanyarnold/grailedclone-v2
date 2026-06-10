@@ -2,24 +2,153 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
-import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import {
+  Plus, Trash2, Check, X, TrendingDown, Zap, Tag, ChevronDown, Menu, Bell, Megaphone,
+} from "lucide-react";
 
+// ── Sidebar nav structure ──────────────────────────────────────────────────
+const NAV = [
+  { label: "MESSAGES", href: "/messages" },
+  { label: "ORDERS", href: "/seller/dashboard?tab=orders" },
+  {
+    label: "SELLING",
+    children: [
+      { label: "FOR SALE", tab: "forsale" },
+      { label: "OFFERS", tab: "offers" },
+      { label: "SOLD", tab: "sold" },
+      { label: "DRAFTS", tab: "drafts" },
+    ],
+  },
+  {
+    label: "SETTINGS",
+    children: [
+      { label: "PROFILE", href: "/profile" },
+      { label: "FEEDBACK", href: "/feedback" },
+      { label: "ACCOUNT HEALTH", href: "/account-health" },
+      { label: "VACATION MODE", href: "/vacation-mode" },
+      { label: "SHIPPING LABELS", href: "/shipping-labels" },
+      { label: "MY SIZES", href: "/my-sizes" },
+      { label: "ADDRESSES", href: "/addresses" },
+      { label: "PAYMENTS", href: "/payments" },
+      { label: "NOTIFICATIONS", href: "/notifications" },
+      { label: "DEVICES", href: "/devices" },
+      { label: "HELP", href: "/help" },
+    ],
+  },
+];
+
+// ── Sidebar component ──────────────────────────────────────────────────────
+function Sidebar({
+  activeTab,
+  onTabChange,
+  onClose,
+}: {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onClose?: () => void;
+}) {
+  const [sellingOpen, setSellingOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  return (
+    <nav
+      className="w-full h-full py-6 pr-4"
+      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+    >
+      {NAV.map((item) => {
+        if (!item.children) {
+          const isActive = item.label === "MESSAGES"
+            ? false
+            : item.href?.includes(`tab=${activeTab}`);
+          return (
+            <Link
+              key={item.label}
+              href={item.href!}
+              onClick={onClose}
+              className={`block py-[7px] text-[11px] font-bold tracking-[0.1em] transition-colors ${
+                isActive
+                  ? "text-[#1A1A1A] border-b border-[#1A1A1A] w-fit"
+                  : "text-[#888] hover:text-[#1A1A1A]"
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        }
+
+        const isGroup = item.label === "SELLING";
+        const open = isGroup ? sellingOpen : settingsOpen;
+        const toggle = isGroup
+          ? () => setSellingOpen((v) => !v)
+          : () => setSettingsOpen((v) => !v);
+
+        return (
+          <div key={item.label} className="mt-5">
+            <button
+              onClick={toggle}
+              className="flex items-center justify-between w-full text-[10px] font-bold tracking-[0.14em] text-[#888] mb-1 uppercase hover:text-[#1A1A1A] transition-colors"
+            >
+              {item.label}
+              <ChevronDown
+                className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`}
+              />
+            </button>
+            {open && (
+              <div className="ml-0">
+                {item.children.map((child) => {
+                  if ("tab" in child) {
+                    const isActive = activeTab === child.tab;
+                    return (
+                      <button
+                        key={child.label}
+                        onClick={() => { onTabChange(child.tab!); onClose?.(); }}
+                        className={`block w-full text-left py-[7px] text-[11px] font-bold tracking-[0.1em] transition-colors ${
+                          isActive
+                            ? "text-[#1A1A1A] border-b border-[#1A1A1A] w-fit"
+                            : "text-[#888] hover:text-[#1A1A1A]"
+                        }`}
+                      >
+                        {child.label}
+                      </button>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={child.label}
+                      href={child.href!}
+                      onClick={onClose}
+                      className="block py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#888] hover:text-[#1A1A1A] transition-colors"
+                    >
+                      {child.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+// ── Main page ──────────────────────────────────────────────────────────────
 export default function SellerDashboardPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const { listings, offers, updateOfferStatus, addListing, deleteListing } = useStore();
   const { getProfileById } = useProfiles();
-  const [activeTab, setActiveTab] = useState<"listings" | "offers">("listings");
+
+  const [activeTab, setActiveTab] = useState("forsale");
   const [showForm, setShowForm] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [form, setForm] = useState({
-    title: "",
-    brand: "",
-    description: "",
-    category: "Tops",
-    size: "",
-    condition: "Gently Used",
+    title: "", brand: "", description: "",
+    category: "Tops", size: "", condition: "Gently Used",
     price: "",
     images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
   });
@@ -29,6 +158,7 @@ export default function SellerDashboardPage() {
   const myListings = listings.filter((l) => l.seller_id === user.id);
   const myListingIds = myListings.map((l) => l.id);
   const myOffers = offers.filter((o) => myListingIds.includes(o.listing_id));
+  const pendingOffers = myOffers.filter((o) => o.status === "pending");
 
   const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,240 +178,288 @@ export default function SellerDashboardPage() {
   };
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Seller Dashboard</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab("listings")}
-            className={`px-4 py-2 text-xs font-bold tracking-wide border transition-colors ${
-              activeTab === "listings" ? "bg-[#1A1A1A] text-white" : "border-[#1A1A1A] hover:bg-gray-50"
-            }`}
-          >
-            MY LISTINGS
-          </button>
-          <button
-            onClick={() => setActiveTab("offers")}
-            className={`px-4 py-2 text-xs font-bold tracking-wide border transition-colors ${
-              activeTab === "offers" ? "bg-[#1A1A1A] text-white" : "border-[#1A1A1A] hover:bg-gray-50"
-            }`}
-          >
-            OFFERS ({myOffers.filter((o) => o.status === "pending").length})
-          </button>
-        </div>
-      </div>
+    <div
+      className="min-h-screen bg-white"
+      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+    >
+      <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-120px)]">
 
-      {activeTab === "listings" && (
-        <div>
-          <div className="flex justify-end mb-4">
+        {/* ── Desktop Sidebar ── */}
+        <aside className="hidden lg:block w-[200px] flex-shrink-0 border-r border-[#E8E8E8] py-6 pr-6">
+          <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        </aside>
+
+        {/* ── Mobile sidebar overlay ── */}
+        {mobileSidebarOpen && (
+          <div className="fixed inset-0 z-[100] lg:hidden">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
+            <div className="absolute left-0 top-0 h-full w-[260px] bg-white px-5 overflow-y-auto">
+              <div className="flex items-center justify-between py-4 border-b border-[#E8E8E8] mb-2">
+                <span className="text-[13px] font-bold tracking-[0.08em]">DASHBOARD</span>
+                <button onClick={() => setMobileSidebarOpen(false)}>
+                  <X className="w-5 h-5 text-[#888]" />
+                </button>
+              </div>
+              <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onClose={() => setMobileSidebarOpen(false)} />
+            </div>
+          </div>
+        )}
+
+        {/* ── Main Content ── */}
+        <main className="flex-1 py-6 px-4 sm:px-8 min-w-0">
+
+          {/* Mobile top bar */}
+          <div className="flex items-center gap-3 mb-6 lg:hidden">
             <button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] text-white text-xs font-bold tracking-wide hover:bg-black transition-colors"
+              onClick={() => setMobileSidebarOpen(true)}
+              className="p-2 border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              {showForm ? "CANCEL" : "NEW LISTING"}
+              <Menu className="w-4 h-4" />
             </button>
+            <span className="text-[13px] font-bold tracking-[0.08em] uppercase">
+              {activeTab === "forsale" ? "For Sale" :
+               activeTab === "offers" ? "Offers" :
+               activeTab === "sold" ? "Sold" : "Drafts"}
+            </span>
           </div>
 
-          {showForm && (
-            <form onSubmit={handleCreateListing} className="bg-white border border-[#E8E8E8] p-6 mb-6">
-              <h2 className="text-sm font-bold mb-4">Create New Listing</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Title</label>
-                  <input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Brand</label>
-                  <input
-                    value={form.brand}
-                    onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Price</label>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Size</label>
-                  <input
-                    value={form.size}
-                    onChange={(e) => setForm({ ...form, size: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Category</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none bg-white"
-                  >
-                    <option>Tops</option>
-                    <option>Bottoms</option>
-                    <option>Outerwear</option>
-                    <option>Footwear</option>
-                    <option>Accessories</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Condition</label>
-                  <select
-                    value={form.condition}
-                    onChange={(e) => setForm({ ...form, condition: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none bg-white"
-                  >
-                    <option>New/Never Worn</option>
-                    <option>Gently Used</option>
-                    <option>Used</option>
-                    <option>Very Worn</option>
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Description</label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none h-20 resize-none"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Image URL</label>
-                  <input
-                    value={form.images[0]}
-                    onChange={(e) => setForm({ ...form, images: [e.target.value] })}
-                    className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
-                  />
-                </div>
+          {/* ── Announcements Banner ── */}
+          <div className="bg-[#F7F7F7] border border-[#E8E8E8] px-5 py-4 mb-8">
+            <div className="flex items-start gap-3">
+              <Megaphone className="w-4 h-4 text-[#888] mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-1">
+                  Seller Announcements
+                </p>
+                <p className="text-[12px] text-[#888] leading-relaxed">
+                  Smart Pricing is now available — automatically drop your price 10% weekly until it hits your floor price.{" "}
+                  <a href="/sell" className="underline text-[#1A1A1A] hover:opacity-70">
+                    Try it on your next listing →
+                  </a>
+                </p>
               </div>
-              <button
-                type="submit"
-                className="mt-4 px-6 py-2.5 bg-[#1A1A1A] text-white text-xs font-bold tracking-wide hover:bg-black transition-colors"
-              >
-                CREATE LISTING
-              </button>
-            </form>
-          )}
+            </div>
+          </div>
 
-          {/* Listings Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {myListings.map((listing) => (
-              <div key={listing.id} className="bg-white border border-[#E8E8E8] overflow-hidden">
-                <Link href={`/listing/${listing.id}`}>
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                    />
-                  </div>
+          {/* ── FOR SALE tab ── */}
+          {activeTab === "forsale" && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A]">
+                  For Sale ({myListings.length})
+                </h2>
+                <Link
+                  href="/sell"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] text-white text-[11px] font-bold tracking-[0.1em] hover:bg-black transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  NEW LISTING
                 </Link>
-                <div className="p-3">
-                  <p className="text-xs font-medium truncate">{listing.title}</p>
-                  <p className="text-sm font-bold">${listing.price.toLocaleString()}</p>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() => deleteListing(listing.id)}
-                      className="flex items-center gap-1 px-2 py-1 text-[10px] text-red-600 border border-red-200 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-3 h-3" /> Delete
-                    </button>
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {activeTab === "offers" && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold uppercase tracking-wide">Incoming Offers</h2>
-          {myOffers.length === 0 ? (
-            <p className="text-sm text-gray-500">No offers yet.</p>
-          ) : (
-            <div className="bg-white border border-[#E8E8E8] overflow-x-auto">
-              {myOffers.map((offer) => {
-                const listing = listings.find((l) => l.id === offer.listing_id);
-                const buyer = getProfileById(offer.buyer_id);
-                const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
-
-                return (
-                  <div
-                    key={offer.id}
-                    className={`flex items-center justify-between p-4 border-b border-[#F0F0F0] last:border-0 ${
-                      offer.status === "declined" ? "opacity-50" : ""
-                    }`}
+              {myListings.length === 0 ? (
+                <div className="text-center py-20 border border-dashed border-[#D4D4D4]">
+                  <p className="text-[13px] text-[#888] mb-4">You don&apos;t have any listings yet.</p>
+                  <Link
+                    href="/sell"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A1A1A] text-white text-[11px] font-bold tracking-[0.1em] hover:bg-black transition-colors"
                   >
-                    <div className="flex items-center gap-4">
-                      {listing && (
-                        <img src={listing.images[0]} alt="" className="w-12 h-12 object-cover" />
-                      )}
-                      <div>
-                        <p className="text-sm font-medium">{listing?.title}</p>
-                        <p className="text-xs text-gray-500">
-                          From: {buyer?.name} · Listed: ${listing?.price.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-sm font-bold">${offer.amount.toLocaleString()}</p>
-                        <span
-                          className={`px-2 py-0.5 text-[10px] font-bold rounded-sm ${
-                            competitive ? "bg-green-100 text-[#16A34A]" : "bg-red-100 text-[#DC2626]"
-                          }`}
-                        >
-                          {competitive ? "Competitive" : "Low"}
-                        </span>
-                      </div>
-                      {offer.status === "pending" ? (
-                        <div className="flex gap-1">
+                    <Plus className="w-3.5 h-3.5" />
+                    CREATE YOUR FIRST LISTING
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myListings.map((listing) => {
+                    const offerCount = myOffers.filter(
+                      (o) => o.listing_id === listing.id && o.status === "pending"
+                    ).length;
+                    return (
+                      <div
+                        key={listing.id}
+                        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 hover:border-[#C8C8C8] transition-colors"
+                      >
+                        {/* Thumbnail */}
+                        <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
+                          <div className="w-[72px] h-[72px] bg-[#F2F2F2] overflow-hidden">
+                            <img
+                              src={listing.images[0]}
+                              alt={listing.title}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                            />
+                          </div>
+                        </Link>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] uppercase tracking-[0.1em] text-[#888] mb-0.5">
+                            {listing.brand}
+                          </p>
+                          <Link href={`/listing/${listing.id}`}>
+                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate hover:underline">
+                              {listing.title}
+                            </p>
+                          </Link>
+                          <div className="flex flex-wrap items-center gap-3 mt-1">
+                            <span className="text-[13px] font-bold text-[#1A1A1A]">
+                              ${listing.price.toLocaleString()}
+                            </span>
+                            <span className="text-[11px] text-[#888]">
+                              Size {listing.size} · {listing.condition}
+                            </span>
+                            {offerCount > 0 && (
+                              <span className="px-2 py-0.5 bg-[#FFF0E8] text-[#E85D00] text-[10px] font-bold tracking-[0.06em]">
+                                {offerCount} OFFER{offerCount > 1 ? "S" : ""}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                           <button
-                            onClick={() => updateOfferStatus(offer.id, "accepted")}
-                            className="p-2 bg-green-50 hover:bg-green-100 rounded transition-colors"
+                            onClick={() => alert("Price Drop — Demo")}
+                            className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
                           >
-                            <Check className="w-4 h-4 text-green-600" />
+                            <TrendingDown className="w-3 h-3" />
+                            PRICE DROP
                           </button>
                           <button
-                            onClick={() => updateOfferStatus(offer.id, "declined")}
-                            className="p-2 bg-red-50 hover:bg-red-100 rounded transition-colors"
+                            onClick={() => alert("Bump — Demo")}
+                            className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                           >
-                            <X className="w-4 h-4 text-red-600" />
+                            <Zap className="w-3 h-3" />
+                            BUMP
+                          </button>
+                          <button
+                            onClick={() => alert("Send Offer — Demo")}
+                            className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
+                          >
+                            <Tag className="w-3 h-3" />
+                            SEND OFFER
+                          </button>
+                          <button
+                            onClick={() => deleteListing(listing.id)}
+                            className="p-2 text-[#DC2626] border border-[#FECACA] hover:bg-red-50 transition-colors"
+                            title="Delete listing"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      ) : (
-                        <span
-                          className={`px-3 py-1 text-xs font-medium ${
-                            offer.status === "accepted" ? "text-green-600" : "text-gray-500"
-                          }`}
-                        >
-                          {offer.status === "accepted" ? "Accepted ✓" : "Declined"}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
+
+          {/* ── OFFERS tab ── */}
+          {activeTab === "offers" && (
+            <div>
+              <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-6">
+                Offers ({pendingOffers.length} pending)
+              </h2>
+              {myOffers.length === 0 ? (
+                <div className="text-center py-20 border border-dashed border-[#D4D4D4]">
+                  <p className="text-[13px] text-[#888]">No offers yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {myOffers.map((offer) => {
+                    const listing = listings.find((l) => l.id === offer.listing_id);
+                    const buyer = getProfileById(offer.buyer_id);
+                    const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
+                    return (
+                      <div
+                        key={offer.id}
+                        className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
+                          offer.status === "declined" ? "opacity-50" : ""
+                        }`}
+                      >
+                        {listing && (
+                          <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
+                            <img src={listing.images[0]} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
+                          <p className="text-[11px] text-[#888] mt-0.5">
+                            From: {buyer?.name || "Buyer"} · Listed at ${listing?.price.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <div className="text-right">
+                            <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 ${
+                              competitive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                            }`}>
+                              {competitive ? "COMPETITIVE" : "LOW"}
+                            </span>
+                          </div>
+                          {offer.status === "pending" ? (
+                            <div className="flex gap-1.5">
+                              <button
+                                onClick={() => updateOfferStatus(offer.id, "accepted")}
+                                className="p-2 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors"
+                                title="Accept"
+                              >
+                                <Check className="w-4 h-4 text-green-600" />
+                              </button>
+                              <button
+                                onClick={() => updateOfferStatus(offer.id, "declined")}
+                                className="p-2 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
+                                title="Decline"
+                              >
+                                <X className="w-4 h-4 text-red-500" />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className={`text-[11px] font-medium px-3 py-1.5 ${
+                              offer.status === "accepted" ? "text-green-600 bg-green-50" : "text-[#888] bg-[#F7F7F7]"
+                            }`}>
+                              {offer.status === "accepted" ? "Accepted ✓" : "Declined"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── SOLD tab ── */}
+          {activeTab === "sold" && (
+            <div>
+              <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-6">Sold</h2>
+              <div className="text-center py-20 border border-dashed border-[#D4D4D4]">
+                <p className="text-[13px] text-[#888]">Items you&apos;ve sold will appear here.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── DRAFTS tab ── */}
+          {activeTab === "drafts" && (
+            <div>
+              <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-6">Drafts</h2>
+              <div className="text-center py-20 border border-dashed border-[#D4D4D4]">
+                <p className="text-[13px] text-[#888] mb-4">
+                  Listings saved as drafts will appear here.
+                </p>
+                <Link
+                  href="/sell"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#1A1A1A] text-[11px] font-bold tracking-[0.1em] hover:bg-[#F7F7F7] transition-colors"
+                >
+                  START A LISTING
+                </Link>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
     </div>
   );
 }
