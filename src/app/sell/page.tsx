@@ -82,7 +82,7 @@ function SelectField({
         className={`w-full appearance-none border border-[#D4D4D4] px-4 py-3 text-sm bg-white pr-10 outline-none focus:border-[#1A1A1A] transition-colors ${
           disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
         } ${!value ? "text-[#888]" : "text-[#1A1A1A]"}`}
-        style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+        style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
       >
         <option value="" disabled>{placeholder}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -99,7 +99,7 @@ function SectionTitle({ children, link, linkLabel }: {
     <div className="flex items-center justify-between mb-4">
       <h2
         className="text-[22px] font-bold text-[#1A1A1A]"
-        style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 700 }}
+        style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
       >
         {children}
       </h2>
@@ -214,7 +214,7 @@ export default function SellPage() {
       : null;
 
   return (
-    <div className="min-h-screen bg-white pb-24" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+    <div className="min-h-screen bg-white pb-24" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
       <div className="max-w-[920px] mx-auto px-4 sm:px-8 pt-10 pb-2">
 
         {/* Header */}

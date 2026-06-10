@@ -63,7 +63,7 @@ export default function ListingDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
       <Navbar />
 
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">

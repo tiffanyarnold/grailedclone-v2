@@ -46,7 +46,7 @@ export default function MessagesPage() {
       <div className="min-h-screen flex items-center justify-center">
         <p
           className="text-[#888] text-sm"
-          style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
         >
           Please log in to view your messages.
         </p>
@@ -57,7 +57,7 @@ export default function MessagesPage() {
   return (
     <div
       className="min-h-screen bg-white"
-      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+      style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
     >
       <div className="max-w-[1200px] mx-auto flex">
         {/* Left Sidebar */}

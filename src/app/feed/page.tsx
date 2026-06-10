@@ -60,7 +60,7 @@ export default function FeedPage() {
   const hasListings = feedListings.length > 0;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
       <Navbar />
 
       <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8">

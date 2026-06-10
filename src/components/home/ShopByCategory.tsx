@@ -43,7 +43,7 @@ export default function ShopByCategory() {
       <div>
         <h2
           className="text-[22px] font-bold text-[#1A1A1A] mb-5"
-          style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 700 }}
+          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
         >
           Shop Menswear
         </h2>
@@ -66,7 +66,7 @@ export default function ShopByCategory() {
       <div>
         <h2
           className="text-[22px] font-bold text-[#1A1A1A] mb-5"
-          style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 700 }}
+          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
         >
           Shop Womenswear
         </h2>

@@ -57,7 +57,7 @@ function Sidebar({
   return (
     <nav
       className="w-full h-full py-6 pr-4"
-      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+      style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
     >
       {NAV.map((item) => {
         if (!item.children) {
@@ -180,7 +180,7 @@ export default function SellerDashboardPage() {
   return (
     <div
       className="min-h-screen bg-white"
-      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+      style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
     >
       <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-120px)]">
 

@@ -43,13 +43,13 @@ export default function EditorialSection() {
         <div className="w-full lg:w-[36%] flex-shrink-0 flex flex-col">
           <p
             className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
-            style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+            style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
           >
             {SECTION_CONFIG.brands}
           </p>
           <h3
             className="text-[17px] font-bold text-[#1A1A1A] mb-3"
-            style={{ fontFamily: "var(--font-syne), 'Arial Black', sans-serif", fontWeight: 700 }}
+            style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
           >
             {SECTION_CONFIG.title}
           </h3>
@@ -71,7 +71,7 @@ export default function EditorialSection() {
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <span
                       className="text-white text-[11px] font-bold tracking-[0.12em]"
-                      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+                      style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
                     >
                       + VIEW MORE
                     </span>
@@ -92,19 +92,19 @@ export default function EditorialSection() {
           <div className="absolute bottom-8 left-8 bg-white rounded-xl p-6 max-w-[340px] shadow-sm">
             <p
               className="text-[11px] tracking-[0.05em] text-[#888] mb-2"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
             >
               {section.categoryLabel}
             </p>
             <h3
               className="text-[24px] font-bold text-[#1A1A1A] mb-2 leading-tight"
-              style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
             >
               {section.title}
             </h3>
             <p
               className="text-sm text-[#555] leading-relaxed"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
             >
               {section.description}
             </p>

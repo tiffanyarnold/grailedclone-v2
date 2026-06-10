@@ -28,7 +28,7 @@ export default function FavoritesPage() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="min-h-[60vh] flex items-center justify-center">
-          <p className="text-[#888] text-sm" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+          <p className="text-[#888] text-sm" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
             Please log in to view your favorites.
           </p>
         </div>
@@ -40,7 +40,7 @@ export default function FavoritesPage() {
   const favoritedListings = listings.filter((l) => isFavorited(user.id, l.id));
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
       <Navbar />
 
       <div className="max-w-[1440px] mx-auto px-8 py-10">
@@ -48,7 +48,7 @@ export default function FavoritesPage() {
         <div className="text-center mb-8">
           <h1
             className="text-[32px] font-bold text-[#1A1A1A] mb-3"
-            style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
           >
             Favorites
           </h1>

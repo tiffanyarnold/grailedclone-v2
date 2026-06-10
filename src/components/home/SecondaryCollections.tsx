@@ -58,13 +58,13 @@ export default function SecondaryCollections() {
             <div key={col.title}>
               <p
                 className="text-[10px] tracking-[0.14em] uppercase text-[#888] mb-1"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
               >
                 {col.brands}
               </p>
               <h3
                 className="text-[17px] font-bold text-[#1A1A1A] mb-3"
-                style={{ fontFamily: "var(--font-syne), 'Arial Black', sans-serif", fontWeight: 700 }}
+                style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
               >
                 {col.title}
               </h3>
@@ -84,7 +84,7 @@ export default function SecondaryCollections() {
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span
                           className="text-white text-[11px] font-bold tracking-[0.12em]"
-                          style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+                          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
                         >
                           + VIEW MORE
                         </span>

@@ -78,7 +78,7 @@ export default function LoginModal() {
     >
       <div
         className="relative bg-white w-full max-w-[460px] mx-4 rounded-md p-8 shadow-2xl"
-        style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+        style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
       >
         {/* Close */}
         <button
@@ -93,7 +93,7 @@ export default function LoginModal() {
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-3 leading-tight"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 800 }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 800 }}
             >
               Find Your Grail
             </h2>
@@ -105,7 +105,7 @@ export default function LoginModal() {
             <button
               onClick={() => setShowEmailForm(true)}
               className="w-full py-[13px] bg-[#1A1A1A] text-white text-[13px] font-bold tracking-[0.08em] hover:bg-black transition-colors mb-5"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
             >
               CREATE ACCOUNT WITH EMAIL
             </button>
@@ -136,7 +136,7 @@ export default function LoginModal() {
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-2 leading-tight"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 800 }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 800 }}
             >
               Create Account
             </h2>
@@ -209,7 +209,7 @@ export default function LoginModal() {
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-2 leading-tight"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 800 }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 800 }}
             >
               Log in
             </h2>
@@ -221,7 +221,7 @@ export default function LoginModal() {
             <button
               onClick={() => setShowEmailForm(true)}
               className="w-full py-[13px] bg-[#1A1A1A] text-white text-[13px] font-bold tracking-[0.08em] hover:bg-black transition-colors mb-5"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
             >
               LOG IN WITH EMAIL
             </button>
@@ -240,7 +240,7 @@ export default function LoginModal() {
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-2 leading-tight"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontWeight: 800 }}
+              style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 800 }}
             >
               Log in
             </h2>
@@ -280,7 +280,7 @@ export default function LoginModal() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-[13px] bg-[#1A1A1A] text-white text-[13px] font-bold tracking-[0.08em] hover:bg-black transition-colors disabled:opacity-60 mt-1"
-                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+                style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
               >
                 {loading ? "..." : "LOG IN"}
               </button>

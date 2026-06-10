@@ -140,7 +140,7 @@ export default function HeroCarousel() {
         {/* Bold headline */}
         <h2
           style={{
-            fontFamily: "var(--font-syne), 'Arial Black', sans-serif",
+            fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
             fontSize: "clamp(28px, 5vw, 66px)",
             fontWeight: 800,
             letterSpacing: "-0.02em",

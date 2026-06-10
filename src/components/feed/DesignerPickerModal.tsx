@@ -94,13 +94,13 @@ export default function DesignerPickerModal({ open, onClose }: Props) {
     >
       <div
         className="relative bg-white w-full max-w-[560px] mx-4 rounded-lg shadow-2xl flex flex-col"
-        style={{ maxHeight: "90vh", fontFamily: "var(--font-space-grotesk), sans-serif" }}
+        style={{ maxHeight: "90vh", fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-4">
           <h2
             className="text-[26px] font-bold text-[#1A1A1A] leading-tight"
-            style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
           >
             What designers are you into?
           </h2>
