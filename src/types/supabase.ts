@@ -98,47 +98,68 @@ export type Database = {
         Row: {
           brand: string
           category: string
+          competitive_range_max: number | null
+          competitive_range_min: number | null
           condition: string
           created_at: string | null
           description: string
           featured: boolean
           id: string
           image_url: string[]
+          last_sold_price: number | null
           listed_price: number
+          lowest_ask: number | null
+          min_offer_price: number | null
+          offer_acceptance_rate: number | null
           original_price: number | null
           seller_id: string
           size: string
           title: string
+          watchers_count: number
         }
         Insert: {
           brand: string
           category: string
+          competitive_range_max?: number | null
+          competitive_range_min?: number | null
           condition: string
           created_at?: string | null
           description?: string
           featured?: boolean
           id?: string
           image_url?: string[]
+          last_sold_price?: number | null
           listed_price: number
+          lowest_ask?: number | null
+          min_offer_price?: number | null
+          offer_acceptance_rate?: number | null
           original_price?: number | null
           seller_id: string
           size: string
           title: string
+          watchers_count?: number
         }
         Update: {
           brand?: string
           category?: string
+          competitive_range_max?: number | null
+          competitive_range_min?: number | null
           condition?: string
           created_at?: string | null
           description?: string
           featured?: boolean
           id?: string
           image_url?: string[]
+          last_sold_price?: number | null
           listed_price?: number
+          lowest_ask?: number | null
+          min_offer_price?: number | null
+          offer_acceptance_rate?: number | null
           original_price?: number | null
           seller_id?: string
           size?: string
           title?: string
+          watchers_count?: number
         }
         Relationships: [
           {
@@ -156,24 +177,30 @@ export type Database = {
           buyer_id: string
           created_at: string | null
           id: string
+          is_competitive: boolean
           listing_id: string
           status: string
+          updated_at: string | null
         }
         Insert: {
           amount: number
           buyer_id: string
           created_at?: string | null
           id?: string
+          is_competitive?: boolean
           listing_id: string
           status?: string
+          updated_at?: string | null
         }
         Update: {
           amount?: number
           buyer_id?: string
           created_at?: string | null
           id?: string
+          is_competitive?: boolean
           listing_id?: string
           status?: string
+          updated_at?: string | null
         }
         Relationships: [
           {

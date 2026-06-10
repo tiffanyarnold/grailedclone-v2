@@ -15,6 +15,15 @@ export interface Listing {
   listed_price: number;
   original_price?: number | null;
   featured?: boolean;
+  // Week 1
+  min_offer_price?: number | null;
+  // Week 2
+  competitive_range_min?: number | null;
+  competitive_range_max?: number | null;
+  last_sold_price?: number | null;
+  lowest_ask?: number | null;
+  offer_acceptance_rate?: number | null;
+  watchers_count?: number;
   created_at: string;
   image_url: string[];
 }
@@ -25,6 +34,8 @@ export interface Offer {
   buyer_id: string;
   amount: number;
   status: "pending" | "accepted" | "declined";
+  is_competitive?: boolean;
+  updated_at?: string | null;
   created_at: string;
 }
 
