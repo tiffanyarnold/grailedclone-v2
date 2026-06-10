@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth-context";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 
 export default function LoginModal() {
   const { loginModalOpen, loginModalMode, closeLoginModal, login, signup } = useAuth();
@@ -14,6 +14,7 @@ export default function LoginModal() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Sync mode when modal opens
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function LoginModal() {
       setPassword("");
       setName("");
       setError("");
+      setShowPassword(false);
     }
   }, [loginModalOpen, loginModalMode]);
 
@@ -159,14 +161,24 @@ export default function LoginModal() {
                 className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
                 required
               />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {error && <p className="text-xs text-[#DC2626]">{error}</p>}
               <button
                 type="submit"
@@ -245,14 +257,24 @@ export default function LoginModal() {
                 className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
                 required
               />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {error && <p className="text-xs text-[#DC2626]">{error}</p>}
               <button
                 type="submit"
