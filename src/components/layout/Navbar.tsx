@@ -1,20 +1,43 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useStore } from "@/lib/store-context";
 import { Search, ChevronDown, MessageCircle, Heart, User, Menu, X } from "lucide-react";
 import DesignerPickerModal, { getFollowedDesigners } from "@/components/feed/DesignerPickerModal";
 
+// Static mock data matching Grailed's popular searches + designer suggestions
+const POPULAR_SEARCHES = [
+  "Rebecca Minkoff Handbag",
+  "Handmade",
+  "Luxury Handbags",
+  "Louis Vuitton Louis Vuitton Papillon 30 Monogram Old Model Leather Bag Brown",
+];
+
+const MOCK_DESIGNERS = [
+  "Handmade",
+  "handvaerk",
+  "Haider Ackermann",
+  "Helmut Lang",
+  "Heron Preston",
+  "Hermes",
+  "Human Made",
+];
+
 export default function Navbar() {
   const { user, logout, openLoginModal } = useAuth();
+  const { listings } = useStore();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFeedClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,11 +50,14 @@ export default function Navbar() {
     setMobileOpen(false);
   };
 
-  // Close dropdown when clicking outside
+  // Close avatar dropdown when clicking outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
         setAvatarOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -48,16 +74,59 @@ export default function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/browse?search=${encodeURIComponent(searchQuery.trim())}`);
+      setDropdownOpen(false);
       setMobileOpen(false);
+      inputRef.current?.blur();
     }
   };
+
+  const handleSuggestionClick = (query: string) => {
+    setSearchQuery(query);
+    router.push(`/browse?search=${encodeURIComponent(query)}`);
+    setDropdownOpen(false);
+    inputRef.current?.blur();
+  };
+
+  const handleClear = () => {
+    setSearchQuery("");
+    setDropdownOpen(false);
+    inputRef.current?.focus();
+  };
+
+  // Compute filtered designers from both mock list and actual listing brands
+  const matchingDesigners = useCallback((): string[] => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    const fromListings = Array.from(new Set(listings.map((l) => l.brand)))
+      .filter((b) => b.toLowerCase().startsWith(q));
+    const fromMock = MOCK_DESIGNERS.filter((d) => d.toLowerCase().startsWith(q));
+    // Merge, dedupe, limit to 5
+    return Array.from(new Set([...fromListings, ...fromMock])).slice(0, 5);
+  }, [searchQuery, listings]);
+
+  // Compute matching popular searches
+  const matchingPopular = useCallback((): string[] => {
+    if (!searchQuery.trim()) return POPULAR_SEARCHES;
+    const q = searchQuery.toLowerCase();
+    // Also search listing titles
+    const fromListings = listings
+      .filter((l) => l.title.toLowerCase().includes(q) || l.brand.toLowerCase().includes(q))
+      .map((l) => l.title)
+      .slice(0, 3);
+    const fromMock = POPULAR_SEARCHES.filter((s) => s.toLowerCase().includes(q));
+    return Array.from(new Set([...fromMock, ...fromListings])).slice(0, 6);
+  }, [searchQuery, listings]);
+
+  const designers = matchingDesigners();
+  const popular = matchingPopular();
+  const showDropdown = dropdownOpen;
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-4 lg:px-8 py-3 max-w-[1440px] mx-auto h-[56px] lg:h-[64px]">
+      <div className="relative flex items-center px-4 lg:px-6 max-w-[1440px] mx-auto h-[52px]">
 
-        {/* Hamburger — mobile only, far left */}
+        {/* Hamburger — mobile only */}
         <button
           className="lg:hidden mr-3 flex-shrink-0 text-[#1A1A1A] hover:opacity-60 transition-opacity"
           onClick={() => setMobileOpen(true)}
@@ -66,90 +135,181 @@ export default function Navbar() {
           <Menu className="w-6 h-6" />
         </button>
 
-        {/* Logo — matches Grailed's bold condensed all-caps wordmark */}
-        <Link href="/" className="flex-shrink-0">
-          <h1
-            className="text-[20px] lg:text-[22px] leading-none text-[#1A1A1A] select-none"
+        {/* Logo */}
+        <Link href="/" className="flex-shrink-0 mr-6">
+          <span
+            className="text-[22px] leading-none text-[#1A1A1A] select-none block"
             style={{
-              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif",
               fontWeight: 900,
-              letterSpacing: "0.03em",
-              fontStretch: "condensed",
+              letterSpacing: "-0.01em",
             }}
           >
             GRAILED
-          </h1>
+          </span>
         </Link>
 
-        {/* Search — absolutely centered on desktop, hidden on mobile */}
-        <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 w-[460px]">
+        {/* Search — centered, takes remaining space between logo and right actions */}
+        <div
+          ref={searchRef}
+          className="hidden lg:block flex-1 max-w-[480px] mx-auto relative"
+        >
           <form onSubmit={handleSearch}>
-            <div className="flex items-center border border-[#1A1A1A] overflow-hidden h-[40px]">
-              <div className="flex items-center pl-3 flex-shrink-0">
-                <Search className="w-4 h-4 text-[#888]" />
+            <div className={`flex items-center bg-white overflow-hidden h-[36px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
+              {/* Left icon — X when typing, search icon otherwise */}
+              <div className="flex items-center pl-2.5 pr-1 flex-shrink-0">
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-[#888] hover:text-[#1A1A1A] transition-colors p-0.5"
+                    tabIndex={-1}
+                  >
+                    <X className="w-[14px] h-[14px]" />
+                  </button>
+                ) : (
+                  <Search className="w-[14px] h-[14px] text-[#888]" />
+                )}
               </div>
+
               <input
+                ref={inputRef}
                 type="text"
                 placeholder="Search for anything"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-3 text-sm outline-none bg-transparent placeholder:text-[#999] h-full"
-                             />
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setDropdownOpen(true);
+                }}
+                onFocus={() => setDropdownOpen(true)}
+                className="flex-1 px-2 text-[13px] outline-none bg-transparent placeholder:text-[#999] h-full"
+                autoComplete="off"
+              />
               <button
                 type="submit"
-                className="h-full px-5 text-[11px] font-bold tracking-[0.12em] text-[#1A1A1A] border-l border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap flex-shrink-0"
-                             >
+                className="h-full px-4 text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] border-l border-[#1A1A1A] hover:bg-[#F5F5F5] transition-colors whitespace-nowrap flex-shrink-0"
+              >
                 SEARCH
               </button>
             </div>
           </form>
+
+          {/* ── Search Dropdown ── */}
+          {showDropdown && (
+            <div
+              className="absolute left-0 right-0 top-full bg-white border border-[#1A1A1A] border-t-0 z-[200] overflow-hidden shadow-sm"
+              style={{ maxHeight: "480px", overflowY: "auto" }}
+            >
+              {/* Info banner — light blue tint, matches Grailed exactly */}
+              <div className="px-4 py-3 bg-[#EEF2FF] border-b border-[#D4DCFF]">
+                <p className="text-[12px] text-[#444] leading-snug">
+                  You can now use{" "}
+                  <a href="#" className="text-[#2557D6] underline">negative</a>
+                  {" "}and{" "}
+                  <a href="#" className="text-[#2557D6] underline">exact</a>
+                  {" "}key words to refine your search
+                  <br />
+                  (e.g. &apos;Lemaire -Uniqlo, &quot;Trucker Hat&quot;&apos;)
+                </p>
+              </div>
+
+              {/* Designers section — only shown when there's a query matching designers */}
+              {designers.length > 0 && (
+                <div>
+                  <p className="px-4 pt-3 pb-1.5 text-[12px] font-bold text-[#1A1A1A] tracking-[0.02em]">
+                    Designers
+                  </p>
+                  {designers.map((designer) => (
+                    <button
+                      key={designer}
+                      type="button"
+                      onClick={() => handleSuggestionClick(designer)}
+                      className="w-full text-left px-4 py-[7px] text-[13px] text-[#1A1A1A] hover:bg-[#F5F5F5] transition-colors"
+                    >
+                      {designer}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Popular Searches section */}
+              {popular.length > 0 && (
+                <div>
+                  <p className="px-4 pt-3 pb-1.5 text-[12px] font-bold text-[#1A1A1A] tracking-[0.02em]">
+                    Popular Searches
+                  </p>
+                  {popular.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => handleSuggestionClick(item)}
+                      className="w-full text-left px-4 py-[7px] text-[13px] text-[#1A1A1A] hover:bg-[#F5F5F5] transition-colors truncate"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Empty state when no matches */}
+              {designers.length === 0 && popular.length === 0 && searchQuery.trim() && (
+                <div className="px-4 py-4">
+                  <p className="text-[13px] text-[#888]">No results for &ldquo;{searchQuery}&rdquo;</p>
+                </div>
+              )}
+
+              {/* Bottom padding */}
+              <div className="h-2" />
+            </div>
+          )}
         </div>
 
         {/* Right Actions */}
         <div className="ml-auto flex items-center gap-3 lg:gap-4 flex-shrink-0">
           {user ? (
             <>
-              {/* SELL / ADMIN — desktop only */}
+              {/* SELL / ADMIN */}
               <Link
                 href={user.role === "admin" ? "/admin" : "/sell"}
-                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                             >
+                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+              >
                 {user.role === "admin" ? "ADMIN" : "SELL"}
               </Link>
 
-              {/* MY FEED — desktop only */}
+              {/* MY FEED */}
               <button
                 onClick={handleFeedClick}
-                className="hidden lg:inline-flex text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
-                             >
+                className="hidden lg:inline-flex items-center text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
+              >
                 MY FEED
               </button>
 
-              {/* Messages icon */}
+              {/* Messages */}
               <button
                 onClick={() => { router.push("/messages"); setMobileOpen(false); }}
                 className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity"
               >
-                <MessageCircle className="w-[22px] h-[22px]" strokeWidth={1.5} />
+                <MessageCircle className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </button>
 
-              {/* Favorites icon */}
+              {/* Favorites */}
               <Link href="/favorites" className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity">
-                <Heart className="w-[22px] h-[22px]" strokeWidth={1.5} />
+                <Heart className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </Link>
 
               {/* Avatar + dropdown */}
               <div className="relative" ref={avatarRef}>
                 <button
                   onClick={() => setAvatarOpen((o) => !o)}
-                  className="w-[32px] h-[32px] lg:w-[34px] lg:h-[34px] rounded-full bg-[#1A1A1A] flex items-center justify-center text-white hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0"
+                  className="w-[30px] h-[30px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] flex items-center justify-center hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0 relative"
                 >
-                  <User className="w-[16px] h-[16px] lg:w-[18px] lg:h-[18px]" strokeWidth={1.5} />
+                  <User className="w-[15px] h-[15px] text-[#666]" strokeWidth={1.5} />
+                  {/* Red dot */}
+                  <span className="absolute -top-[2px] -right-[2px] w-[8px] h-[8px] rounded-full bg-[#E53935] border-[1.5px] border-white" />
                 </button>
 
                 {avatarOpen && (
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#E8E8E8] shadow-lg rounded-sm z-50 py-1"
-                                     >
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#E8E8E8] shadow-lg z-50 py-1">
                     <div className="px-4 py-3 border-b border-[#E8E8E8]">
                       <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{user.name}</p>
                       <p className="text-[11px] text-[#888] truncate">{user.email}</p>
@@ -181,30 +341,45 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {/* Desktop auth buttons */}
               <button
                 onClick={() => openLoginModal("login")}
-                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-70 transition-opacity"
-                             >
+                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+              >
                 SELL
               </button>
               <button
-                onClick={() => openLoginModal("signup")}
-                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                             >
-                SIGN UP
+                onClick={() => openLoginModal("login")}
+                className="hidden lg:inline-flex items-center text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity"
+              >
+                MY FEED
               </button>
               <button
                 onClick={() => openLoginModal("login")}
-                className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-                             >
-                LOG IN
+                className="hidden lg:block text-[#1A1A1A] hover:opacity-60 transition-opacity"
+              >
+                <MessageCircle className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </button>
-              {/* Mobile: just LOG IN button */}
               <button
                 onClick={() => openLoginModal("login")}
-                className="lg:hidden px-4 py-[6px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
-                             >
+                className="hidden lg:block text-[#1A1A1A] hover:opacity-60 transition-opacity"
+              >
+                <Heart className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              </button>
+              {/* Avatar placeholder */}
+              <div className="relative hidden lg:block">
+                <button
+                  onClick={() => openLoginModal("login")}
+                  className="w-[30px] h-[30px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] flex items-center justify-center hover:opacity-80 transition-opacity relative"
+                >
+                  <User className="w-[15px] h-[15px] text-[#666]" strokeWidth={1.5} />
+                  <span className="absolute -top-[2px] -right-[2px] w-[8px] h-[8px] rounded-full bg-[#E53935] border-[1.5px] border-white" />
+                </button>
+              </div>
+              {/* Mobile: LOG IN button */}
+              <button
+                onClick={() => openLoginModal("login")}
+                className="lg:hidden px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+              >
                 LOG IN
               </button>
             </>
@@ -214,7 +389,7 @@ export default function Navbar() {
 
       {/* Secondary Nav — desktop only */}
       <nav className="hidden lg:block border-t border-[#E8E8E8]">
-        <div className="flex items-center justify-between px-8 py-3 max-w-[1440px] mx-auto">
+        <div className="flex items-center justify-between px-6 max-w-[1440px] mx-auto h-[38px]">
           <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
           <NavLink href="/browse?category=womenswear" hasChevron>WOMENSWEAR</NavLink>
@@ -225,30 +400,20 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[100] lg:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
-          <div
-            className="absolute left-0 top-0 h-full w-[300px] bg-white flex flex-col overflow-y-auto"
-          >
-            {/* Drawer header */}
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-[300px] bg-white flex flex-col overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E8E8]">
               <span
                 className="text-[20px] leading-none text-[#1A1A1A] select-none"
-                style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
+                style={{ fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif", fontWeight: 900 }}
               >GRAILED</span>
               <button onClick={() => setMobileOpen(false)} className="text-[#1A1A1A] hover:opacity-60">
                 <X className="w-6 h-6" />
               </button>
             </div>
-
-            {/* Mobile search */}
             <div className="px-5 py-4 border-b border-[#E8E8E8]">
               <form onSubmit={handleSearch}>
                 <div className="flex items-center border border-[#1A1A1A] overflow-hidden h-[40px]">
@@ -265,8 +430,6 @@ export default function Navbar() {
                 </div>
               </form>
             </div>
-
-            {/* Nav links */}
             <nav className="flex-1 px-5 py-4">
               <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-3 uppercase">Browse</p>
               {[
@@ -287,7 +450,6 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
-
               {user && (
                 <div className="mt-6">
                   <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-3 uppercase">Account</p>
@@ -307,8 +469,6 @@ export default function Navbar() {
                 </div>
               )}
             </nav>
-
-            {/* Bottom auth buttons */}
             {!user && (
               <div className="px-5 py-5 border-t border-[#E8E8E8] space-y-2">
                 <button
@@ -325,7 +485,6 @@ export default function Navbar() {
                 </button>
               </div>
             )}
-
             {user && (
               <div className="px-5 py-5 border-t border-[#E8E8E8]">
                 <p className="text-[13px] font-semibold text-[#1A1A1A] truncate mb-0.5">{user.name}</p>
@@ -342,7 +501,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Designer Picker Modal */}
       <DesignerPickerModal
         open={designerPickerOpen}
         onClose={() => setDesignerPickerOpen(false)}
@@ -355,10 +513,10 @@ function NavLink({ href, children, hasChevron }: { href: string; children: React
   return (
     <Link
       href={href}
-      className="flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.12em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
+      className="flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap uppercase"
     >
       {children}
-      {hasChevron && <ChevronDown className="w-3 h-3 ml-0.5" />}
+      {hasChevron && <ChevronDown className="w-[11px] h-[11px] ml-0.5" />}
     </Link>
   );
 }
