@@ -112,7 +112,7 @@ export default function Navbar() {
             <>
               {/* SELL / ADMIN — desktop only */}
               <Link
-                href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
+                href={user.role === "admin" ? "/admin" : "/sell"}
                 className="hidden lg:inline-flex px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
@@ -137,9 +137,9 @@ export default function Navbar() {
               </button>
 
               {/* Favorites icon */}
-              <button className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity">
+              <Link href="/favorites" className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity">
                 <Heart className="w-[22px] h-[22px]" strokeWidth={1.5} />
-              </button>
+              </Link>
 
               {/* Avatar + dropdown */}
               <div className="relative" ref={avatarRef}>
@@ -304,7 +304,7 @@ export default function Navbar() {
                     MY FEED
                   </button>
                   <Link
-                    href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
+                    href={user.role === "admin" ? "/admin" : "/sell"}
                     onClick={() => setMobileOpen(false)}
                     className="block py-3 text-[13px] font-semibold tracking-[0.08em] text-[#1A1A1A] border-b border-[#F0F0F0] hover:opacity-60"
                   >
