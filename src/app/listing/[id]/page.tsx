@@ -34,8 +34,8 @@ export default function ListingDetailPage() {
   }
 
   const seller = getProfileById(listing.seller_id);
-  const lowestAsk = Math.round(listing.price * 0.82);
-  const lastSold = Math.round(listing.price * 0.9);
+  const lowestAsk = Math.round(listing.listed_price * 0.82);
+  const lastSold = Math.round(listing.listed_price * 0.9);
   const acceptanceRate = 67;
 
   const handleOpenOffer = () => {
@@ -68,13 +68,13 @@ export default function ListingDetailPage() {
           <div>
             <div className="aspect-square bg-white overflow-hidden mb-3">
               <img
-                src={listing.images[selectedImage]}
+                src={listing.image_url[selectedImage]}
                 alt={listing.title}
                 className="w-full h-full object-contain"
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {listing.images.map((img, i) => (
+              {listing.image_url.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
@@ -93,7 +93,7 @@ export default function ListingDetailPage() {
             <div>
               <p className="text-[10px] tracking-[0.12em] uppercase text-gray-500 mb-1">{listing.brand}</p>
               <h1 className="text-xl font-bold text-[#1A1A1A] mb-2">{listing.title}</h1>
-              <p className="text-2xl font-bold text-[#1A1A1A] mb-1">${listing.price.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-[#1A1A1A] mb-1">${listing.listed_price.toLocaleString()}</p>
 
               <p className="text-xs text-gray-500 mb-4">
                 Lowest ask in 30 days: ${lowestAsk} · Last sold: ${lastSold} · Acceptance rate: {acceptanceRate}%

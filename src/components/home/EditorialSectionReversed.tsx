@@ -35,7 +35,7 @@ export default function EditorialSectionReversed() {
     colListings[i] ?? {
       id: `outerwear-fallback-${i}`,
       title: "Outerwear",
-      images: [OUTERWEAR_FALLBACKS[i]],
+      image_url: [OUTERWEAR_FALLBACKS[i]],
     }
   );
 
@@ -95,7 +95,7 @@ export default function EditorialSectionReversed() {
                 className="relative aspect-square overflow-hidden group"
               >
                 <img
-                  src={listing.images[0]}
+                  src={listing.image_url[0]}
                   alt={listing.title}
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                 />

@@ -8,8 +8,8 @@ interface Listing {
   title: string;
   brand: string;
   size: string;
-  price: number;
-  images: string[];
+  listed_price: number;
+  image_url: string[];
   condition: string;
 }
 
@@ -29,7 +29,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
   const [tosAccepted, setTosAccepted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const MIN_OFFER = Math.ceil(listing.price * 0.7); // must be at least 70% of price
+  const MIN_OFFER = Math.ceil(listing.listed_price * 0.7); // must be at least 70% of price
   const offerNum = parseFloat(offerAmount);
   const isTooLow = !isNaN(offerNum) && offerNum < MIN_OFFER;
   const isValidOffer = !isNaN(offerNum) && offerNum >= MIN_OFFER && offerNum <= 9999;
@@ -74,7 +74,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
             {/* Listing summary */}
             <div className="flex items-center gap-4 pb-5 border-b border-[#E8E8E8] mb-6">
               <div className="w-[72px] h-[72px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover" />
+                <img src={listing.image_url[0]} alt={listing.title} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.1em] text-[#888] mb-0.5">{listing.brand}</p>
@@ -83,7 +83,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
               </div>
               <div className="text-right flex-shrink-0">
                 <p className="text-[11px] text-[#888] mb-0.5">Listed price</p>
-                <p className="text-[16px] font-bold text-[#1A1A1A]">${listing.price.toLocaleString()}</p>
+                <p className="text-[16px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</p>
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
             )}
             {isValidOffer && (
               <p className="text-[12px] text-[#888] mt-1 mb-4">
-                {offerNum >= listing.price * 0.85
+                {offerNum >= listing.listed_price * 0.85
                   ? "✓ Competitive offer — likely to be accepted."
                   : "Offers close to the asking price are more likely to be accepted."}
               </p>
@@ -188,7 +188,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
               {/* Item card */}
               <div className="flex items-center gap-4 pb-5 border-b border-[#E8E8E8] mb-5">
                 <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                  <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover" />
+                  <img src={listing.image_url[0]} alt={listing.title} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] uppercase tracking-[0.1em] text-[#888] mb-0.5">{listing.brand}</p>

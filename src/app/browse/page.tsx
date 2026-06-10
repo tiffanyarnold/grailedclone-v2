@@ -67,15 +67,15 @@ function BrowsePage() {
     }
 
     // Price range
-    result = result.filter((l) => l.price >= priceRange[0] && l.price <= priceRange[1]);
+    result = result.filter((l) => l.listed_price >= priceRange[0] && l.listed_price <= priceRange[1]);
 
     // Sort
     if (sortBy === "newest") {
       result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     } else if (sortBy === "price-low") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.listed_price - b.listed_price);
     } else if (sortBy === "price-high") {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.listed_price - a.listed_price);
     }
 
     return result;
@@ -234,7 +234,7 @@ function BrowsePage() {
                   <Link href={`/listing/${listing.id}`}>
                     <div className="relative aspect-square overflow-hidden bg-white mb-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-150">
                       <img
-                        src={listing.images[0]}
+                        src={listing.image_url[0]}
                         alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                       />
@@ -243,7 +243,7 @@ function BrowsePage() {
                       <p className="text-xs font-medium text-gray-500 truncate">{listing.brand}</p>
                       <p className="text-xs text-[#1A1A1A] truncate">{listing.title}</p>
                       <p className="text-xs text-gray-500">Size: {listing.size}</p>
-                      <p className="text-sm font-bold text-[#1A1A1A]">${listing.price.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</p>
                     </div>
                   </Link>
                   {user && (

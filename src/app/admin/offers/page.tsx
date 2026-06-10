@@ -29,7 +29,7 @@ export default function AdminOffersPage() {
               const listing = listings.find((l) => l.id === offer.listing_id);
               const buyer = getProfileById(offer.buyer_id);
               const seller = listing ? getProfileById(listing.seller_id) : null;
-              const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
+              const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
 
               return (
                 <tr key={offer.id} className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">

@@ -29,11 +29,11 @@ export default function ShopByCategory() {
   );
 
   const mensSlots = Array.from({ length: 6 }, (_, i) =>
-    allItems[i] ?? { id: `mens-fb-${i}`, title: "Menswear", images: [MENS_FALLBACKS[i]] }
+    allItems[i] ?? { id: `mens-fb-${i}`, title: "Menswear", image_url: [MENS_FALLBACKS[i]] }
   );
 
   const womensSlots = Array.from({ length: 6 }, (_, i) =>
-    allItems[i + 6] ?? { id: `womens-fb-${i}`, title: "Womenswear", images: [WOMENS_FALLBACKS[i]] }
+    allItems[i + 6] ?? { id: `womens-fb-${i}`, title: "Womenswear", image_url: [WOMENS_FALLBACKS[i]] }
   );
 
   return (
@@ -52,7 +52,7 @@ export default function ShopByCategory() {
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
                 <img
-                  src={item.images[0]}
+                  src={item.image_url[0]}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-200"
                 />
@@ -75,7 +75,7 @@ export default function ShopByCategory() {
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
                 <img
-                  src={item.images[0]}
+                  src={item.image_url[0]}
                   alt={item.title}
                   className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-200"
                 />

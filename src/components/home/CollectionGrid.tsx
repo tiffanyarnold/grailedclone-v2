@@ -45,7 +45,7 @@ export default function CollectionGrid() {
   const getSlots = (cats: string[], fallbacks: string[]) => {
     const found = listings.filter((l) => cats.includes(l.category)).slice(0, 4);
     return Array.from({ length: 4 }, (_, i) =>
-      found[i] ?? { id: `fb-${i}`, title: "", images: [fallbacks[i]] }
+      found[i] ?? { id: `fb-${i}`, title: "", image_url: [fallbacks[i]] }
     );
   };
 
@@ -83,7 +83,7 @@ function CollectionCard({ config, slots }: { config: { brands: string; title: st
             className="relative aspect-square overflow-hidden group"
           >
             <img
-              src={listing.images[0]}
+              src={listing.image_url[0]}
               alt={listing.title}
               className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
             />

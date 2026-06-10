@@ -40,7 +40,7 @@ export default function AdminDashboardPage() {
         <div className="space-y-3">
           {recentOffers.map((offer) => {
             const listing = listings.find((l) => l.id === offer.listing_id);
-            const competitive = listing ? offer.amount >= listing.price * 0.85 : false;
+            const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
             return (
               <div key={offer.id} className="flex items-center justify-between py-2 border-b border-[#F0F0F0] last:border-0">
                 <div>

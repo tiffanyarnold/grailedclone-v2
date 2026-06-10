@@ -20,14 +20,14 @@ export default function AdminListingsPage() {
     condition: "Gently Used",
     price: "",
     seller_id: "",
-    images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
+    image_url: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
   });
 
   const resetForm = () => {
     setForm({
       title: "", brand: "", description: "", category: "Tops", size: "",
       condition: "Gently Used", price: "", seller_id: sellers[0]?.id || "",
-      images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
+      image_url: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
     });
     setEditId(null);
     setShowForm(false);
@@ -35,13 +35,12 @@ export default function AdminListingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { price, ...rest } = form;
+    const payload = { ...rest, listed_price: parseFloat(price) };
     if (editId) {
-      await updateListing(editId, { ...form, price: parseFloat(form.price) });
+      await updateListing(editId, payload);
     } else {
-      await addListing({
-        ...form,
-        price: parseFloat(form.price),
-      });
+      await addListing(payload);
     }
     resetForm();
   };
@@ -54,9 +53,9 @@ export default function AdminListingsPage() {
       category: listing.category,
       size: listing.size,
       condition: listing.condition,
-      price: listing.price.toString(),
+      price: listing.listed_price.toString(),
       seller_id: listing.seller_id,
-      images: listing.images,
+      image_url: listing.image_url,
     });
     setEditId(listing.id);
     setShowForm(true);
@@ -170,12 +169,12 @@ export default function AdminListingsPage() {
             <div className="md:col-span-2">
               <label className="block text-[10px] uppercase tracking-wide font-medium text-gray-500 mb-1">Image URL</label>
               <input
-                value={form.images[0]}
-                onChange={(e) => setForm({ ...form, images: [e.target.value] })}
+                value={form.image_url[0]}
+                onChange={(e) => setForm({ ...form, image_url: [e.target.value] })}
                 className="w-full px-3 py-2 border border-gray-300 text-sm outline-none"
               />
-              {form.images[0] && (
-                <img src={form.images[0]} alt="Preview" className="w-20 h-20 object-cover mt-2 border" />
+              {form.image_url[0] && (
+                <img src={form.image_url[0]} alt="Preview" className="w-20 h-20 object-cover mt-2 border" />
               )}
             </div>
           </div>
@@ -205,11 +204,11 @@ export default function AdminListingsPage() {
             {listings.map((listing) => (
               <tr key={listing.id} className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
                 <td className="px-4 py-3">
-                  <img src={listing.images[0]} alt="" className="w-10 h-10 object-cover" />
+                  <img src={listing.image_url[0]} alt="" className="w-10 h-10 object-cover" />
                 </td>
                 <td className="px-4 py-3 text-xs">{listing.title}</td>
                 <td className="px-4 py-3 text-xs text-gray-500">{listing.brand}</td>
-                <td className="px-4 py-3 text-xs font-medium">${listing.price.toLocaleString()}</td>
+                <td className="px-4 py-3 text-xs font-medium">${listing.listed_price.toLocaleString()}</td>
                 <td className="px-4 py-3 text-xs text-gray-500">{getProfileById(listing.seller_id)?.name}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">

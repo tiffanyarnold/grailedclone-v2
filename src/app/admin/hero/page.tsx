@@ -25,7 +25,7 @@ export default function AdminHeroPage() {
       headline: form.headline,
       subheadline: form.subheadline,
       button_text: form.button_text,
-      image: form.image || listing?.images[0] || "",
+      image: form.image || listing?.image_url[0] || "",
       position: heroSlides.length + 1,
       active: true,
     });
@@ -72,7 +72,7 @@ export default function AdminHeroPage() {
               >
                 <option value="">Select listing...</option>
                 {listings.map((l) => (
-                  <option key={l.id} value={l.id}>{l.title} - ${l.price}</option>
+                  <option key={l.id} value={l.id}>{l.title} - ${l.listed_price}</option>
                 ))}
               </select>
             </div>

@@ -85,15 +85,15 @@ export default function FeedPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8">
             {feedListings.map((listing) => {
               const favorited = isFavorited(user.id, listing.id);
-              const wasPrice = getWasPrice(listing.price);
-              const discountPct = getDiscountPct(listing.price);
+              const wasPrice = getWasPrice(listing.listed_price);
+              const discountPct = getDiscountPct(listing.listed_price);
 
               return (
                 <div key={listing.id} className="group flex flex-col">
                   {/* Image */}
                   <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden aspect-square bg-[#F5F5F5]">
                     <img
-                      src={listing.images[0]}
+                      src={listing.image_url[0]}
                       alt={listing.title}
                       className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                     />
@@ -135,7 +135,7 @@ export default function FeedPage() {
 
                     {/* Price row */}
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[13px] font-bold text-[#C62828]">${listing.price.toLocaleString()}</span>
+                      <span className="text-[13px] font-bold text-[#C62828]">${listing.listed_price.toLocaleString()}</span>
                       <span className="text-[12px] text-[#888] line-through">${wasPrice.toLocaleString()}</span>
                       <span className="text-[11px] text-[#888]">{discountPct}% off</span>
                     </div>

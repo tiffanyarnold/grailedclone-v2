@@ -92,7 +92,7 @@ export default function FavoritesPage() {
                       className="relative block overflow-hidden aspect-square bg-[#F5F5F5]"
                     >
                       <img
-                        src={listing.images[0]}
+                        src={listing.image_url[0]}
                         alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                       />
@@ -121,7 +121,7 @@ export default function FavoritesPage() {
                       </p>
                       <p className="text-[11px] text-[#888]">{listing.size}</p>
                       <p className="text-[13px] font-bold text-[#1A1A1A] mt-0.5">
-                        ${listing.price.toLocaleString()}
+                        ${listing.listed_price.toLocaleString()}
                       </p>
                     </div>
                   </div>

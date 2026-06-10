@@ -12,9 +12,9 @@ export interface Listing {
   category: string;
   size: string;
   condition: string;
-  price: number;
+  listed_price: number;
   created_at: string;
-  images: string[];
+  image_url: string[];
 }
 
 export interface Offer {

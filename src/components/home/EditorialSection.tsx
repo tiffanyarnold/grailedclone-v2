@@ -31,7 +31,7 @@ export default function EditorialSection() {
     colListings[i] ?? {
       id: `acc-fallback-${i}`,
       title: "Accessories",
-      images: [ACCESSORY_FALLBACKS[i]],
+      image_url: [ACCESSORY_FALLBACKS[i]],
     }
   );
 
@@ -63,7 +63,7 @@ export default function EditorialSection() {
                 className="relative aspect-square overflow-hidden group"
               >
                 <img
-                  src={listing.images[0]}
+                  src={listing.image_url[0]}
                   alt={listing.title}
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
                 />
