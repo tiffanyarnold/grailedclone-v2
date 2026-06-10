@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.listings (
   size TEXT NOT NULL,
   condition TEXT NOT NULL,
   listed_price NUMERIC NOT NULL,
+  original_price NUMERIC,
+  featured BOOLEAN NOT NULL DEFAULT false,
   image_url TEXT[] NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

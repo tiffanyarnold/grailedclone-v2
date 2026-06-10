@@ -20,6 +20,8 @@ export interface Listing {
   size: string;
   condition: string;
   listed_price: number;
+  original_price?: number | null;
+  featured?: boolean;
   created_at: string;
   image_url: string[];
 }
