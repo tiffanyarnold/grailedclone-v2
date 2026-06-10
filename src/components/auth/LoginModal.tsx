@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth-context";
 import { X } from "lucide-react";
 
@@ -36,7 +37,10 @@ export default function LoginModal() {
     return () => { document.body.style.overflow = ""; };
   }, [loginModalOpen]);
 
-  if (!loginModalOpen) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!loginModalOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,10 +69,9 @@ export default function LoginModal() {
   const switchToLogin = () => { setMode("login"); setError(""); setShowEmailForm(false); };
   const switchToSignup = () => { setMode("signup"); setError(""); setShowEmailForm(false); };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
       onClick={(e) => { if (e.target === e.currentTarget) closeLoginModal(); }}
     >
       <div
@@ -280,6 +283,7 @@ export default function LoginModal() {
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
