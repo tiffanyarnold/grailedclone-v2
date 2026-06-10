@@ -286,6 +286,7 @@ export default function SellerDashboardPage() {
                               src={listing.image_url[0]}
                               alt={listing.title}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                              onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                             />
                           </div>
                         </Link>
@@ -379,7 +380,7 @@ export default function SellerDashboardPage() {
                       >
                         {listing && (
                           <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                            <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" />
+                            <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">

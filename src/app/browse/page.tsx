@@ -231,10 +231,18 @@ function BrowsePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
               {filteredListings.map((listing) => {
                 const favorited = user ? isFavorited(user.id, listing.id) : false;
-                const hasDiscount = listing.original_price && listing.original_price > listing.listed_price;
-                const discountPct = hasDiscount
-                  ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
-                  : null;
+                const hasSalePrice = listing.sale_price && listing.sale_price < listing.listed_price;
+                const hasOriginalDiscount = listing.original_price && listing.original_price > listing.listed_price;
+                const hasDiscount = hasSalePrice || hasOriginalDiscount;
+                const discountPct = listing.discount
+                  ? Math.round(listing.discount)
+                  : hasSalePrice
+                    ? Math.round((1 - listing.sale_price! / listing.listed_price) * 100)
+                    : hasOriginalDiscount
+                      ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
+                      : null;
+                const displayPrice = hasSalePrice ? listing.sale_price! : listing.listed_price;
+                const strikethroughPrice = hasSalePrice ? listing.listed_price : listing.original_price;
 
                 return (
                   <div key={listing.id} className="group flex flex-col cursor-pointer">
@@ -245,6 +253,9 @@ function BrowsePage() {
                           src={listing.image_url[0]}
                           alt={listing.title}
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60";
+                          }}
                         />
                       )}
                     </Link>
@@ -271,9 +282,9 @@ function BrowsePage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {hasDiscount ? (
                             <>
-                              <span className="text-[12px] font-bold text-[#C62828]">${listing.listed_price.toLocaleString()}</span>
-                              <span className="text-[11px] text-[#888] line-through">${listing.original_price!.toLocaleString()}</span>
-                              <span className="text-[10px] text-[#888]">{discountPct}% off</span>
+                              <span className="text-[12px] font-bold text-[#C62828]">${displayPrice.toLocaleString()}</span>
+                              {strikethroughPrice && <span className="text-[11px] text-[#888] line-through">${strikethroughPrice.toLocaleString()}</span>}
+                              {discountPct && <span className="text-[10px] text-[#888]">{discountPct}% off</span>}
                             </>
                           ) : (
                             <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>

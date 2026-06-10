@@ -34,15 +34,23 @@ export default function ListingDetailPage() {
   }
 
   const seller = getProfileById(listing.seller_id);
-  const lowestAsk = Math.round(listing.listed_price * 0.82);
-  const lastSold = Math.round(listing.listed_price * 0.9);
-  const acceptanceRate = 67;
+  const lowestAsk = listing.lowest_ask || Math.round(listing.listed_price * 0.82);
+  const lastSold = listing.last_sold_price || Math.round(listing.listed_price * 0.9);
+  const acceptanceRate = listing.offer_acceptance_rate || 67;
 
-  // Discount
-  const hasDiscount = listing.original_price && listing.original_price > listing.listed_price;
-  const discountPct = hasDiscount
-    ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
-    : null;
+  // Discount: use sale_price/discount columns if available, fall back to original_price calculation
+  const hasSalePrice = listing.sale_price && listing.sale_price < listing.listed_price;
+  const hasOriginalDiscount = listing.original_price && listing.original_price > listing.listed_price;
+  const hasDiscount = hasSalePrice || hasOriginalDiscount;
+  const discountPct = listing.discount
+    ? Math.round(listing.discount)
+    : hasSalePrice
+      ? Math.round((1 - listing.sale_price! / listing.listed_price) * 100)
+      : hasOriginalDiscount
+        ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
+        : null;
+  const displayPrice = hasSalePrice ? listing.sale_price! : listing.listed_price;
+  const strikethroughPrice = hasSalePrice ? listing.listed_price : listing.original_price;
 
   const images = listing.image_url.length > 0
     ? listing.image_url
@@ -91,7 +99,7 @@ export default function ListingDetailPage() {
                     : "border-transparent hover:border-[#C8C8C8]"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
               </button>
             ))}
           </div>
@@ -103,6 +111,7 @@ export default function ListingDetailPage() {
                 src={images[selectedImage]}
                 alt={listing.title}
                 className="w-full h-full object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=60"; }}
               />
 
               {/* Prev / Next arrows */}
@@ -138,7 +147,7 @@ export default function ListingDetailPage() {
                       i === selectedImage ? "border-[#1A1A1A]" : "border-transparent hover:border-[#C8C8C8]"
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                   </button>
                 ))}
               </div>
@@ -156,16 +165,18 @@ export default function ListingDetailPage() {
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-[26px] font-bold text-[#1A1A1A]">
-                  ${listing.listed_price.toLocaleString()}
+                  ${displayPrice.toLocaleString()}
                 </span>
-                {hasDiscount && (
+                {hasDiscount && strikethroughPrice && (
                   <>
                     <span className="text-[17px] text-[#888] line-through">
-                      ${listing.original_price!.toLocaleString()}
+                      ${strikethroughPrice.toLocaleString()}
                     </span>
-                    <span className="text-[13px] font-bold text-[#C62828]">
-                      {discountPct}% off
-                    </span>
+                    {discountPct && (
+                      <span className="text-[13px] font-bold text-[#C62828]">
+                        {discountPct}% off
+                      </span>
+                    )}
                   </>
                 )}
               </div>

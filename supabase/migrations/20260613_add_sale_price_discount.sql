@@ -1,0 +1,3 @@
+ALTER TABLE public.listings
+  ADD COLUMN IF NOT EXISTS sale_price NUMERIC,
+  ADD COLUMN IF NOT EXISTS discount NUMERIC;

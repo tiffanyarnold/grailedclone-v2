@@ -103,6 +103,7 @@ export type Database = {
           condition: string
           created_at: string | null
           description: string
+          discount: number | null
           featured: boolean
           id: string
           image_url: string[]
@@ -112,6 +113,7 @@ export type Database = {
           min_offer_price: number | null
           offer_acceptance_rate: number | null
           original_price: number | null
+          sale_price: number | null
           seller_id: string
           size: string
           title: string
@@ -125,6 +127,7 @@ export type Database = {
           condition: string
           created_at?: string | null
           description?: string
+          discount?: number | null
           featured?: boolean
           id?: string
           image_url?: string[]
@@ -134,6 +137,7 @@ export type Database = {
           min_offer_price?: number | null
           offer_acceptance_rate?: number | null
           original_price?: number | null
+          sale_price?: number | null
           seller_id: string
           size: string
           title: string
@@ -147,6 +151,7 @@ export type Database = {
           condition?: string
           created_at?: string | null
           description?: string
+          discount?: number | null
           featured?: boolean
           id?: string
           image_url?: string[]
@@ -156,6 +161,7 @@ export type Database = {
           min_offer_price?: number | null
           offer_acceptance_rate?: number | null
           original_price?: number | null
+          sale_price?: number | null
           seller_id?: string
           size?: string
           title?: string

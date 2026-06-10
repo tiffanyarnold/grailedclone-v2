@@ -20,6 +20,8 @@ export interface Listing {
   size: string;
   condition: string;
   listed_price: number;
+  sale_price?: number | null;
+  discount?: number | null;
   original_price?: number | null;
   featured?: boolean;
   // Week 1

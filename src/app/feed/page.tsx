@@ -55,14 +55,20 @@ export default function FeedPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-[10px] gap-y-6">
             {listings.map((listing) => {
               const favorited = isFavorited(user.id, listing.id);
-              const hasDiscount =
+              const hasSalePrice = listing.sale_price && listing.sale_price < listing.listed_price;
+              const hasOriginalDiscount =
                 listing.original_price != null &&
                 listing.original_price > listing.listed_price;
-              const discountPct = hasDiscount
-                ? Math.round(
-                    (1 - listing.listed_price / listing.original_price!) * 100
-                  )
-                : null;
+              const hasDiscount = hasSalePrice || hasOriginalDiscount;
+              const discountPct = listing.discount
+                ? Math.round(listing.discount)
+                : hasSalePrice
+                  ? Math.round((1 - listing.sale_price! / listing.listed_price) * 100)
+                  : hasOriginalDiscount
+                    ? Math.round((1 - listing.listed_price / listing.original_price!) * 100)
+                    : null;
+              const displayPrice = hasSalePrice ? listing.sale_price! : listing.listed_price;
+              const strikethroughPrice = hasSalePrice ? listing.listed_price : listing.original_price;
 
               return (
                 <div key={listing.id} className="group flex flex-col">
@@ -78,6 +84,9 @@ export default function FeedPage() {
                         src={listing.image_url[0]}
                         alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60";
+                        }}
                       />
                     )}
                   </Link>
@@ -112,14 +121,18 @@ export default function FeedPage() {
                         {hasDiscount ? (
                           <>
                             <span className="text-[12px] font-bold text-[#CC0000]">
-                              ${listing.listed_price.toLocaleString()}
+                              ${displayPrice.toLocaleString()}
                             </span>
-                            <span className="text-[11px] text-[#888] line-through">
-                              ${listing.original_price!.toLocaleString()}
-                            </span>
-                            <span className="text-[11px] text-[#888]">
-                              {discountPct}% off
-                            </span>
+                            {strikethroughPrice && (
+                              <span className="text-[11px] text-[#888] line-through">
+                                ${strikethroughPrice.toLocaleString()}
+                              </span>
+                            )}
+                            {discountPct && (
+                              <span className="text-[11px] text-[#888]">
+                                {discountPct}% off
+                              </span>
+                            )}
                           </>
                         ) : (
                           <span className="text-[12px] font-bold text-[#1A1A1A]">
