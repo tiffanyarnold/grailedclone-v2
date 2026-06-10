@@ -21,6 +21,10 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  loginModalOpen: boolean;
+  loginModalMode: "login" | "signup";
+  openLoginModal: (mode?: "login" | "signup") => void;
+  closeLoginModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,11 +33,23 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => ({ success: false }),
   logout: async () => {},
   isLoading: true,
+  loginModalOpen: false,
+  loginModalMode: "login",
+  openLoginModal: () => {},
+  closeLoginModal: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginModalMode, setLoginModalMode] = useState<"login" | "signup">("login");
+
+  const openLoginModal = (mode: "login" | "signup" = "login") => {
+    setLoginModalMode(mode);
+    setLoginModalOpen(true);
+  };
+  const closeLoginModal = () => setLoginModalOpen(false);
 
   const loadProfile = async (userId: string) => {
     const { data } = await supabase
@@ -92,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, loginModalOpen, loginModalMode, openLoginModal, closeLoginModal }}>
       {children}
     </AuthContext.Provider>
   );

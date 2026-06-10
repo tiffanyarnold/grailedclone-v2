@@ -1,15 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, MessageCircle, Heart, User } from "lucide-react";
+import DesignerPickerModal, { getFollowedDesigners } from "@/components/feed/DesignerPickerModal";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, openLoginModal } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  const handleFeedClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const followed = getFollowedDesigners();
+    if (followed.length === 0) {
+      setDesignerPickerOpen(true);
+    } else {
+      router.push("/feed");
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,50 +89,105 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions — far right */}
-        <div className="ml-auto flex items-center gap-3 flex-shrink-0">
+        <div className="ml-auto flex items-center gap-4 flex-shrink-0">
           {user ? (
             <>
-              {(user.role === "seller" || user.role === "admin") && (
-                <Link
-                  href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
-                  className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                  style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-                >
-                  {user.role === "admin" ? "ADMIN" : "SELL"}
-                </Link>
-              )}
-              <span className="text-xs text-gray-500 px-1">{user.name}</span>
-              <button
-                onClick={logout}
-                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
+              {/* SELL / ADMIN link */}
+              <Link
+                href={user.role === "admin" ? "/admin" : "/seller/dashboard"}
+                className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
-                LOG OUT
+                {user.role === "admin" ? "ADMIN" : "SELL"}
+              </Link>
+
+              {/* MY FEED */}
+              <button
+                onClick={handleFeedClick}
+                className="text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap"
+                style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+              >
+                MY FEED
               </button>
+
+              {/* Messages icon */}
+              <button
+                onClick={() => router.push("/messages")}
+                className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity"
+              >
+                <MessageCircle className="w-[22px] h-[22px]" strokeWidth={1.5} />
+              </button>
+
+              {/* Favorites icon */}
+              <button className="relative text-[#1A1A1A] hover:opacity-60 transition-opacity">
+                <Heart className="w-[22px] h-[22px]" strokeWidth={1.5} />
+              </button>
+
+              {/* Avatar + dropdown */}
+              <div className="relative" ref={avatarRef}>
+                <button
+                  onClick={() => setAvatarOpen((o) => !o)}
+                  className="w-[34px] h-[34px] rounded-full bg-[#1A1A1A] flex items-center justify-center text-white hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0"
+                >
+                  <User className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                </button>
+
+                {avatarOpen && (
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#E8E8E8] shadow-lg rounded-sm z-50 py-1"
+                    style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
+                  >
+                    <div className="px-4 py-3 border-b border-[#E8E8E8]">
+                      <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{user.name}</p>
+                      <p className="text-[11px] text-[#888] truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      href="/seller/dashboard"
+                      onClick={() => setAvatarOpen(false)}
+                      className="block px-4 py-2 text-[12px] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={(e) => { setAvatarOpen(false); handleFeedClick(e as unknown as React.MouseEvent); }}
+                      className="w-full text-left block px-4 py-2 text-[12px] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                    >
+                      My Feed
+                    </button>
+                    <div className="border-t border-[#E8E8E8] mt-1 pt-1">
+                      <button
+                        onClick={() => { logout(); setAvatarOpen(false); }}
+                        className="w-full text-left px-4 py-2 text-[12px] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                      >
+                        Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>
-              <Link
-                href="/login"
+              <button
+                onClick={() => openLoginModal("login")}
                 className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-70 transition-opacity"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 SELL
-              </Link>
-              <Link
-                href="/login?mode=signup"
+              </button>
+              <button
+                onClick={() => openLoginModal("signup")}
                 className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 SIGN UP
-              </Link>
-              <Link
-                href="/login"
+              </button>
+              <button
+                onClick={() => openLoginModal("login")}
                 className="px-5 py-[7px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
                 style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
               >
                 LOG IN
-              </Link>
+              </button>
             </>
           )}
         </div>
@@ -125,6 +205,12 @@ export default function Navbar() {
           <NavLink href="/browse">EDITORIAL</NavLink>
         </div>
       </nav>
+
+      {/* Designer Picker Modal */}
+      <DesignerPickerModal
+        open={designerPickerOpen}
+        onClose={() => setDesignerPickerOpen(false)}
+      />
     </header>
   );
 }

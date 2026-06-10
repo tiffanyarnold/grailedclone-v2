@@ -6,7 +6,7 @@ import ClientProviders from "@/components/providers/ClientProviders";
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const syne = Syne({
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} ${syne.variable} font-sans bg-[#F7F7F7] text-[#1A1A1A] antialiased`}>
+      <body className={`${spaceGrotesk.variable} ${syne.variable} bg-[#F7F7F7] text-[#1A1A1A] antialiased`} style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
         <ClientProviders>
           {children}
         </ClientProviders>
