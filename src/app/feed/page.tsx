@@ -32,27 +32,20 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function FeedPage() {
-  const { user, openLoginModal } = useAuth();
+  const { user } = useAuth();
   const { listings, isFavorited, toggleFavorite } = useStore();
   const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
 
-  // Redirect to login modal if not logged in
+  // Redirect to home if not logged in
   useEffect(() => {
     if (!user) {
-      openLoginModal("login");
+      window.location.href = "/";
     }
-  }, [user, openLoginModal]);
+  }, [user]);
 
+  // Don't render anything while redirecting
   if (!user) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <p className="text-[#888] text-sm">Please log in to view your feed.</p>
-        </div>
-        <Footer />
-      </div>
-    );
+    return null;
   }
 
   // Show all listings as feed (in a real app, filtered by followed sellers)

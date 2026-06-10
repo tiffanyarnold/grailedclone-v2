@@ -105,6 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    // Always send users back to the home page on logout
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   };
 
   return (
