@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { ChevronDown, Camera, X, GripVertical, Star } from "lucide-react";
+import { useStore } from "@/lib/store-context";
+import { supabase } from "@/lib/supabase";
+import { ChevronDown, Camera, X, GripVertical, Star, Loader2 } from "lucide-react";
 
 const DEPARTMENTS = ["Menswear", "Womenswear"];
 
@@ -115,13 +117,17 @@ function SectionTitle({ children, link, linkLabel }: {
 // ── Photo item type ──────────────────────────────────────────────────────────
 interface PhotoItem {
   id: string;
-  url: string;
+  url: string;      // object URL for preview
+  file: File;       // raw file for upload
 }
 
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function SellPage() {
   const { user, openLoginModal } = useAuth();
+  const { addListing } = useStore();
   const router = useRouter();
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState("");
 
   const [department, setDepartment] = useState("");
   const [subcategory, setSubcategory] = useState("");
@@ -159,12 +165,13 @@ export default function SellPage() {
   const handleDepartmentChange = (v: string) => { setDepartment(v); setSubcategory(""); setSize(""); };
   const handleSubcategoryChange = (v: string) => { setSubcategory(v); setSize(""); };
 
-  // Photo upload
+  // Photo upload — store both preview URL and raw File
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newPhotos: PhotoItem[] = files.map((file) => ({
       id: `${Date.now()}-${Math.random()}`,
       url: URL.createObjectURL(file),
+      file,
     }));
     setPhotos((prev) => [...prev, ...newPhotos].slice(0, 9));
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -205,8 +212,96 @@ export default function SellPage() {
     setPreviewIdx(0);
   };
 
-  const handlePublish = () => { alert("Listing published! (Demo)"); router.push("/seller/dashboard"); };
-  const handleSaveDraft = () => alert("Saved as draft! (Demo)");
+  // Upload a single file to Supabase Storage and return its public URL.
+  // Falls back to the local object URL if the bucket doesn't exist or upload fails.
+  const uploadPhoto = async (photo: PhotoItem): Promise<string> => {
+    const ext = photo.file.name.split(".").pop() || "jpg";
+    const path = `listings/${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage
+      .from("listing-images")
+      .upload(path, photo.file, { cacheControl: "3600", upsert: false });
+    if (error) {
+      // Bucket may not exist — return object URL as fallback so the listing still saves
+      console.warn("Photo upload failed, using object URL:", error.message);
+      return photo.url;
+    }
+    const { data } = supabase.storage.from("listing-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const handlePublish = async () => {
+    setPublishError("");
+    if (!price || parseFloat(price) <= 0) {
+      setPublishError("Please enter a valid listed price.");
+      return;
+    }
+    if (!designer.trim()) {
+      setPublishError("Please enter a designer / brand name.");
+      return;
+    }
+
+    setPublishing(true);
+    try {
+      // Upload photos (or fall back to object URLs)
+      let imageUrls: string[] = [];
+      if (photos.length > 0) {
+        imageUrls = await Promise.all(photos.map(uploadPhoto));
+      }
+
+      await addListing({
+        seller_id: user!.id,
+        title: itemName || designer,
+        brand: designer,
+        description,
+        category: subcategory || department || "Other",
+        size: size || "One Size",
+        condition,
+        listed_price: parseFloat(price),
+        original_price: originalPrice ? parseFloat(originalPrice) : null,
+        featured: featuredOnHome,
+        image_url: imageUrls,
+      });
+
+      router.push("/seller/dashboard");
+    } catch (err) {
+      console.error("Publish error:", err);
+      setPublishError("Something went wrong. Please try again.");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    setPublishError("");
+    setPublishing(true);
+    try {
+      let imageUrls: string[] = [];
+      if (photos.length > 0) {
+        imageUrls = await Promise.all(photos.map(uploadPhoto));
+      }
+
+      await addListing({
+        seller_id: user!.id,
+        title: itemName || designer || "Draft",
+        brand: designer || "Unknown",
+        description,
+        category: subcategory || department || "Other",
+        size: size || "One Size",
+        condition: condition || "not_specified",
+        listed_price: parseFloat(price) || 0,
+        original_price: originalPrice ? parseFloat(originalPrice) : null,
+        featured: false,
+        image_url: imageUrls,
+      });
+
+      router.push("/seller/dashboard");
+    } catch (err) {
+      console.error("Draft save error:", err);
+      setPublishError("Something went wrong saving the draft.");
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const discountPct =
     originalPrice && price && parseFloat(originalPrice) > parseFloat(price)
@@ -540,11 +635,23 @@ export default function SellPage() {
       {/* ── STICKY BOTTOM BAR ── */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E8E8] z-40">
         <div className="max-w-[920px] mx-auto px-4 sm:px-8 py-3 flex items-center justify-end gap-3">
-          <button onClick={handleSaveDraft} className="px-6 sm:px-10 py-3 text-[12px] font-bold tracking-[0.1em] border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors">
+          {publishError && (
+            <p className="text-[12px] text-[#DC2626] mr-auto">{publishError}</p>
+          )}
+          <button
+            onClick={handleSaveDraft}
+            disabled={publishing}
+            className="px-6 sm:px-10 py-3 text-[12px] font-bold tracking-[0.1em] border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             SAVE AS DRAFT
           </button>
-          <button onClick={handlePublish} className="px-6 sm:px-10 py-3 text-[12px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors">
-            PUBLISH
+          <button
+            onClick={handlePublish}
+            disabled={publishing}
+            className="px-6 sm:px-10 py-3 text-[12px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {publishing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {publishing ? "PUBLISHING..." : "PUBLISH"}
           </button>
         </div>
       </div>
