@@ -110,13 +110,78 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await Promise.all([fetchListings(), fetchOffers(), fetchHeroSlides(), fetchFavorites()]);
   }, []);
 
+  // Initial data load
   useEffect(() => {
     refreshData().finally(() => setIsLoading(false));
   }, [refreshData]);
 
+  // ── Real-time subscriptions ──────────────────────────────────────────────
+  // This ensures offers and listings update live across different browser sessions
+  // (buyer makes offer → seller sees it instantly without refresh, and vice versa)
+  useEffect(() => {
+    // Subscribe to listings changes
+    const listingsChannel = supabase
+      .channel("realtime-listings")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "listings" },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setListings((prev) => {
+              // Avoid duplicates (optimistic update may have already added it)
+              if (prev.some((l) => l.id === (payload.new as Listing).id)) return prev;
+              return [payload.new as Listing, ...prev];
+            });
+          } else if (payload.eventType === "UPDATE") {
+            setListings((prev) =>
+              prev.map((l) => (l.id === (payload.new as Listing).id ? (payload.new as Listing) : l))
+            );
+          } else if (payload.eventType === "DELETE") {
+            setListings((prev) => prev.filter((l) => l.id !== (payload.old as { id: string }).id));
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to offers changes
+    const offersChannel = supabase
+      .channel("realtime-offers")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "offers" },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setOffers((prev) => {
+              // Avoid duplicates (optimistic update may have already added it)
+              if (prev.some((o) => o.id === (payload.new as Offer).id)) return prev;
+              return [payload.new as Offer, ...prev];
+            });
+          } else if (payload.eventType === "UPDATE") {
+            setOffers((prev) =>
+              prev.map((o) => (o.id === (payload.new as Offer).id ? (payload.new as Offer) : o))
+            );
+          } else if (payload.eventType === "DELETE") {
+            setOffers((prev) => prev.filter((o) => o.id !== (payload.old as { id: string }).id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(listingsChannel);
+      supabase.removeChannel(offersChannel);
+    };
+  }, []);
+
   const addListing = async (listing: Omit<Listing, "id" | "created_at">) => {
     const { data, error } = await supabase.from("listings").insert(listing).select().single();
-    if (!error && data) setListings((prev) => [data as Listing, ...prev]);
+    if (!error && data) {
+      setListings((prev) => {
+        // Avoid duplicates if realtime fires before this resolves
+        if (prev.some((l) => l.id === (data as Listing).id)) return prev;
+        return [data as Listing, ...prev];
+      });
+    }
   };
 
   const updateListing = async (id: string, data: Partial<Listing>) => {
@@ -131,7 +196,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const addOffer = async (offer: Omit<Offer, "id" | "created_at">) => {
     const { data, error } = await supabase.from("offers").insert(offer).select().single();
-    if (!error && data) setOffers((prev) => [data as Offer, ...prev]);
+    if (!error && data) {
+      setOffers((prev) => {
+        // Avoid duplicates if realtime fires before this resolves
+        if (prev.some((o) => o.id === (data as Offer).id)) return prev;
+        return [data as Offer, ...prev];
+      });
+    }
   };
 
   const updateOfferStatus = async (id: string, status: "accepted" | "declined") => {

@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, Check, X, TrendingDown, Zap, Tag, ChevronDown, Menu, Bell, Megaphone,
+  Plus, Trash2, Check, X, TrendingDown, Zap, Tag, ChevronDown, Menu, Megaphone,
 } from "lucide-react";
 
 // ── Sidebar nav structure ──────────────────────────────────────────────────
@@ -139,43 +138,21 @@ function Sidebar({
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function SellerDashboardPage() {
   const { user } = useAuth();
-  const router = useRouter();
-  const { listings, offers, updateOfferStatus, addListing, deleteListing } = useStore();
+  const { listings, offers, updateOfferStatus, deleteListing } = useStore();
   const { getProfileById } = useProfiles();
 
   const [activeTab, setActiveTab] = useState("forsale");
-  const [showForm, setShowForm] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [form, setForm] = useState({
-    title: "", brand: "", description: "",
-    category: "Tops", size: "", condition: "Gently Used",
-    price: "",
-    image_url: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"],
-  });
 
   if (!user) return null;
 
   const myListings = listings.filter((l) => l.seller_id === user.id);
   const myListingIds = myListings.map((l) => l.id);
+  // Offers RECEIVED as a seller (on my listings)
   const myOffers = offers.filter((o) => myListingIds.includes(o.listing_id));
   const pendingOffers = myOffers.filter((o) => o.status === "pending");
-
-  const handleCreateListing = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await addListing({
-      seller_id: user.id,
-      title: form.title,
-      brand: form.brand,
-      description: form.description,
-      category: form.category,
-      size: form.size,
-      condition: form.condition,
-      listed_price: parseFloat(form.price),
-      image_url: form.image_url,
-    });
-    setForm({ title: "", brand: "", description: "", category: "Tops", size: "", condition: "Gently Used", price: "", image_url: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80"] });
-    setShowForm(false);
-  };
+  // Offers SENT as a buyer (by me on other people's listings)
+  const sentOffers = offers.filter((o) => o.buyer_id === user.id);
 
   return (
     <div
@@ -357,77 +334,138 @@ export default function SellerDashboardPage() {
 
           {/* ── OFFERS tab ── */}
           {activeTab === "offers" && (
-            <div>
-              <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-6">
-                Offers ({pendingOffers.length} pending)
-              </h2>
-              {myOffers.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-[#D4D4D4]">
-                  <p className="text-[13px] text-[#888]">No offers yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {myOffers.map((offer) => {
-                    const listing = listings.find((l) => l.id === offer.listing_id);
-                    const buyer = getProfileById(offer.buyer_id);
-                    const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
-                    return (
-                      <div
-                        key={offer.id}
-                        className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
-                          offer.status === "declined" ? "opacity-50" : ""
-                        }`}
-                      >
-                        {listing && (
-                          <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                            <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
-                          <p className="text-[11px] text-[#888] mt-0.5">
-                            From: {buyer?.name || "Buyer"} · Listed at ${listing?.listed_price.toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="text-right">
-                            <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 ${
-                              competitive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                            }`}>
-                              {competitive ? "COMPETITIVE" : "LOW"}
-                            </span>
-                          </div>
-                          {offer.status === "pending" ? (
-                            <div className="flex gap-1.5">
-                              <button
-                                onClick={() => updateOfferStatus(offer.id, "accepted")}
-                                className="p-2 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors"
-                                title="Accept"
-                              >
-                                <Check className="w-4 h-4 text-green-600" />
-                              </button>
-                              <button
-                                onClick={() => updateOfferStatus(offer.id, "declined")}
-                                className="p-2 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
-                                title="Decline"
-                              >
-                                <X className="w-4 h-4 text-red-500" />
-                              </button>
+            <div className="space-y-10">
+
+              {/* ── RECEIVED offers (seller view) ── */}
+              <div>
+                <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-1">
+                  Offers Received ({pendingOffers.length} pending)
+                </h2>
+                <p className="text-[11px] text-[#888] mb-5">Offers buyers have made on your listings</p>
+                {myOffers.length === 0 ? (
+                  <div className="text-center py-12 border border-dashed border-[#D4D4D4]">
+                    <p className="text-[13px] text-[#888]">No offers received yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myOffers.map((offer) => {
+                      const listing = listings.find((l) => l.id === offer.listing_id);
+                      const buyer = getProfileById(offer.buyer_id);
+                      const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
+                      return (
+                        <div
+                          key={offer.id}
+                          className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
+                            offer.status === "declined" ? "opacity-50" : ""
+                          }`}
+                        >
+                          {listing && (
+                            <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
+                              <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                             </div>
-                          ) : (
-                            <span className={`text-[11px] font-medium px-3 py-1.5 ${
-                              offer.status === "accepted" ? "text-green-600 bg-green-50" : "text-[#888] bg-[#F7F7F7]"
-                            }`}>
-                              {offer.status === "accepted" ? "Accepted ✓" : "Declined"}
-                            </span>
                           )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
+                            <p className="text-[11px] text-[#888] mt-0.5">
+                              From: {buyer?.name || "Buyer"} · Listed at ${listing?.listed_price.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="text-right">
+                              <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 ${
+                                competitive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                              }`}>
+                                {competitive ? "COMPETITIVE" : "LOW"}
+                              </span>
+                            </div>
+                            {offer.status === "pending" ? (
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={() => updateOfferStatus(offer.id, "accepted")}
+                                  className="p-2 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors"
+                                  title="Accept"
+                                >
+                                  <Check className="w-4 h-4 text-green-600" />
+                                </button>
+                                <button
+                                  onClick={() => updateOfferStatus(offer.id, "declined")}
+                                  className="p-2 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
+                                  title="Decline"
+                                >
+                                  <X className="w-4 h-4 text-red-500" />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className={`text-[11px] font-medium px-3 py-1.5 ${
+                                offer.status === "accepted" ? "text-green-600 bg-green-50" : "text-[#888] bg-[#F7F7F7]"
+                              }`}>
+                                {offer.status === "accepted" ? "Accepted ✓" : "Declined"}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── SENT offers (buyer view) ── */}
+              <div>
+                <h2 className="text-[13px] font-bold tracking-[0.1em] uppercase text-[#1A1A1A] mb-1">
+                  Offers Sent ({sentOffers.filter((o) => o.status === "pending").length} pending)
+                </h2>
+                <p className="text-[11px] text-[#888] mb-5">Offers you&apos;ve made on other listings</p>
+                {sentOffers.length === 0 ? (
+                  <div className="text-center py-12 border border-dashed border-[#D4D4D4]">
+                    <p className="text-[13px] text-[#888]">You haven&apos;t made any offers yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sentOffers.map((offer) => {
+                      const listing = listings.find((l) => l.id === offer.listing_id);
+                      return (
+                        <div
+                          key={offer.id}
+                          className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
+                            offer.status === "declined" ? "opacity-50" : ""
+                          }`}
+                        >
+                          {listing && (
+                            <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
+                              <div className="w-[64px] h-[64px] bg-[#F2F2F2] overflow-hidden hover:opacity-80 transition-opacity">
+                                <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
+                              </div>
+                            </Link>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
+                            <p className="text-[11px] text-[#888] mt-0.5">
+                              {listing?.brand} · Listed at ${listing?.listed_price.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="text-right">
+                              <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 ${
+                                offer.status === "pending"
+                                  ? "bg-[#FFF0E8] text-[#E85D00]"
+                                  : offer.status === "accepted"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-[#F7F7F7] text-[#888]"
+                              }`}>
+                                {offer.status === "pending" ? "PENDING" : offer.status === "accepted" ? "ACCEPTED ✓" : "DECLINED"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
 
