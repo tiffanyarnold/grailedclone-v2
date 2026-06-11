@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useStore } from "@/lib/store-context";
 import { Search, ChevronDown, MessageCircle, Heart, User, Menu, X } from "lucide-react";
-import DesignerPickerModal, { getFollowedDesigners } from "@/components/feed/DesignerPickerModal";
 
 // Static mock data matching Grailed's popular searches + designer suggestions
 const POPULAR_SEARCHES = [
@@ -33,7 +32,6 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -41,12 +39,9 @@ export default function Navbar() {
 
   const handleFeedClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const followed = getFollowedDesigners();
-    if (followed.length === 0) {
-      setDesignerPickerOpen(true);
-    } else {
-      router.push("/feed");
-    }
+    // Always navigate to the feed page directly.
+    // The feed page itself has the designer picker banner for first-time users.
+    router.push("/feed");
     setMobileOpen(false);
   };
 
@@ -501,10 +496,6 @@ export default function Navbar() {
         </div>
       )}
 
-      <DesignerPickerModal
-        open={designerPickerOpen}
-        onClose={() => setDesignerPickerOpen(false)}
-      />
     </header>
   );
 }

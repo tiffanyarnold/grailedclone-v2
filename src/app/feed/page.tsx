@@ -79,16 +79,14 @@ export default function FeedPage() {
                     className="block relative overflow-hidden bg-[#F2F2F2]"
                     style={{ aspectRatio: "1 / 1" }}
                   >
-                    {listing.image_url[0] && (
-                      <img
-                        src={listing.image_url[0]}
-                        alt={listing.title}
-                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60";
-                        }}
-                      />
-                    )}
+                    <img
+                      src={listing.image_url[0] || "https://images.unsplash.com/photo-1523381294911-8d3cead13475?w=400&q=60"}
+                      alt={listing.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1523381294911-8d3cead13475?w=400&q=60";
+                      }}
+                    />
                   </Link>
 
                   {/* Card info */}

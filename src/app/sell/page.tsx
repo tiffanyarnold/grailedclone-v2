@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useStore } from "@/lib/store-context";
 import { supabase } from "@/lib/supabase";
 import { ChevronDown, Camera, X, GripVertical, Star, Loader2 } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
 
 const DEPARTMENTS = ["Menswear", "Womenswear"];
 
@@ -31,11 +32,11 @@ const COLORS = [
 ];
 
 const CONDITIONS = [
-  { value: "new", label: "New/Never Worn", count: "10k+" },
-  { value: "gently_used", label: "Gently Used", count: "10k+" },
-  { value: "used", label: "Used", count: "10k+" },
-  { value: "very_worn", label: "Very Worn", count: "244" },
-  { value: "not_specified", label: "Not Specified", count: "1" },
+  { value: "New/Never Worn", label: "New/Never Worn", count: "10k+" },
+  { value: "Gently Used", label: "Gently Used", count: "10k+" },
+  { value: "Used", label: "Used", count: "10k+" },
+  { value: "Very Worn", label: "Very Worn", count: "244" },
+  { value: "Not Specified", label: "Not Specified", count: "1" },
 ];
 
 const STYLES = [
@@ -287,7 +288,7 @@ export default function SellPage() {
         description,
         category: subcategory || department || "Other",
         size: size || "One Size",
-        condition: condition || "not_specified",
+        condition: condition || "Not Specified",
         listed_price: parseFloat(price) || 0,
         original_price: originalPrice ? parseFloat(originalPrice) : null,
         featured: false,
@@ -310,6 +311,7 @@ export default function SellPage() {
 
   return (
     <div className="min-h-screen bg-white pb-24" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
+      <Navbar />
       <div className="max-w-[920px] mx-auto px-4 sm:px-8 pt-10 pb-2">
 
         {/* Header */}
