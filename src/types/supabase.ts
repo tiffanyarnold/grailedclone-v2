@@ -232,6 +232,7 @@ export type Database = {
           id: string
           name: string
           role: string
+          transaction_count: number
         }
         Insert: {
           created_at?: string | null
@@ -239,6 +240,7 @@ export type Database = {
           id: string
           name?: string
           role?: string
+          transaction_count?: number
         }
         Update: {
           created_at?: string | null
@@ -246,6 +248,7 @@ export type Database = {
           id?: string
           name?: string
           role?: string
+          transaction_count?: number
         }
         Relationships: []
       }

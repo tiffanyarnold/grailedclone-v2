@@ -217,13 +217,12 @@ export default function ListingDetailPage() {
                 Lowest ask (30d): ${lowestAsk} · Last sold: ${lastSold} · Acceptance: {acceptanceRate}%
               </p>
 
-              {/* Details list */}
+              {/* Details list — Seller shown in dedicated block below */}
               <div className="border-t border-[#E8E8E8] pt-4 space-y-2.5">
                 {[
                   { label: "Size", value: listing.size },
                   { label: "Condition", value: listing.condition },
                   { label: "Category", value: listing.category },
-                  { label: "Seller", value: seller?.name || "Unknown" },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center">
                     <span className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.08em]">{label}</span>
@@ -241,23 +240,62 @@ export default function ListingDetailPage() {
                   <p className="text-[13px] text-[#555] leading-relaxed">{listing.description}</p>
                 </div>
               )}
+
+              {/* ── Seller Block ── */}
+              <div className="border-t border-[#E8E8E8] pt-4 mt-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* Avatar initial circle */}
+                    <div className="w-9 h-9 rounded-full bg-[#E8E8E8] flex-shrink-0 flex items-center justify-center">
+                      <span className="text-[13px] font-bold text-[#888] uppercase select-none">
+                        {(seller?.name || "S")[0]}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <a
+                        href="#"
+                        onClick={(e) => e.preventDefault()}
+                        className="text-[13px] font-semibold text-[#1A1A1A] hover:underline truncate block leading-tight"
+                      >
+                        {seller?.name || "Unknown Seller"}
+                      </a>
+                      <p className="text-[11px] text-[#888] mt-0.5">
+                        {seller?.transaction_count ?? 0} Transactions
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => e.preventDefault()}
+                    className="flex-shrink-0 px-4 py-1.5 border border-[#1A1A1A] text-[11px] font-bold tracking-[0.08em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                  >
+                    FOLLOW
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Save */}
-            {user && (
+            {/* Heart / Save — icon + count, always visible; filled when saved */}
+            <div className="flex items-center justify-between">
               <button
-                onClick={() => toggleFavorite(user.id, listing.id)}
-                className="flex items-center gap-2 text-[12px] hover:opacity-70 transition-opacity"
+                onClick={() => {
+                  if (!user) { openLoginModal("login"); return; }
+                  toggleFavorite(user.id, listing.id);
+                }}
+                className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
+                aria-label="Save listing"
               >
                 <Heart
-                  className="w-4 h-4"
-                  fill={isFavorited(user.id, listing.id) ? "#1A1A1A" : "none"}
-                  stroke="#1A1A1A"
+                  className="w-[16px] h-[16px]"
+                  fill={user && isFavorited(user.id, listing.id) ? "#1A1A1A" : "none"}
+                  stroke={user && isFavorited(user.id, listing.id) ? "#1A1A1A" : "#888"}
                   strokeWidth={1.5}
                 />
-                <span>{isFavorited(user.id, listing.id) ? "Saved" : "Save"}</span>
+                <span className="text-[12px] text-[#888]">
+                  {listing.watchers_count ?? 0}
+                </span>
               </button>
-            )}
+              <p className="text-[11px] text-[#888]">+ Shipping · United States</p>
+            </div>
 
             {/* CTA */}
             <div className="space-y-2.5">
@@ -298,7 +336,6 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            <p className="text-[11px] text-[#888]">+ Shipping calculated at checkout · United States</p>
           </div>
 
         </div>

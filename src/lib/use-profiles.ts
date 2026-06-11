@@ -8,12 +8,13 @@ export interface Profile {
   name: string;
   email: string;
   role: string;
+  transaction_count: number;
 }
 
 const fetchAllProfiles = async (set: (p: Profile[]) => void) => {
   const { data } = await supabase
     .from("profiles")
-    .select("id, name, email, role");
+    .select("id, name, email, role, transaction_count");
   if (data) set(data as Profile[]);
 };
 
