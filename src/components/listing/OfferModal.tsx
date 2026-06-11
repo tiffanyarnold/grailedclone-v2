@@ -55,7 +55,8 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
   }, []);
 
   const offerNum      = parseFloat(offerAmount) || 0;
-  // Min offer: use listing's min_offer_price if set, else fall back to 70% of listed price
+  // TEMP STUB — replace with item.min_offer_price once seeded in DB (see 20260618_seed_demo_offers.sql)
+  // Uses listing.min_offer_price when available; falls back to 70% of listed_price client-side
   const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
   const isTooLow      = offerAmount !== "" && offerNum > 0 && offerNum < minOffer;
   const isValidOffer  = offerNum > 0 && offerNum <= 99999 && !isTooLow;
@@ -179,12 +180,12 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                   className="relative flex items-center pb-1 px-2"
                   style={{
                     minWidth: "200px",
-                    borderBottom: `2px solid ${isTooLow ? "#C0392B" : "#1A1A1A"}`,
+                    borderBottom: `2px solid ${isTooLow ? "#CC0000" : "#1A1A1A"}`,
                   }}
                 >
                   <span
                     className="text-[28px] font-normal mr-1 select-none"
-                    style={{ color: isTooLow ? "#C0392B" : "#BBBBBB" }}
+                    style={{ color: isTooLow ? "#CC0000" : "#BBBBBB" }}
                   >
                     $
                   </span>
@@ -200,7 +201,7 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                     className="text-[32px] font-light outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
                     style={{
                       minWidth: "120px",
-                      color: isTooLow ? "#C0392B" : "#888",
+                      color: isTooLow ? "#CC0000" : "#888",
                     }}
                     autoFocus
                   />
@@ -209,7 +210,7 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
 
               {/* Red "too low" error — shown exactly like OG Grailed screenshot */}
               {isTooLow ? (
-                <p className="text-[12px] text-center mb-3" style={{ color: "#C0392B" }}>
+                <p className="text-[12px] text-center mb-3" style={{ color: "#CC0000" }}>
                   Your offer is too low. Must be ${minOffer.toLocaleString()} or higher.
                 </p>
               ) : (
@@ -354,10 +355,17 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                     <p className="text-[12px] font-semibold text-[#1A1A1A]">{listing.brand}</p>
                     <p className="text-[12px] text-[#1A1A1A] leading-snug">{listing.title}</p>
                     <p className="text-[11px] text-[#888] mt-0.5">Size: {listing.size}</p>
-                    <p className="text-[11px] text-[#888]">
-                      Seller:{" "}
-                      <span className="text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
-                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                      <span className="text-[11px] text-[#888]">Seller:</span>
+                      <span className="text-[11px] text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
+                      <span className="flex items-center" style={{ lineHeight: 1 }}>
+                        {[1,2,3,4,5].map((i) => (
+                          <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill="#F5A623" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
+                          </svg>
+                        ))}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

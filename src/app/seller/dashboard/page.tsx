@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, Check, X, TrendingDown, Zap, Tag, Menu, MapPin, Star,
+  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 
@@ -496,55 +496,60 @@ function SellerDashboardInner() {
                       {myOffers.map((offer) => {
                         const listing = listings.find((l) => l.id === offer.listing_id);
                         const buyer = getProfileById(offer.buyer_id);
-                        const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
                         const thumb = listing?.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
                         return (
                           <div
                             key={offer.id}
                             className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
-                              offer.status === "declined" ? "opacity-50" : ""
+                              offer.status !== "pending" ? "opacity-60" : ""
                             }`}
                           >
+                            {/* Thumbnail */}
                             <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
                               <img src={thumb} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                             </div>
+
+                            {/* Info */}
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title || "Listing removed"}</p>
                               <p className="text-[11px] text-[#888] mt-0.5">
                                 From: {buyer?.name || "Buyer"} · {listing ? `Listed at $${listing.listed_price.toLocaleString()}` : ""}
                               </p>
                             </div>
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                              <div className="text-right">
-                                <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 ${
-                                  competitive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                                }`}>
-                                  {competitive ? "COMPETITIVE" : "LOW"}
-                                </span>
-                              </div>
+
+                            {/* Amount */}
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               {offer.status === "pending" ? (
-                                <div className="flex gap-1.5">
+                                <>
                                   <button
                                     onClick={() => setAcceptingOffer(offer)}
-                                    className="p-2 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors"
-                                    title="Accept"
+                                    className="px-3 py-1.5 bg-[#1A1A1A] text-white text-[11px] font-bold tracking-[0.06em] hover:bg-black transition-colors"
                                   >
-                                    <Check className="w-4 h-4 text-green-600" />
+                                    Accept
                                   </button>
                                   <button
                                     onClick={() => updateOfferStatus(offer.id, "declined")}
-                                    className="p-2 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
-                                    title="Decline"
+                                    className="px-3 py-1.5 border border-[#D4D4D4] text-[#888] text-[11px] font-bold tracking-[0.06em] hover:border-[#888] hover:text-[#1A1A1A] transition-colors"
                                   >
-                                    <X className="w-4 h-4 text-red-500" />
+                                    Pass
                                   </button>
-                                </div>
+                                  <button
+                                    onClick={() => {/* non-functional for demo */}}
+                                    className="px-3 py-1.5 text-[11px] font-normal text-[#2557D6] hover:underline transition-colors"
+                                  >
+                                    Message Buyer
+                                  </button>
+                                </>
                               ) : (
                                 <span className={`text-[11px] font-medium px-3 py-1.5 ${
                                   offer.status === "accepted" ? "text-green-600 bg-green-50" : "text-[#888] bg-[#F7F7F7]"
                                 }`}>
-                                  {offer.status === "accepted" ? "Accepted ✓" : "Declined"}
+                                  {offer.status === "accepted" ? "Accepted ✓" : "Passed"}
                                 </span>
                               )}
                             </div>
