@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
@@ -136,13 +137,25 @@ function Sidebar({
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────
-export default function SellerDashboardPage() {
+
+function SellerDashboardInner() {
   const { user } = useAuth();
   const { listings, offers, updateOfferStatus, deleteListing } = useStore();
   const { getProfileById } = useProfiles();
+  const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState("forsale");
+  // Honour ?tab= query param so links like /seller/dashboard?tab=offers
+  // deep-link directly to the right tab.
+  const tabParam = searchParams.get("tab") || "forsale";
+  const validTabs = ["forsale", "offers", "sold", "drafts"];
+  const [activeTab, setActiveTab] = useState(validTabs.includes(tabParam) ? tabParam : "forsale");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const t = searchParams.get("tab") || "forsale";
+    if (validTabs.includes(t)) setActiveTab(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   if (!user) return null;
 
@@ -504,5 +517,13 @@ export default function SellerDashboardPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function SellerDashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <SellerDashboardInner />
+    </Suspense>
   );
 }

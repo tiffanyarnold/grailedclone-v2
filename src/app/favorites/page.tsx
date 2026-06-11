@@ -13,15 +13,15 @@ type Tab = "Listings" | "Searches" | "Designers" | "Sellers" | "Collections";
 const TABS: Tab[] = ["Listings", "Searches", "Designers", "Sellers", "Collections"];
 
 export default function FavoritesPage() {
-  const { user, openLoginModal } = useAuth();
+  const { user, isLoading, openLoginModal } = useAuth();
   const { listings, isFavorited, toggleFavorite } = useStore();
   const [activeTab, setActiveTab] = useState<Tab>("Listings");
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       openLoginModal("login");
     }
-  }, [user, openLoginModal]);
+  }, [isLoading, user, openLoginModal]);
 
   if (!user) {
     return (
@@ -92,15 +92,18 @@ export default function FavoritesPage() {
                       className="relative block overflow-hidden aspect-square bg-[#F5F5F5]"
                     >
                       <img
-                        src={listing.image_url[0]}
+                        src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60"}
                         alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60"; }}
                       />
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          toggleFavorite(user.id, listing.id);
+                          toggleFavorite(user.id, listing.id).catch((err) => {
+                            console.error("toggleFavorite failed:", err);
+                          });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors"
                       >

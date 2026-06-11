@@ -14,7 +14,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   React.useEffect(() => {
     if (!isLoading && (!user || user.role !== "admin")) {
-      router.push("/login");
+      // /login just bounces back to / — skip the extra hop.
+      router.push("/");
     }
   }, [user, isLoading, router]);
 

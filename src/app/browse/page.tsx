@@ -19,7 +19,7 @@ export default function BrowsePageWrapper() {
 
 function BrowsePage() {
   const searchParams = useSearchParams();
-  const { listings, toggleFavorite, isFavorited } = useStore();
+  const { listings, isLoading: storeLoading, toggleFavorite, isFavorited } = useStore();
   const { user } = useAuth();
   const searchQuery = searchParams.get("search") || "";
   const categoryParam = searchParams.get("category") || "";
@@ -228,6 +228,29 @@ function BrowsePage() {
             )}
 
             {/* Grid */}
+            {storeLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="flex flex-col gap-2 animate-pulse">
+                    <div className="bg-[#F2F2F2] w-full aspect-square" />
+                    <div className="h-[10px] bg-[#F2F2F2] rounded w-3/4" />
+                    <div className="h-[10px] bg-[#F2F2F2] rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredListings.length === 0 ? (
+              <div className="py-20 text-center">
+                <p className="text-[14px] text-[#888] mb-3">No listings found.</p>
+                {(localSearch || brandFilter.length > 0 || categoryFilter) && (
+                  <button
+                    onClick={() => { setLocalSearch(""); setBrandFilter([]); setCategoryFilter(""); }}
+                    className="text-[12px] text-[#1A1A1A] underline hover:opacity-60"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
               {filteredListings.map((listing) => {
                 const favorited = user ? isFavorited(user.id, listing.id) : false;
@@ -296,7 +319,9 @@ function BrowsePage() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              toggleFavorite(user.id, listing.id);
+                              toggleFavorite(user.id, listing.id).catch((err) => {
+                                console.error("toggleFavorite failed:", err);
+                              });
                             }}
                             className="flex-shrink-0 ml-1 p-0.5 text-[#888] hover:text-[#1A1A1A] transition-colors"
                             aria-label="Save"
@@ -318,6 +343,7 @@ function BrowsePage() {
                 );
               })}
             </div>
+            )}
           </div>
         </div>
       </main>

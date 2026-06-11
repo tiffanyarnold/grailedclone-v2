@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
+// Only reference routes that actually exist in this app
 const sidebarItems = {
   top: [
-    { label: "MESSAGES", href: "/messages", active: true },
-    { label: "ORDERS", href: "/orders" },
+    { label: "MESSAGES", href: "/messages" },
+    { label: "FAVORITES", href: "/favorites" },
   ],
   selling: [
     { label: "FOR SALE", href: "/seller/dashboard" },
@@ -17,39 +20,41 @@ const sidebarItems = {
   ],
   settings: [
     { label: "PROFILE", href: "/profile" },
-    { label: "FEEDBACK", href: "/feedback" },
-    { label: "ACCOUNT HEALTH", href: "/account-health" },
-    { label: "VACATION MODE", href: "/vacation-mode" },
-    { label: "SHIPPING LABELS", href: "/shipping-labels" },
-    { label: "MY SIZES", href: "/my-sizes" },
-    { label: "ADDRESSES", href: "/addresses" },
-    { label: "PAYMENTS", href: "/payments" },
-    { label: "NOTIFICATIONS", href: "/notifications" },
-    { label: "DEVICES", href: "/devices" },
-    { label: "HELP", href: "/help" },
+    { label: "HELP", href: "/browse" },
   ],
 };
 
 export default function MessagesPage() {
-  const { user, openLoginModal } = useAuth();
-  const router = useRouter();
+  const { user, isLoading, openLoginModal } = useAuth();
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       openLoginModal("login");
     }
-  }, [user, openLoginModal]);
+  }, [isLoading, user, openLoginModal]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p
-          className="text-[#888] text-sm"
-          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
-        >
-          Please log in to view your messages.
-        </p>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <p
+            className="text-[#888] text-sm"
+            style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
+          >
+            Please log in to view your messages.
+          </p>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -59,65 +64,65 @@ export default function MessagesPage() {
       className="min-h-screen bg-white"
       style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
     >
-      <div className="max-w-[1200px] mx-auto flex">
-        {/* Left Sidebar */}
-        <aside className="w-[200px] flex-shrink-0 border-r border-[#E8E8E8] min-h-[calc(100vh-120px)] py-8 pr-6">
-          {/* Top links */}
+      <Navbar />
+
+      <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-120px)]">
+
+        {/* Left Sidebar — desktop only */}
+        <aside className="hidden lg:block w-[200px] flex-shrink-0 border-r border-[#E8E8E8] py-8 pr-6">
           <nav className="mb-6">
             {sidebarItems.top.map((item) => (
-              <a
+              <Link
                 key={item.label}
                 href={item.href}
                 className={`block py-[6px] text-[11px] font-bold tracking-[0.1em] transition-colors ${
-                  item.active
+                  item.href === "/messages"
                     ? "text-[#1A1A1A] border-b border-[#1A1A1A] w-fit mb-1"
                     : "text-[#888] hover:text-[#1A1A1A]"
                 }`}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
-          {/* SELLING section */}
           <div className="mb-6">
             <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-2 uppercase">
               Selling
             </p>
             <nav>
               {sidebarItems.selling.map((item) => (
-                <a
+                <Link
                   key={item.label}
                   href={item.href}
                   className="block py-[6px] text-[11px] font-bold tracking-[0.1em] text-[#888] hover:text-[#1A1A1A] transition-colors"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
 
-          {/* SETTINGS section */}
           <div>
             <p className="text-[10px] font-bold tracking-[0.14em] text-[#888] mb-2 uppercase">
               Settings
             </p>
             <nav>
               {sidebarItems.settings.map((item) => (
-                <a
+                <Link
                   key={item.label}
                   href={item.href}
                   className="block py-[6px] text-[11px] font-bold tracking-[0.1em] text-[#888] hover:text-[#1A1A1A] transition-colors"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 py-8 px-10">
+        <main className="flex-1 py-8 px-6 lg:px-10">
           {/* Tabs */}
           <div className="flex items-center gap-8 border-b border-[#E8E8E8] mb-8">
             <button
@@ -144,21 +149,22 @@ export default function MessagesPage() {
 
           {/* Empty state */}
           <div className="py-16 text-center">
-            <p
-              className="text-[14px] text-[#1A1A1A] mb-6 leading-relaxed max-w-[420px] mx-auto"
-            >
-              Your conversations will appear here when you make an offer, ask a
-              question, or purchase an item.
+            <p className="text-[14px] text-[#1A1A1A] mb-6 leading-relaxed max-w-[420px] mx-auto">
+              {activeTab === "buy"
+                ? "Your buy conversations will appear here when you make an offer, ask a question, or purchase an item."
+                : "Your sell conversations will appear here when a buyer contacts you about one of your listings."}
             </p>
-            <a
-              href="#"
+            <Link
+              href="/browse"
               className="text-[13px] text-[#1A1A1A] underline hover:opacity-60 transition-opacity font-medium"
             >
-              Click Here to View Archived Messages
-            </a>
+              Browse listings →
+            </Link>
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

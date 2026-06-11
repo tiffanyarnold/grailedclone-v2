@@ -330,6 +330,7 @@ export default function LoginModal() {
               <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2 text-center">Demo Accounts</p>
               <div className="space-y-1 text-[10px] text-gray-500 text-center">
                 <p><span className="font-medium">Admin:</span> jillian.krebsbach@pursuit.org / Password123!</p>
+                <p><span className="font-medium">Admin:</span> tiffanyarnold@pursuit.org / Password123!</p>
                 <p><span className="font-medium">Seller:</span> marcus@seller.com / Password123!</p>
                 <p><span className="font-medium">Buyer:</span> jordan@buyer.com / Password123!</p>
               </div>

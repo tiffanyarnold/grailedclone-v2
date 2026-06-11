@@ -14,6 +14,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "GRAILED - Buy & Sell Designer, Streetwear & Vintage Fashion",
   description: "Grailed is the peer-to-peer marketplace for luxury and streetwear fashion.",
+  icons: {
+    icon: [
+      { url: "/grailed-favicon.png", type: "image/png", sizes: "1200x1200" },
+      { url: "/favicon.ico", type: "image/x-icon" },
+    ],
+    shortcut: "/grailed-favicon.png",
+    apple: "/grailed-favicon.png",
+  },
 };
 
 export const viewport = {
