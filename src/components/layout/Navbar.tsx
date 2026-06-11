@@ -135,9 +135,9 @@ export default function Navbar() {
           <span
             className="text-[22px] leading-none text-[#1A1A1A] select-none block"
             style={{
-              fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif",
-              fontWeight: 900,
-              letterSpacing: "-0.01em",
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontWeight: 500,
+              letterSpacing: "0.04em",
             }}
           >
             GRAILED
@@ -336,10 +336,16 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {/* Desktop: SIGN UP + LOG IN */}
+              {/* Desktop: SELL + SIGN UP + LOG IN */}
+              <Link
+                href="/sell"
+                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+              >
+                SELL
+              </Link>
               <button
                 onClick={() => openLoginModal("signup")}
-                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                className="hidden lg:inline-flex items-center text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity"
               >
                 SIGN UP
               </button>
@@ -382,7 +388,7 @@ export default function Navbar() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E8E8]">
               <span
                 className="text-[20px] leading-none text-[#1A1A1A] select-none"
-                style={{ fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif", fontWeight: 900 }}
+                style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fontWeight: 500, letterSpacing: "0.04em" }}
               >GRAILED</span>
               <button onClick={() => setMobileOpen(false)} className="text-[#1A1A1A] hover:opacity-60">
                 <X className="w-6 h-6" />

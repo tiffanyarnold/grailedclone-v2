@@ -59,7 +59,7 @@ export default function FeedPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-[10px] gap-y-6">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="flex flex-col gap-2 animate-pulse">
-                <div className="bg-[#F2F2F2] w-full" style={{ aspectRatio: "1 / 1" }} />
+                <div className="bg-[#F2F2F2] w-full" style={{ aspectRatio: "3 / 4" }} />
                 <div className="h-[10px] bg-[#F2F2F2] rounded w-3/4" />
                 <div className="h-[10px] bg-[#F2F2F2] rounded w-1/2" />
               </div>
@@ -91,7 +91,7 @@ export default function FeedPage() {
                   <Link
                     href={`/listing/${listing.id}`}
                     className="block relative overflow-hidden bg-[#F2F2F2]"
-                    style={{ aspectRatio: "1 / 1" }}
+                    style={{ aspectRatio: "3 / 4" }}
                   >
                     <img
                       src={listing.image_url[0] || "https://images.unsplash.com/photo-1523381294911-8d3cead13475?w=400&q=60"}

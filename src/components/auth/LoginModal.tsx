@@ -82,7 +82,7 @@ export default function LoginModal() {
       onClick={(e) => { if (e.target === e.currentTarget) closeLoginModal(); }}
     >
       <div
-        className="relative bg-white w-full max-w-[460px] mx-4 rounded-md p-8 shadow-2xl"
+        className="relative bg-white w-full max-w-[460px] mx-4 rounded-md p-8 shadow-2xl border border-[#D0D0D0]"
         style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}
       >
         {/* Close */}
@@ -176,40 +176,49 @@ export default function LoginModal() {
               Join the platform for personal style.
             </p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Full name"
-                className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
-                required
-              />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
-                className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
-                required
-              />
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-normal text-[#444]">Full Name</label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-normal text-[#444]">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-normal text-[#444]">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               {error && <p className="text-xs text-[#DC2626]">{error}</p>}
               <button
@@ -280,32 +289,38 @@ export default function LoginModal() {
               Log in to your Grailed account to buy, sell, comment, and more.
             </p>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
-                className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
-                required
-              />
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-normal text-[#444]">Email Address</label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-normal text-[#444]">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 pr-11 border border-[#D4D4D4] text-sm outline-none focus:border-[#1A1A1A] rounded-sm"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#1A1A1A] transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               {error && <p className="text-xs text-[#DC2626]">{error}</p>}
               <button
@@ -325,16 +340,6 @@ export default function LoginModal() {
               </button>
             </p>
 
-            {/* Demo accounts */}
-            <div className="mt-6 pt-4 border-t border-[#E8E8E8]">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2 text-center">Demo Accounts</p>
-              <div className="space-y-1 text-[10px] text-gray-500 text-center">
-                <p><span className="font-medium">Admin:</span> jillian.krebsbach@pursuit.org / Password123!</p>
-                <p><span className="font-medium">Admin:</span> tiffanyarnold@pursuit.org / Password123!</p>
-                <p><span className="font-medium">Seller:</span> marcus@seller.com / Password123!</p>
-                <p><span className="font-medium">Buyer:</span> jordan@buyer.com / Password123!</p>
-              </div>
-            </div>
           </>
         )}
       </div>

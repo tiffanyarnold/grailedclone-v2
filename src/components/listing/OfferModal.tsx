@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, Shield, CreditCard } from "lucide-react";
+import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
 
 interface Listing {
   id: string;
@@ -10,6 +10,10 @@ interface Listing {
   brand: string;
   size: string;
   listed_price: number;
+  sale_price?: number | null;
+  discount?: number | null;
+  min_offer_price?: number | null;
+  watchers_count?: number;
   image_url: string[];
   condition: string;
   seller_id?: string;
@@ -51,7 +55,10 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
   }, []);
 
   const offerNum      = parseFloat(offerAmount) || 0;
-  const isValidOffer  = offerNum > 0 && offerNum <= 99999;
+  // Min offer: use listing's min_offer_price if set, else fall back to 70% of listed price
+  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
+  const isTooLow      = offerAmount !== "" && offerNum > 0 && offerNum < minOffer;
+  const isValidOffer  = offerNum > 0 && offerNum <= 99999 && !isTooLow;
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -127,19 +134,37 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
 
             <div className="px-8 py-6">
               {/* Listing summary */}
-              <div className="flex items-center gap-4 pb-5 border-b border-[#E8E8E8] mb-6">
+              <div className="flex items-start gap-4 pb-5 border-b border-[#E8E8E8] mb-6">
                 <div className="w-[60px] h-[60px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
                   {listing.image_url[0] && (
                     <img src={listing.image_url[0]} alt={listing.title} className="w-full h-full object-cover" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
-                  <p className="text-[13px] text-[#1A1A1A] truncate">{listing.title}</p>
-                  <p className="text-[12px] text-[#888]">{listing.size}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[15px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</p>
+                  {/* Top row: brand + price */}
+                  <div className="flex items-start justify-between gap-2 mb-0.5">
+                    <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
+                    {/* Price: show sale_price + struck-through original if discounted, else just listed_price */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {listing.sale_price ? (
+                        <>
+                          <span className="text-[13px] font-bold text-[#1A1A1A]">${listing.sale_price.toLocaleString()}</span>
+                          <span className="text-[12px] text-[#C0392B] line-through">${listing.listed_price.toLocaleString()}</span>
+                        </>
+                      ) : (
+                        <span className="text-[13px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[12px] text-[#1A1A1A] truncate">{listing.title}</p>
+                  {/* Bottom row: size + heart with count */}
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[12px] text-[#888]">{listing.size}</p>
+                    <div className="flex items-center gap-1 text-[#888]">
+                      <Heart className="w-[13px] h-[13px]" strokeWidth={1.5} />
+                      <span className="text-[11px]">{listing.watchers_count ?? 0}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -149,9 +174,20 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
               </p>
 
               {/* Dollar input — no spinners */}
-              <div className="flex items-center justify-center mb-3">
-                <div className="relative flex items-center border-b-2 border-[#1A1A1A] pb-1 px-2" style={{ minWidth: "200px" }}>
-                  <span className="text-[28px] font-normal text-[#BBBBBB] mr-1 select-none">$</span>
+              <div className="flex items-center justify-center mb-2">
+                <div
+                  className="relative flex items-center pb-1 px-2"
+                  style={{
+                    minWidth: "200px",
+                    borderBottom: `2px solid ${isTooLow ? "#C0392B" : "#1A1A1A"}`,
+                  }}
+                >
+                  <span
+                    className="text-[28px] font-normal mr-1 select-none"
+                    style={{ color: isTooLow ? "#C0392B" : "#BBBBBB" }}
+                  >
+                    $
+                  </span>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -161,12 +197,24 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                       const v = e.target.value.replace(/[^0-9.]/g, "");
                       setOfferAmount(v);
                     }}
-                    className="text-[32px] font-light text-[#888] outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
-                    style={{ minWidth: "120px" }}
+                    className="text-[32px] font-light outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
+                    style={{
+                      minWidth: "120px",
+                      color: isTooLow ? "#C0392B" : "#888",
+                    }}
                     autoFocus
                   />
                 </div>
               </div>
+
+              {/* Red "too low" error — shown exactly like OG Grailed screenshot */}
+              {isTooLow ? (
+                <p className="text-[12px] text-center mb-3" style={{ color: "#C0392B" }}>
+                  Your offer is too low. Must be ${minOffer.toLocaleString()} or higher.
+                </p>
+              ) : (
+                <div className="mb-3" style={{ height: "18px" }} />
+              )}
 
               <p className="text-[12px] text-[#888] text-center mb-2">
                 Shipping and taxes calculated in the next step

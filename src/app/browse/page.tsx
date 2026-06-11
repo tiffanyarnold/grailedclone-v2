@@ -232,7 +232,7 @@ function BrowsePage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <div key={i} className="flex flex-col gap-2 animate-pulse">
-                    <div className="bg-[#F2F2F2] w-full aspect-square" />
+                    <div className="bg-[#F2F2F2] w-full" style={{ aspectRatio: "3 / 4" }} />
                     <div className="h-[10px] bg-[#F2F2F2] rounded w-3/4" />
                     <div className="h-[10px] bg-[#F2F2F2] rounded w-1/2" />
                   </div>
@@ -270,7 +270,7 @@ function BrowsePage() {
                 return (
                   <div key={listing.id} className="group flex flex-col cursor-pointer">
                     {/* Image */}
-                    <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden aspect-square bg-[#F0F0F0]">
+                    <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden bg-[#F0F0F0]" style={{ aspectRatio: "3 / 4" }}>
                       {listing.image_url[0] && (
                         <img
                           src={listing.image_url[0]}
