@@ -260,7 +260,7 @@ export default function SellerDashboardPage() {
                         <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
                           <div className="w-[72px] h-[72px] bg-[#F2F2F2] overflow-hidden">
                             <img
-                              src={listing.image_url[0]}
+                              src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
                               alt={listing.title}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                               onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
@@ -352,6 +352,7 @@ export default function SellerDashboardPage() {
                       const listing = listings.find((l) => l.id === offer.listing_id);
                       const buyer = getProfileById(offer.buyer_id);
                       const competitive = listing ? offer.amount >= listing.listed_price * 0.85 : false;
+                      const thumb = listing?.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
                       return (
                         <div
                           key={offer.id}
@@ -359,15 +360,13 @@ export default function SellerDashboardPage() {
                             offer.status === "declined" ? "opacity-50" : ""
                           }`}
                         >
-                          {listing && (
-                            <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                              <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
-                            </div>
-                          )}
+                          <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
+                            <img src={thumb} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
+                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title || "Listing removed"}</p>
                             <p className="text-[11px] text-[#888] mt-0.5">
-                              From: {buyer?.name || "Buyer"} · Listed at ${listing?.listed_price.toLocaleString()}
+                              From: {buyer?.name || "Buyer"} · {listing ? `Listed at $${listing.listed_price.toLocaleString()}` : ""}
                             </p>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">
@@ -425,6 +424,7 @@ export default function SellerDashboardPage() {
                   <div className="space-y-3">
                     {sentOffers.map((offer) => {
                       const listing = listings.find((l) => l.id === offer.listing_id);
+                      const thumb = listing?.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
                       return (
                         <div
                           key={offer.id}
@@ -432,17 +432,21 @@ export default function SellerDashboardPage() {
                             offer.status === "declined" ? "opacity-50" : ""
                           }`}
                         >
-                          {listing && (
+                          {listing ? (
                             <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
                               <div className="w-[64px] h-[64px] bg-[#F2F2F2] overflow-hidden hover:opacity-80 transition-opacity">
-                                <img src={listing.image_url[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
+                                <img src={thumb} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                               </div>
                             </Link>
+                          ) : (
+                            <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
+                              <img src={thumb} alt="" className="w-full h-full object-cover" />
+                            </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title}</p>
+                            <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title || "Listing removed"}</p>
                             <p className="text-[11px] text-[#888] mt-0.5">
-                              {listing?.brand} · Listed at ${listing?.listed_price.toLocaleString()}
+                              {listing ? `${listing.brand} · Listed at $${listing.listed_price.toLocaleString()}` : ""}
                             </p>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">

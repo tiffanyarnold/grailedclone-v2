@@ -124,7 +124,7 @@ interface PhotoItem {
 
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function SellPage() {
-  const { user, openLoginModal } = useAuth();
+  const { user, isLoading: authLoading, openLoginModal } = useAuth();
   const { addListing } = useStore();
   const router = useRouter();
   const [publishing, setPublishing] = useState(false);
@@ -154,11 +154,16 @@ export default function SellPage() {
   const [previewIdx, setPreviewIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Only open the login modal once we know for certain the user is not logged in.
+  // Checking authLoading prevents the modal from flashing on page load before
+  // the Supabase session is restored.
   useEffect(() => {
-    if (!user) openLoginModal("login");
-  }, [user, openLoginModal]);
+    if (!authLoading && !user) openLoginModal("login");
+  }, [authLoading, user, openLoginModal]);
 
-  if (!user) return null;
+  // Show blank page while auth resolves (avoids flash of login modal for
+  // already-logged-in users navigating directly to /sell)
+  if (authLoading || !user) return null;
 
   const subcategoryOptions = department ? SUBCATEGORIES[department] || [] : [];
   const sizeOptions = subcategory ? SIZES[subcategory] || ["One Size"] : [];
@@ -232,12 +237,16 @@ export default function SellPage() {
 
   const handlePublish = async () => {
     setPublishError("");
+    if (!designer.trim()) {
+      setPublishError("Please enter a designer / brand name.");
+      return;
+    }
     if (!price || parseFloat(price) <= 0) {
       setPublishError("Please enter a valid listed price.");
       return;
     }
-    if (!designer.trim()) {
-      setPublishError("Please enter a designer / brand name.");
+    if (!condition) {
+      setPublishError("Please select a condition.");
       return;
     }
 

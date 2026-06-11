@@ -87,22 +87,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchListings = async () => {
-    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) console.error("fetchListings error:", error.message);
     if (data) setListings(data as Listing[]);
   };
 
   const fetchOffers = async () => {
-    const { data } = await supabase.from("offers").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("offers")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) console.error("fetchOffers error:", error.message);
     if (data) setOffers(data as Offer[]);
   };
 
   const fetchHeroSlides = async () => {
-    const { data } = await supabase.from("hero_slides").select("*").order("position");
+    const { data, error } = await supabase
+      .from("hero_slides")
+      .select("*")
+      .order("position");
+    if (error) console.error("fetchHeroSlides error:", error.message);
     if (data) setHeroSlides(data as HeroSlide[]);
   };
 
   const fetchFavorites = async () => {
-    const { data } = await supabase.from("favorites").select("*");
+    const { data, error } = await supabase.from("favorites").select("*");
+    if (error) console.error("fetchFavorites error:", error.message);
     if (data) setFavorites(data as Favorite[]);
   };
 
@@ -110,16 +123,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await Promise.all([fetchListings(), fetchOffers(), fetchHeroSlides(), fetchFavorites()]);
   }, []);
 
-  // Initial data load
+  // ── Initial data load ────────────────────────────────────────────────────
   useEffect(() => {
     refreshData().finally(() => setIsLoading(false));
   }, [refreshData]);
 
-  // ── Real-time subscriptions ──────────────────────────────────────────────
-  // This ensures offers and listings update live across different browser sessions
-  // (buyer makes offer → seller sees it instantly without refresh, and vice versa)
+  // ── Re-fetch auth-gated tables when session changes ──────────────────────
+  // The initial load fires before the Supabase session is ready, so offers
+  // and favorites (protected by RLS) come back empty on the first fetch.
+  // We re-fetch them once the session is confirmed, and clear them on logout.
   useEffect(() => {
-    // Subscribe to listings changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        fetchOffers();
+        fetchFavorites();
+      } else if (event === "SIGNED_OUT") {
+        setOffers([]);
+        setFavorites([]);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ── Real-time subscriptions ──────────────────────────────────────────────
+  // Streams live INSERT/UPDATE/DELETE to all connected sessions so a buyer's
+  // offer appears on the seller's dashboard without a page refresh.
+  useEffect(() => {
     const listingsChannel = supabase
       .channel("realtime-listings")
       .on(
@@ -128,22 +157,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           if (payload.eventType === "INSERT") {
             setListings((prev) => {
-              // Avoid duplicates (optimistic update may have already added it)
               if (prev.some((l) => l.id === (payload.new as Listing).id)) return prev;
               return [payload.new as Listing, ...prev];
             });
           } else if (payload.eventType === "UPDATE") {
             setListings((prev) =>
-              prev.map((l) => (l.id === (payload.new as Listing).id ? (payload.new as Listing) : l))
+              prev.map((l) =>
+                l.id === (payload.new as Listing).id ? (payload.new as Listing) : l
+              )
             );
           } else if (payload.eventType === "DELETE") {
-            setListings((prev) => prev.filter((l) => l.id !== (payload.old as { id: string }).id));
+            setListings((prev) =>
+              prev.filter((l) => l.id !== (payload.old as { id: string }).id)
+            );
           }
         }
       )
       .subscribe();
 
-    // Subscribe to offers changes
     const offersChannel = supabase
       .channel("realtime-offers")
       .on(
@@ -152,16 +183,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           if (payload.eventType === "INSERT") {
             setOffers((prev) => {
-              // Avoid duplicates (optimistic update may have already added it)
               if (prev.some((o) => o.id === (payload.new as Offer).id)) return prev;
               return [payload.new as Offer, ...prev];
             });
           } else if (payload.eventType === "UPDATE") {
             setOffers((prev) =>
-              prev.map((o) => (o.id === (payload.new as Offer).id ? (payload.new as Offer) : o))
+              prev.map((o) =>
+                o.id === (payload.new as Offer).id ? (payload.new as Offer) : o
+              )
             );
           } else if (payload.eventType === "DELETE") {
-            setOffers((prev) => prev.filter((o) => o.id !== (payload.old as { id: string }).id));
+            setOffers((prev) =>
+              prev.filter((o) => o.id !== (payload.old as { id: string }).id)
+            );
           }
         }
       )
@@ -173,76 +207,102 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // ── Mutations ────────────────────────────────────────────────────────────
+  // Every mutation THROWS on Supabase error so callers (sell page, offer
+  // modal, dashboard) can catch it and show the user a real error message
+  // instead of silently failing and leaving state inconsistent.
+
   const addListing = async (listing: Omit<Listing, "id" | "created_at">) => {
-    const { data, error } = await supabase.from("listings").insert(listing).select().single();
-    if (!error && data) {
-      setListings((prev) => {
-        // Avoid duplicates if realtime fires before this resolves
-        if (prev.some((l) => l.id === (data as Listing).id)) return prev;
-        return [data as Listing, ...prev];
-      });
-    }
+    const { data, error } = await supabase
+      .from("listings")
+      .insert(listing)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    // Optimistic local update — realtime subscription may also fire; the
+    // duplicate guard below prevents the listing appearing twice.
+    setListings((prev) => {
+      if (prev.some((l) => l.id === (data as Listing).id)) return prev;
+      return [data as Listing, ...prev];
+    });
   };
 
   const updateListing = async (id: string, data: Partial<Listing>) => {
     const { error } = await supabase.from("listings").update(data).eq("id", id);
-    if (!error) setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...data } : l)));
+    if (error) throw new Error(error.message);
+    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...data } : l)));
   };
 
   const deleteListing = async (id: string) => {
     const { error } = await supabase.from("listings").delete().eq("id", id);
-    if (!error) setListings((prev) => prev.filter((l) => l.id !== id));
+    if (error) throw new Error(error.message);
+    setListings((prev) => prev.filter((l) => l.id !== id));
   };
 
   const addOffer = async (offer: Omit<Offer, "id" | "created_at">) => {
-    const { data, error } = await supabase.from("offers").insert(offer).select().single();
-    if (!error && data) {
-      setOffers((prev) => {
-        // Avoid duplicates if realtime fires before this resolves
-        if (prev.some((o) => o.id === (data as Offer).id)) return prev;
-        return [data as Offer, ...prev];
-      });
-    }
+    const { data, error } = await supabase
+      .from("offers")
+      .insert(offer)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    setOffers((prev) => {
+      if (prev.some((o) => o.id === (data as Offer).id)) return prev;
+      return [data as Offer, ...prev];
+    });
   };
 
   const updateOfferStatus = async (id: string, status: "accepted" | "declined") => {
     const { error } = await supabase.from("offers").update({ status }).eq("id", id);
-    if (!error) setOffers((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    if (error) throw new Error(error.message);
+    setOffers((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
   };
 
   const addHeroSlide = async (slide: Omit<HeroSlide, "id">) => {
-    const { data, error } = await supabase.from("hero_slides").insert(slide).select().single();
-    if (!error && data) setHeroSlides((prev) => [...prev, data as HeroSlide]);
+    const { data, error } = await supabase
+      .from("hero_slides")
+      .insert(slide)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    setHeroSlides((prev) => [...prev, data as HeroSlide]);
   };
 
   const removeHeroSlide = async (id: string) => {
     const { error } = await supabase.from("hero_slides").delete().eq("id", id);
-    if (!error) setHeroSlides((prev) => prev.filter((s) => s.id !== id));
+    if (error) throw new Error(error.message);
+    setHeroSlides((prev) => prev.filter((s) => s.id !== id));
   };
 
   const updateHeroSlide = async (id: string, data: Partial<HeroSlide>) => {
     const { error } = await supabase.from("hero_slides").update(data).eq("id", id);
-    if (!error) setHeroSlides((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
+    if (error) throw new Error(error.message);
+    setHeroSlides((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...data } : s))
+    );
   };
 
   const toggleFavorite = async (userId: string, listingId: string) => {
-    const exists = favorites.find((f) => f.user_id === userId && f.listing_id === listingId);
+    const exists = favorites.find(
+      (f) => f.user_id === userId && f.listing_id === listingId
+    );
     if (exists) {
       const { error } = await supabase.from("favorites").delete().eq("id", exists.id);
-      if (!error) setFavorites((prev) => prev.filter((f) => f.id !== exists.id));
+      if (error) throw new Error(error.message);
+      setFavorites((prev) => prev.filter((f) => f.id !== exists.id));
     } else {
       const { data, error } = await supabase
         .from("favorites")
         .insert({ user_id: userId, listing_id: listingId })
         .select()
         .single();
-      if (!error && data) setFavorites((prev) => [...prev, data as Favorite]);
+      if (error) throw new Error(error.message);
+      setFavorites((prev) => [...prev, data as Favorite]);
     }
   };
 
-  const isFavorited = (userId: string, listingId: string) => {
-    return favorites.some((f) => f.user_id === userId && f.listing_id === listingId);
-  };
+  const isFavorited = (userId: string, listingId: string) =>
+    favorites.some((f) => f.user_id === userId && f.listing_id === listingId);
 
   return (
     <StoreContext.Provider

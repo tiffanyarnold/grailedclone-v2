@@ -10,18 +10,21 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 export default function FeedPage() {
-  const { user } = useAuth();
-  const { listings, isFavorited, toggleFavorite } = useStore();
+  const { user, isLoading: authLoading } = useAuth();
+  const { listings, isLoading: storeLoading, isFavorited, toggleFavorite } = useStore();
   const [designerPickerOpen, setDesignerPickerOpen] = useState(false);
 
-  // Redirect to home if not logged in
+  // Only redirect once we know for sure the user isn't logged in.
+  // Checking authLoading prevents a hard redirect for logged-in users
+  // while the Supabase session is still being restored on page load.
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       window.location.href = "/";
     }
-  }, [user]);
+  }, [authLoading, user]);
 
-  if (!user) return null;
+  // Render nothing while auth is resolving to avoid a redirect flash
+  if (authLoading || !user) return null;
 
   return (
     <div className="min-h-screen bg-white">
@@ -51,7 +54,18 @@ export default function FeedPage() {
         </div>
 
         {/* Grid — 5 columns, tight gap matching Grailed */}
-        {listings.length > 0 ? (
+        {storeLoading ? (
+          /* Skeleton grid while listings are fetching */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-[10px] gap-y-6">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="flex flex-col gap-2 animate-pulse">
+                <div className="bg-[#F2F2F2] w-full" style={{ aspectRatio: "1 / 1" }} />
+                <div className="h-[10px] bg-[#F2F2F2] rounded w-3/4" />
+                <div className="h-[10px] bg-[#F2F2F2] rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : listings.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-[10px] gap-y-6">
             {listings.map((listing) => {
               const favorited = isFavorited(user.id, listing.id);
@@ -144,7 +158,9 @@ export default function FeedPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          toggleFavorite(user.id, listing.id);
+                          toggleFavorite(user.id, listing.id).catch((err) => {
+                            console.error("toggleFavorite failed:", err);
+                          });
                         }}
                         className="flex-shrink-0 p-[2px] text-[#888] hover:text-[#1A1A1A] transition-colors"
                         aria-label="Save"

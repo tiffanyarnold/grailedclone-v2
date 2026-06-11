@@ -12,7 +12,7 @@ import OfferModal from "@/components/listing/OfferModal";
 
 export default function ListingDetailPage() {
   const params = useParams();
-  const { listings, addOffer, toggleFavorite, isFavorited } = useStore();
+  const { listings, offers, isLoading: storeLoading, addOffer, toggleFavorite, isFavorited } = useStore();
   const { user, openLoginModal } = useAuth();
   const { getProfileById } = useProfiles();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -20,6 +20,20 @@ export default function ListingDetailPage() {
   const [offerDone, setOfferDone] = useState(false);
 
   const listing = listings.find((l) => l.id === params.id);
+
+  // Show a spinner while the store is fetching — prevents a false "not found"
+  // when deep-linking directly to a listing URL before data has loaded.
+  if (storeLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="flex items-center justify-center py-20">
+          <p className="text-[13px] text-[#888]">Loading…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!listing) {
     return (
@@ -34,6 +48,15 @@ export default function ListingDetailPage() {
   }
 
   const seller = getProfileById(listing.seller_id);
+
+  // Check if this buyer already has a pending or accepted offer on this listing
+  // so we don't let them submit a second one after navigating away and back.
+  const existingOffer = user
+    ? offers.find((o) => o.listing_id === listing.id && o.buyer_id === user.id)
+    : undefined;
+  // offerDone is also set locally after a fresh submission this session
+  const hasOffer = offerDone || !!existingOffer;
+
   const lowestAsk = listing.lowest_ask || Math.round(listing.listed_price * 0.82);
   const lastSold = listing.last_sold_price || Math.round(listing.listed_price * 0.9);
   const acceptanceRate = listing.offer_acceptance_rate || 67;
@@ -61,13 +84,22 @@ export default function ListingDetailPage() {
 
   const handleOpenOffer = () => {
     if (!user) { openLoginModal("login"); return; }
+    // Don't open a second offer if one is already pending/accepted
+    if (hasOffer) return;
     setOfferModalOpen(true);
   };
 
   const handleSubmitOffer = async (amount: number) => {
     if (!user) return;
-    await addOffer({ listing_id: listing.id, buyer_id: user.id, amount, status: "pending" });
-    setOfferDone(true);
+    try {
+      await addOffer({ listing_id: listing.id, buyer_id: user.id, amount, status: "pending" });
+      setOfferDone(true);
+    } catch (err) {
+      console.error("Offer submission failed:", err);
+      // Surface the error — OfferModal's onSubmit already shows a success screen
+      // only after this resolves, so we re-throw so it stays on the modal.
+      throw err;
+    }
   };
 
   return (
@@ -231,12 +263,17 @@ export default function ListingDetailPage() {
             <div className="space-y-2.5">
               <button
                 onClick={handleOpenOffer}
-                className="w-full py-4 bg-[#1A1A1A] text-white text-[13px] font-bold tracking-[0.12em] hover:bg-black transition-colors"
+                disabled={hasOffer}
+                className={`w-full py-4 text-[13px] font-bold tracking-[0.12em] transition-colors ${
+                  hasOffer
+                    ? "bg-[#888] text-white cursor-not-allowed"
+                    : "bg-[#1A1A1A] text-white hover:bg-black"
+                }`}
               >
                 PURCHASE
               </button>
 
-              {offerDone ? (
+              {hasOffer ? (
                 <div className="w-full py-3.5 border border-[#1A1A1A] text-[13px] font-bold tracking-[0.12em] text-center text-[#1A1A1A]">
                   OFFER SENT ✓
                 </div>
@@ -272,6 +309,8 @@ export default function ListingDetailPage() {
       {offerModalOpen && (
         <OfferModal
           listing={listing}
+          buyerName={user?.name}
+          sellerName={seller?.name}
           onClose={() => setOfferModalOpen(false)}
           onSubmit={handleSubmitOffer}
         />

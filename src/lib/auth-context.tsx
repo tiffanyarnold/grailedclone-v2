@@ -52,13 +52,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const closeLoginModal = () => setLoginModalOpen(false);
 
   const loadProfile = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("id, name, email, role")
       .eq("id", userId)
       .single();
+
     if (data) {
       setUser({ id: data.id, name: data.name, email: data.email, role: data.role as UserRole });
+      return;
+    }
+
+    // Profile row missing (e.g. DB trigger failed on first signup).
+    // Recover by fetching the auth user's metadata and upserting a profile row.
+    if (error?.code === "PGRST116") {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const fallbackName = (authUser.user_metadata?.name as string | undefined) || authUser.email || "User";
+        const fallbackEmail = authUser.email || "";
+        const { data: upserted } = await supabase
+          .from("profiles")
+          .upsert({ id: userId, name: fallbackName, email: fallbackEmail, role: "buyer" })
+          .select("id, name, email, role")
+          .single();
+        if (upserted) {
+          setUser({ id: upserted.id, name: upserted.name, email: upserted.email, role: upserted.role as UserRole });
+        }
+      }
     }
   };
 
@@ -71,11 +91,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
+        // Hold isLoading=true while we fetch the profile so pages that check
+        // `!authLoading && !user` don't flash-redirect in the gap between the
+        // SIGNED_IN event firing and the profile load completing.
+        setIsLoading(true);
+        loadProfile(session.user.id).finally(() => setIsLoading(false));
+      } else if (event === "SIGNED_OUT") {
         setUser(null);
+        setIsLoading(false);
       }
     });
 

@@ -12,18 +12,21 @@ interface Listing {
   listed_price: number;
   image_url: string[];
   condition: string;
+  seller_id?: string;
 }
 
 interface OfferModalProps {
   listing: Listing;
+  buyerName?: string;   // logged-in buyer's display name
+  sellerName?: string;  // seller's display name (from useProfiles)
   onClose: () => void;
-  onSubmit: (amount: number) => void;
+  onSubmit: (amount: number) => Promise<void>;
 }
 
 const SHIPPING_ESTIMATE = 14.99;
 const TAX_RATE = 0.0895; // ~9% estimated tax
 
-export default function OfferModal({ listing, onClose, onSubmit }: OfferModalProps) {
+export default function OfferModal({ listing, buyerName, sellerName, onClose, onSubmit }: OfferModalProps) {
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [offerAmount, setOfferAmount] = useState("");
@@ -31,6 +34,8 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
   const [saveCard, setSaveCard] = useState(true);
   const [billingSame, setBillingSame] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -48,10 +53,18 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
     if (isValidOffer) setStep(2);
   };
 
-  const handleSubmit = () => {
-    if (!tosAccepted || !isValidOffer) return;
-    onSubmit(offerNum);
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    if (!tosAccepted || !isValidOffer || submitting) return;
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      await onSubmit(offerNum);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to submit offer. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!mounted) return null;
@@ -182,11 +195,8 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
                 <h3 className="text-[13px] font-semibold text-[#1A1A1A] mb-3">Shipping Address</h3>
                 <div className="border border-[#D4D4D4] px-4 py-3 mb-5 flex items-start justify-between cursor-pointer hover:border-[#888] transition-colors">
                   <div>
-                    <p className="text-[13px] text-[#1A1A1A] font-medium">Jillian J Krebsbach</p>
-                    <p className="text-[12px] text-[#444]">34-06 45th Street</p>
-                    <p className="text-[12px] text-[#444]">1G</p>
-                    <p className="text-[12px] text-[#444]">Long Island City, NY 11101</p>
-                    <p className="text-[12px] text-[#444]">United States</p>
+                    <p className="text-[13px] text-[#1A1A1A] font-medium">{buyerName || "—"}</p>
+                    <p className="text-[12px] text-[#888] italic">Add a shipping address in your profile settings</p>
                   </div>
                   <ChevronLeft className="w-4 h-4 text-[#888] rotate-180 mt-1 flex-shrink-0" />
                 </div>
@@ -260,7 +270,7 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
                       <p className="text-[12px] text-[#1A1A1A] truncate">{listing.title}</p>
                       <p className="text-[11px] text-[#888]">Size: {listing.size}</p>
                       <p className="text-[11px] text-[#888]">
-                        Seller: <span className="text-[#2557D6] underline cursor-pointer">grailed_seller</span>
+                        Seller: <span className="text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
                       </p>
                     </div>
                   </div>
@@ -316,17 +326,22 @@ export default function OfferModal({ listing, onClose, onSubmit }: OfferModalPro
                   </span>
                 </label>
 
+                {/* Error message */}
+                {submitError && (
+                  <p className="text-[12px] text-[#DC2626] mb-3 text-center">{submitError}</p>
+                )}
+
                 {/* Submit button */}
                 <button
                   onClick={handleSubmit}
-                  disabled={!tosAccepted}
+                  disabled={!tosAccepted || submitting}
                   className={`w-full py-[14px] text-[13px] font-semibold tracking-[0.08em] transition-colors mb-5 ${
-                    tosAccepted
+                    tosAccepted && !submitting
                       ? "bg-[#1A1A1A] text-white hover:bg-black cursor-pointer"
                       : "bg-[#E8E8E8] text-[#AAAAAA] cursor-not-allowed"
                   }`}
                 >
-                  SUBMIT OFFER
+                  {submitting ? "SUBMITTING…" : "SUBMIT OFFER"}
                 </button>
 
                 {/* Grailed Purchase Protection */}

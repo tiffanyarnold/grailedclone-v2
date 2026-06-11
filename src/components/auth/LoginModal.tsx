@@ -15,6 +15,7 @@ export default function LoginModal() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
 
   // Sync mode when modal opens
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function LoginModal() {
       setName("");
       setError("");
       setShowPassword(false);
+      setSignupDone(false);
     }
   }, [loginModalOpen, loginModalMode]);
 
@@ -53,7 +55,10 @@ export default function LoginModal() {
       const result = await signup(email, password, name);
       setLoading(false);
       if (result.success) {
-        closeLoginModal();
+        // Supabase sends a confirmation email before the session is established.
+        // Don't close the modal — show a "check your email" screen instead so
+        // the user knows they need to confirm before they're logged in.
+        setSignupDone(true);
       } else {
         setError(result.error || "Sign up failed");
       }
@@ -88,8 +93,35 @@ export default function LoginModal() {
           <X className="w-5 h-5" />
         </button>
 
+        {/* ── SIGNUP CONFIRMATION ── */}
+        {signupDone && (
+          <div className="text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-[#1A1A1A] flex items-center justify-center mx-auto mb-5">
+              <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+                <polyline points="4,12 9,17 20,7" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h2 className="text-[24px] font-bold text-[#1A1A1A] mb-3">Check your email</h2>
+            <p className="text-[14px] text-[#555] leading-relaxed mb-6 max-w-[320px] mx-auto">
+              We sent a confirmation link to <strong className="text-[#1A1A1A]">{email}</strong>. Click the link to activate your account and log in.
+            </p>
+            <button
+              onClick={closeLoginModal}
+              className="px-8 py-3 bg-[#1A1A1A] text-white text-[12px] font-bold tracking-[0.1em] hover:bg-black transition-colors"
+            >
+              DONE
+            </button>
+            <p className="text-[12px] text-[#888] mt-4">
+              Already confirmed?{" "}
+              <button onClick={() => { setSignupDone(false); setMode("login"); setShowEmailForm(true); }} className="underline text-[#1A1A1A] hover:opacity-70">
+                Log in
+              </button>
+            </p>
+          </div>
+        )}
+
         {/* ── SIGN UP MODE ── */}
-        {mode === "signup" && !showEmailForm && (
+        {!signupDone && mode === "signup" && !showEmailForm && (
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-3 leading-tight"
@@ -132,7 +164,7 @@ export default function LoginModal() {
         )}
 
         {/* ── SIGN UP EMAIL FORM ── */}
-        {mode === "signup" && showEmailForm && (
+        {!signupDone && mode === "signup" && showEmailForm && (
           <>
             <h2
               className="text-[34px] text-[#1A1A1A] mb-2 leading-tight"
