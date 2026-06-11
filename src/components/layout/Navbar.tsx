@@ -336,40 +336,19 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              {/* Desktop: SIGN UP + LOG IN */}
               <button
-                onClick={() => openLoginModal("login")}
+                onClick={() => openLoginModal("signup")}
                 className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
               >
-                SELL
+                SIGN UP
               </button>
               <button
                 onClick={() => openLoginModal("login")}
-                className="hidden lg:inline-flex items-center text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity"
+                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] bg-[#1A1A1A] text-white hover:bg-black transition-colors"
               >
-                MY FEED
+                LOG IN
               </button>
-              <button
-                onClick={() => openLoginModal("login")}
-                className="hidden lg:block text-[#1A1A1A] hover:opacity-60 transition-opacity"
-              >
-                <MessageCircle className="w-[20px] h-[20px]" strokeWidth={1.5} />
-              </button>
-              <button
-                onClick={() => openLoginModal("login")}
-                className="hidden lg:block text-[#1A1A1A] hover:opacity-60 transition-opacity"
-              >
-                <Heart className="w-[20px] h-[20px]" strokeWidth={1.5} />
-              </button>
-              {/* Avatar placeholder */}
-              <div className="relative hidden lg:block">
-                <button
-                  onClick={() => openLoginModal("login")}
-                  className="w-[30px] h-[30px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] flex items-center justify-center hover:opacity-80 transition-opacity relative"
-                >
-                  <User className="w-[15px] h-[15px] text-[#666]" strokeWidth={1.5} />
-                  <span className="absolute -top-[2px] -right-[2px] w-[8px] h-[8px] rounded-full bg-[#E53935] border-[1.5px] border-white" />
-                </button>
-              </div>
               {/* Mobile: LOG IN button */}
               <button
                 onClick={() => openLoginModal("login")}

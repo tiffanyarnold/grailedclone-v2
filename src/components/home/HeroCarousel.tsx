@@ -126,29 +126,29 @@ export default function HeroCarousel() {
         <p
           style={{
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "13px",
+            fontSize: "10px",
             fontWeight: 500,
-            letterSpacing: "0.12em",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
             marginBottom: "10px",
             textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+            opacity: 0.75,
           }}
         >
           {slide.subheadline}
         </p>
 
-        {/* Bold headline */}
+        {/* Bold headline — single line at 1280px */}
         <h2
           style={{
             fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
-            fontSize: "clamp(28px, 5vw, 66px)",
-            fontWeight: 800,
+            fontSize: "clamp(24px, 3vw, 42px)",
+            fontWeight: 600,
             letterSpacing: "-0.02em",
-            lineHeight: 1.05,
+            lineHeight: 1.1,
             marginBottom: "28px",
             textShadow: "0 2px 8px rgba(0,0,0,0.5)",
-            maxWidth: "800px",
-            padding: "0 24px",
+            whiteSpace: "nowrap",
           }}
         >
           {slide.headline}

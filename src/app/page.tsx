@@ -9,6 +9,7 @@ import SecondaryCollections from "@/components/home/SecondaryCollections";
 import EditorialSectionReversed from "@/components/home/EditorialSectionReversed";
 import EditorialSectionTwo from "@/components/home/EditorialSectionTwo";
 import ShopByCategory from "@/components/home/ShopByCategory";
+import DailyPicks from "@/components/home/DailyPicks";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
       <Navbar />
       <main>
         <HeroCarousel />
+        <DailyPicks />
         <CollectionGrid />
         <EditorialSection />
         <SecondaryCollections />
