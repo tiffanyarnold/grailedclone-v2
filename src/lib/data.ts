@@ -486,7 +486,7 @@ export interface Collection {
 export const collections: Collection[] = [
   {
     id: "col-1",
-    brands: "SUPREME, CHROME HEARTS, MAISON MARGIELA +MORE",
+    brands: "MAISON MARGIELA, ACNE STUDIOS, VETEMENTS +MORE",
     title: "Trending: Apparel",
     listings: ["listing-3", "listing-6", "listing-12", "listing-19"],
   },
@@ -498,7 +498,7 @@ export const collections: Collection[] = [
   },
   {
     id: "col-3",
-    brands: "NIKE, MAISON MARGIELA, JORDAN BRAND +MORE",
+    brands: "PRADA, LEVI'S, JAPANESE BRAND +MORE",
     title: "Trending: Footwear",
     listings: ["listing-2", "listing-7", "listing-8", "listing-20"],
   },
@@ -510,13 +510,13 @@ export const collections: Collection[] = [
   },
   {
     id: "col-5",
-    brands: "RICK OWENS, RICK OWENS DRKSHDW, UNDERCOVER +MORE",
+    brands: "RICK OWENS, CELINE, JAPANESE BRAND +MORE",
     title: "Dark Luxury",
     listings: ["listing-10", "listing-18", "listing-5", "listing-6"],
   },
   {
     id: "col-6",
-    brands: "JORDAN BRAND, NIKE, TRAVIS SCOTT +MORE",
+    brands: "ADIDAS, LEVI'S, VETEMENTS +MORE",
     title: "Court Icons",
     listings: ["listing-7", "listing-20", "listing-8", "listing-11"],
   },

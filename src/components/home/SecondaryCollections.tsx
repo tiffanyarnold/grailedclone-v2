@@ -16,7 +16,7 @@ const COLLECTIONS = [
     ],
   },
   {
-    brands: "RICK OWENS, RICK OWENS DRKSHDW, UNDERCOVER +MORE",
+    brands: "RICK OWENS, CELINE, JAPANESE BRAND +MORE",
     title: "Dark Luxury",
     categories: ["Outerwear"],
     fallbacks: [
@@ -27,7 +27,7 @@ const COLLECTIONS = [
     ],
   },
   {
-    brands: "JORDAN BRAND, NIKE, TRAVIS SCOTT +MORE",
+    brands: "ADIDAS, LEVI'S, VETEMENTS +MORE",
     title: "Court Icons",
     categories: ["Footwear"],
     fallbacks: [

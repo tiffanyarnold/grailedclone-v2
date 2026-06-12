@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store-context";
 import { editorialSections } from "@/lib/data";
 
 const SECTION_CONFIG = {
-  brands: "CHROME HEARTS, LOUIS VUITTON, SUPREME +MORE",
+  brands: "LOUIS VUITTON, DIOR, COACH +MORE",
   title: "Trending: Accessories",
   categories: ["Accessories"],
 };

@@ -8,8 +8,8 @@ import Link from "next/link";
 const FALLBACK_SLIDES = [
   {
     id: "fallback-1",
-    headline: "Archive Under $300",
-    subheadline: "RAF SIMONS, UNDERCOVER + MORE",
+    headline: "Archive Essentials Under $500",
+    subheadline: "RICK OWENS, DIOR, MAISON MARGIELA +MORE",
     button_text: "SHOP NOW",
     image:
       "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1800&q=85",

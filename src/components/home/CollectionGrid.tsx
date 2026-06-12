@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store-context";
 
 const ROW_ONE = [
   {
-    brands: "SUPREME, CHROME HEARTS, MAISON MARGIELA +MORE",
+    brands: "MAISON MARGIELA, ACNE STUDIOS, VETEMENTS +MORE",
     title: "Trending: Apparel",
     categories: ["Tops"],
     fallbacks: [
@@ -27,7 +27,7 @@ const ROW_ONE = [
     ],
   },
   {
-    brands: "NIKE, MAISON MARGIELA, JORDAN BRAND +MORE",
+    brands: "PRADA, LEVI'S, JAPANESE BRAND +MORE",
     title: "Trending: Footwear",
     categories: ["Footwear"],
     fallbacks: [

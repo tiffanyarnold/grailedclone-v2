@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store-context";
 
 const SECTION = {
-  brands: "CAROL CHRISTIAN POELL, MA+, CARPE DIEM +MORE",
+  brands: "RICK OWENS, LEVI'S, JAPANESE BRAND +MORE",
   title: "Leatherwork Mastery",
   categories: ["Outerwear"],
   editorial: {
