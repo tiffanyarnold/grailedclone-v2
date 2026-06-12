@@ -320,7 +320,7 @@ export default function ListingDetailPage() {
                   onClick={handleOpenOffer}
                   className="w-full py-3.5 border border-[#1A1A1A] text-[13px] font-bold tracking-[0.12em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 >
-                  OFFER
+                  Make Offer
                 </button>
               )}
 

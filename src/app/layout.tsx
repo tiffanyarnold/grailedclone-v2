@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   description: "Grailed is the peer-to-peer marketplace for luxury and streetwear fashion.",
   icons: {
     icon: [
-      { url: "/grailed-favicon.png", type: "image/png", sizes: "1200x1200" },
+      { url: "/grailed-favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", type: "image/x-icon" },
     ],
-    shortcut: "/grailed-favicon.png",
-    apple: "/grailed-favicon.png",
+    shortcut: "/grailed-favicon.svg",
+    apple: "/grailed-favicon.svg",
   },
 };
 

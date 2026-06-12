@@ -119,7 +119,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-4 lg:px-6 max-w-[1440px] mx-auto h-[52px]">
+      <div className="relative flex items-center px-4 lg:px-16 max-w-[1440px] mx-auto h-[52px]">
 
         {/* Hamburger — mobile only */}
         <button
@@ -147,12 +147,12 @@ export default function Navbar() {
         {/* Search — centered, takes remaining space between logo and right actions */}
         <div
           ref={searchRef}
-          className="hidden lg:block flex-1 max-w-[480px] mx-auto relative"
+          className="hidden lg:block flex-1 max-w-[600px] mx-auto relative"
         >
           <form onSubmit={handleSearch}>
-            <div className={`flex items-center bg-white overflow-hidden h-[36px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
+            <div className={`flex items-center bg-white overflow-hidden h-[42px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
               {/* Left icon — X when typing, search icon otherwise */}
-              <div className="flex items-center pl-2.5 pr-1 flex-shrink-0">
+              <div className="flex items-center pl-3.5 pr-1.5 flex-shrink-0">
                 {searchQuery ? (
                   <button
                     type="button"
@@ -160,10 +160,10 @@ export default function Navbar() {
                     className="text-[#888] hover:text-[#1A1A1A] transition-colors p-0.5"
                     tabIndex={-1}
                   >
-                    <X className="w-[14px] h-[14px]" />
+                    <X className="w-[15px] h-[15px]" />
                   </button>
                 ) : (
-                  <Search className="w-[14px] h-[14px] text-[#888]" />
+                  <Search className="w-[15px] h-[15px] text-[#888]" />
                 )}
               </div>
 
@@ -177,15 +177,17 @@ export default function Navbar() {
                   setDropdownOpen(true);
                 }}
                 onFocus={() => setDropdownOpen(true)}
-                className="flex-1 px-2 text-[13px] outline-none bg-transparent placeholder:text-[#999] h-full"
+                className="flex-1 px-3 text-[13px] outline-none bg-transparent placeholder:text-[#999] h-full"
                 autoComplete="off"
               />
-              <button
-                type="submit"
-                className="h-full px-4 text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] border-l border-[#1A1A1A] hover:bg-[#F5F5F5] transition-colors whitespace-nowrap flex-shrink-0"
-              >
-                SEARCH
-              </button>
+              <div className="flex items-center pr-2 flex-shrink-0">
+                <button
+                  type="submit"
+                  className="px-3 py-1 text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] border border-[#C8C8C8] hover:bg-[#F5F5F5] transition-colors whitespace-nowrap"
+                >
+                  SEARCH
+                </button>
+              </div>
             </div>
           </form>
 
@@ -260,7 +262,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="ml-auto flex items-center gap-3 lg:gap-4 flex-shrink-0">
+        <div className="ml-auto flex items-center gap-3 lg:gap-6 flex-shrink-0">
           {user ? (
             <>
               {/* SELL / ADMIN */}
@@ -345,7 +347,7 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={() => openLoginModal("signup")}
-                className="hidden lg:inline-flex items-center text-[11px] font-bold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity"
+                className="hidden lg:inline-flex items-center px-4 py-[5px] text-[11px] font-bold tracking-[0.1em] border border-[#C8C8C8] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
               >
                 SIGN UP
               </button>
@@ -369,7 +371,7 @@ export default function Navbar() {
 
       {/* Secondary Nav — desktop only */}
       <nav className="hidden lg:block border-t border-[#E8E8E8]">
-        <div className="flex items-center justify-between px-6 max-w-[1440px] mx-auto h-[38px]">
+        <div className="flex items-center justify-between px-16 max-w-[1440px] mx-auto h-[38px]">
           <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
           <NavLink href="/browse?category=womenswear" hasChevron>WOMENSWEAR</NavLink>
