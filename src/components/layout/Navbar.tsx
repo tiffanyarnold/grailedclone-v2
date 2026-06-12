@@ -283,7 +283,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="ml-10 mr-auto flex items-center gap-3 lg:gap-6 flex-shrink-0">
+        <div className="ml-16 mr-auto flex items-center gap-3 lg:gap-6 flex-shrink-0">
           {user ? (
             <>
               {/* SELL / ADMIN */}
