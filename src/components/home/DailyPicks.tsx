@@ -9,10 +9,10 @@ import { useStore } from "@/lib/store-context";
 const STUB_PICKS = [
   {
     id: "stub-1",
-    title: "Raf Simons Oversized Denim Jacket",
-    brand: "Raf Simons",
-    listed_price: 245,
-    image_url: ["https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=600&q=80"],
+    title: "Vintage 80s Adidas Sweatpants",
+    brand: "Adidas",
+    listed_price: 41,
+    image_url: ["https://storage.googleapis.com/tempo-image-previews/user_342dbn8Ny9Wjw4RsL8HHW4GAVYL-1781283172313-image.png"],
   },
   {
     id: "stub-2",

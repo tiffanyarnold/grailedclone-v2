@@ -8,6 +8,7 @@ const ROW_ONE = [
     brands: "MAISON MARGIELA, ACNE STUDIOS, VETEMENTS +MORE",
     title: "Trending: Apparel",
     categories: ["Tops"],
+    forceStatic: false,
     fallbacks: [
       "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80",
       "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80",
@@ -19,6 +20,7 @@ const ROW_ONE = [
     brands: "From Grailed",
     title: "Get In Your Bag",
     categories: ["Accessories"],
+    forceStatic: false,
     fallbacks: [
       "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
       "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80",
@@ -27,11 +29,12 @@ const ROW_ONE = [
     ],
   },
   {
-    brands: "PRADA, LEVI'S, JAPANESE BRAND +MORE",
-    title: "Trending: Footwear",
+    brands: "Y-3, ADIDAS, BALENCIAGA +MORE",
+    title: "Trending Athletic",
     categories: ["Footwear"],
+    forceStatic: true,
     fallbacks: [
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
+      "https://storage.googleapis.com/tempo-image-previews/user_342dbn8Ny9Wjw4RsL8HHW4GAVYL-1781283172313-image.png",
       "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=80",
       "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=800&q=80",
       "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800&q=80",
@@ -42,7 +45,14 @@ const ROW_ONE = [
 export default function CollectionGrid() {
   const { listings } = useStore();
 
-  const getSlots = (cats: string[], fallbacks: string[]) => {
+  const getSlots = (cats: string[], fallbacks: string[], forceStatic?: boolean) => {
+    if (forceStatic) {
+      return Array.from({ length: 4 }, (_, i) => ({
+        id: `fb-${i}`,
+        title: "",
+        image_url: [fallbacks[i]],
+      }));
+    }
     const found = listings.filter((l) => cats.includes(l.category)).slice(0, 4);
     return Array.from({ length: 4 }, (_, i) =>
       found[i] ?? { id: `fb-${i}`, title: "", image_url: [fallbacks[i]] }
@@ -53,7 +63,7 @@ export default function CollectionGrid() {
     <section className="max-w-[1200px] mx-auto px-6 py-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {ROW_ONE.map((col) => (
-          <CollectionCard key={col.title} config={col} slots={getSlots(col.categories, col.fallbacks)} />
+          <CollectionCard key={col.title} config={col} slots={getSlots(col.categories, col.fallbacks, col.forceStatic)} />
         ))}
       </div>
     </section>
