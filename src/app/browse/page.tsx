@@ -270,12 +270,12 @@ function BrowsePage() {
                 return (
                   <div key={listing.id} className="group flex flex-col cursor-pointer">
                     {/* Image */}
-                    <Link href={`/listing/${listing.id}`} className="relative block overflow-hidden bg-[#F0F0F0]" style={{ aspectRatio: "3 / 4" }}>
+                    <Link href={`/listing/${listing.id}`} className="relative flex items-center justify-center overflow-hidden bg-[#F2F2F2]" style={{ aspectRatio: "3 / 4" }}>
                       {listing.image_url[0] && (
                         <img
                           src={listing.image_url[0]}
                           alt={listing.title}
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                          className="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-200"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60";
                           }}

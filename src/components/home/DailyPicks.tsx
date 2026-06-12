@@ -142,11 +142,11 @@ export default function DailyPicks() {
               className="flex-shrink-0 w-[160px] sm:w-[180px] group"
             >
               {/* Square image */}
-              <div className="w-full aspect-square overflow-hidden bg-[#F2F2F2] mb-2">
+              <div className="w-full aspect-square overflow-hidden bg-[#F2F2F2] mb-2 flex items-center justify-center">
                 <img
                   src={img}
                   alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                  className="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-200"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
                       "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&q=80";
