@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
-import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Bookmark, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import OfferModal from "@/components/listing/OfferModal";
 
 export default function ListingDetailPage() {
@@ -187,16 +187,60 @@ export default function ListingDetailPage() {
           </div>
 
           {/* ── Col 3: Info + CTA ── */}
-          <div className="space-y-5">
+          <div className="space-y-4">
 
-            {/* Brand + title + price */}
+            {/* Brand + title row with bookmark + heart icons */}
             <div>
-              <p className="text-[11px] tracking-[0.12em] uppercase text-[#888] mb-1">{listing.brand}</p>
-              <h1 className="text-[20px] font-bold text-[#1A1A1A] leading-snug mb-3">{listing.title}</h1>
+              <p className="text-[13px] font-bold text-[#1A1A1A] mb-0.5">{listing.brand}</p>
+              <div className="flex items-start justify-between gap-2">
+                <h1 className="text-[16px] font-bold text-[#1A1A1A] leading-snug flex-1">{listing.title}</h1>
+                {/* Bookmark + Heart icons */}
+                <div className="flex items-center gap-3 flex-shrink-0 mt-0.5">
+                  <button
+                    onClick={() => { if (!user) { openLoginModal("login"); return; } }}
+                    className="flex flex-col items-center hover:opacity-70 transition-opacity"
+                    aria-label="Save listing"
+                  >
+                    <Bookmark
+                      className="w-[20px] h-[20px]"
+                      fill="none"
+                      stroke="#1A1A1A"
+                      strokeWidth={1.5}
+                    />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!user) { openLoginModal("login"); return; }
+                      toggleFavorite(user.id, listing.id);
+                    }}
+                    className="flex flex-col items-center hover:opacity-70 transition-opacity"
+                    aria-label="Favorite listing"
+                  >
+                    <Heart
+                      className="w-[20px] h-[20px]"
+                      fill={user && isFavorited(user.id, listing.id) ? "#1A1A1A" : "none"}
+                      stroke="#1A1A1A"
+                      strokeWidth={1.5}
+                    />
+                    <span className="text-[10px] text-[#888] leading-none mt-0.5">
+                      {listing.watchers_count ?? 0}
+                    </span>
+                  </button>
+                </div>
+              </div>
 
-              {/* Price */}
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-[26px] font-bold text-[#1A1A1A]">
+              {/* Metadata row: size · condition · location */}
+              <p className="text-[12px] text-[#888] mt-1.5">
+                {listing.size && <>{listing.size} · </>}
+                {listing.condition && <>{listing.condition} · </>}
+                Located in United States
+              </p>
+            </div>
+
+            {/* Price + shipping */}
+            <div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-[28px] font-bold text-[#1A1A1A]">
                   ${displayPrice.toLocaleString()}
                 </span>
                 {hasDiscount && strikethroughPrice && (
@@ -212,97 +256,20 @@ export default function ListingDetailPage() {
                   </>
                 )}
               </div>
+              <p className="text-[12px] text-[#888] mt-0.5">+ $15.99 Shipping — US to <span className="underline cursor-pointer">United States</span> ▾</p>
 
-              <p className="text-[11px] text-[#888] mb-4">
+              {/* Price context row — hidden for now, enabling next week */}
+              {/* <p className="text-[11px] text-[#888] mb-4">
                 Lowest ask (30d): ${lowestAsk} · Last sold: ${lastSold} · Acceptance: {acceptanceRate}%
-              </p>
-
-              {/* Details list — Seller shown in dedicated block below */}
-              <div className="border-t border-[#E8E8E8] pt-4 space-y-2.5">
-                {[
-                  { label: "Size", value: listing.size },
-                  { label: "Condition", value: listing.condition },
-                  { label: "Category", value: listing.category },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex justify-between items-center">
-                    <span className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.08em]">{label}</span>
-                    <span className="text-[13px] text-[#1A1A1A]">{value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Description */}
-              {listing.description && (
-                <div className="border-t border-[#E8E8E8] pt-4 mt-4">
-                  <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.08em] mb-2">
-                    Seller Description
-                  </p>
-                  <p className="text-[13px] text-[#555] leading-relaxed">{listing.description}</p>
-                </div>
-              )}
-
-              {/* ── Seller Block ── */}
-              <div className="border-t border-[#E8E8E8] pt-4 mt-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Avatar initial circle */}
-                    <div className="w-9 h-9 rounded-full bg-[#E8E8E8] flex-shrink-0 flex items-center justify-center">
-                      <span className="text-[13px] font-bold text-[#888] uppercase select-none">
-                        {(seller?.name || "S")[0]}
-                      </span>
-                    </div>
-                    <div className="min-w-0">
-                      <a
-                        href="#"
-                        onClick={(e) => e.preventDefault()}
-                        className="text-[13px] font-semibold text-[#1A1A1A] hover:underline truncate block leading-tight"
-                      >
-                        {seller?.name || "Unknown Seller"}
-                      </a>
-                      <p className="text-[11px] text-[#888] mt-0.5">
-                        {seller?.transaction_count ?? 0} Transactions
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="flex-shrink-0 px-4 py-1.5 border border-[#1A1A1A] text-[11px] font-bold tracking-[0.08em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
-                  >
-                    FOLLOW
-                  </button>
-                </div>
-              </div>
+              </p> */}
             </div>
 
-            {/* Heart / Save — icon + count, always visible; filled when saved */}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => {
-                  if (!user) { openLoginModal("login"); return; }
-                  toggleFavorite(user.id, listing.id);
-                }}
-                className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
-                aria-label="Save listing"
-              >
-                <Heart
-                  className="w-[16px] h-[16px]"
-                  fill={user && isFavorited(user.id, listing.id) ? "#1A1A1A" : "none"}
-                  stroke={user && isFavorited(user.id, listing.id) ? "#1A1A1A" : "#888"}
-                  strokeWidth={1.5}
-                />
-                <span className="text-[12px] text-[#888]">
-                  {listing.watchers_count ?? 0}
-                </span>
-              </button>
-              <p className="text-[11px] text-[#888]">+ Shipping · United States</p>
-            </div>
-
-            {/* CTA */}
-            <div className="space-y-2.5">
+            {/* CTA Buttons */}
+            <div className="space-y-2">
               <button
                 onClick={handleOpenOffer}
                 disabled={hasOffer}
-                className={`w-full py-4 text-[13px] font-bold tracking-[0.12em] transition-colors ${
+                className={`w-full py-3.5 text-[13px] font-bold tracking-[0.12em] transition-colors ${
                   hasOffer
                     ? "bg-[#888] text-white cursor-not-allowed"
                     : "bg-[#1A1A1A] text-white hover:bg-black"
@@ -312,13 +279,13 @@ export default function ListingDetailPage() {
               </button>
 
               {hasOffer ? (
-                <div className="w-full py-3.5 border border-[#1A1A1A] text-[13px] font-bold tracking-[0.12em] text-center text-[#1A1A1A]">
+                <div className="w-full py-3 border border-[#1A1A1A] text-[13px] font-bold tracking-[0.12em] text-center text-[#1A1A1A]">
                   OFFER SENT ✓
                 </div>
               ) : (
                 <button
                   onClick={handleOpenOffer}
-                  className="w-full py-3.5 border border-[#1A1A1A] text-[13px] font-bold tracking-[0.12em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                  className="w-full py-3 border border-[#D4D4D4] text-[13px] font-bold tracking-[0.12em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                 >
                   Make Offer
                 </button>
@@ -326,7 +293,7 @@ export default function ListingDetailPage() {
 
               <button
                 onClick={() => { if (!user) { openLoginModal("login"); return; } alert("Message seller — Demo"); }}
-                className="w-full py-3.5 border border-[#D4D4D4] text-[13px] font-bold tracking-[0.12em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                className="w-full py-3 border border-[#D4D4D4] text-[13px] font-bold tracking-[0.12em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
               >
                 MESSAGE
               </button>
@@ -334,6 +301,74 @@ export default function ListingDetailPage() {
               {!user && (
                 <p className="text-[11px] text-center text-[#888]">Log in to buy or make an offer</p>
               )}
+            </div>
+
+            {/* Seller Description */}
+            {listing.description && (
+              <div className="border-t border-[#E8E8E8] pt-4">
+                <p className="text-[13px] font-bold text-[#1A1A1A] mb-2">Seller Description</p>
+                <p className="text-[13px] text-[#555] leading-relaxed">{listing.description}</p>
+              </div>
+            )}
+
+            {/* Color / tags */}
+            <div className="border-t border-[#E8E8E8] pt-3 flex items-center gap-2">
+              {listing.category && (
+                <>
+                  <span className="w-3 h-3 rounded-full bg-[#9CA3AF] inline-block"></span>
+                  <span className="text-[12px] text-[#555]">
+                    {listing.category} · {listing.condition || "Luxury"}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* ── Seller Block ── */}
+            <div className="border-t border-[#E8E8E8] pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Avatar circle */}
+                  <div className="w-10 h-10 rounded-full bg-[#E8E8E8] flex-shrink-0 flex items-center justify-center">
+                    <span className="text-[13px] font-bold text-[#888] uppercase select-none">
+                      {(seller?.name || "S")[0]}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <a
+                      href="#"
+                      onClick={(e) => e.preventDefault()}
+                      className="text-[13px] font-bold text-[#1A1A1A] hover:underline truncate block leading-tight uppercase tracking-[0.04em]"
+                    >
+                      {seller?.name || "Unknown Seller"}
+                    </a>
+                    {/* Star rating row */}
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {[1,2,3,4,5].map((star) => (
+                        <Star
+                          key={star}
+                          className="w-3 h-3"
+                          fill={star <= 4 ? "#f59e0b" : "none"}
+                          stroke="#f59e0b"
+                          strokeWidth={1.5}
+                        />
+                      ))}
+                      <span className="text-[11px] text-[#888] ml-0.5">2 Reviews</span>
+                    </div>
+                    <p className="text-[11px] text-[#888] mt-0.5">
+                      {seller?.transaction_count ?? 11} Transactions ·{" "}
+                      <a href="#" onClick={(e) => e.preventDefault()} className="underline hover:text-[#1A1A1A]">
+                        {seller?.transaction_count ? seller.transaction_count * 20 : 238} items for sale
+                      </a>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => e.preventDefault()}
+                  className="flex-shrink-0 px-5 py-2 bg-[#1A1A1A] text-[11px] font-bold tracking-[0.08em] text-white hover:bg-black transition-colors"
+                >
+                  FOLLOW
+                </button>
+              </div>
             </div>
 
           </div>

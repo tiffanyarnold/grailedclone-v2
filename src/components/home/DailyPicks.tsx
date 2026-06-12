@@ -76,7 +76,7 @@ export default function DailyPicks() {
   };
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-8">
+    <section className="max-w-[1200px] mx-auto px-6 py-8">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
         <div>

@@ -36,7 +36,7 @@ export default function EditorialSection() {
   );
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-10">
+    <section className="max-w-[1200px] mx-auto px-6 py-10">
       <div className="flex flex-col lg:flex-row gap-6 items-end">
 
         {/* Left — labels + title directly above 2x2 grid */}

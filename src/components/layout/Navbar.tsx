@@ -119,7 +119,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-4 lg:px-16 max-w-[1440px] mx-auto h-[52px]">
+      <div className="relative flex items-center px-6 max-w-[1200px] mx-auto h-[52px]">
 
         {/* Hamburger — mobile only */}
         <button
@@ -371,8 +371,8 @@ export default function Navbar() {
 
       {/* Secondary Nav — desktop only */}
       <nav className="hidden lg:block border-t border-[#E8E8E8]">
-        <div className="flex items-center justify-between px-16 max-w-[1440px] mx-auto h-[38px]">
-          <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
+        <div className="flex items-center gap-10 px-6 max-w-[1200px] mx-auto h-[38px]">
+          <NavLink href="/browse?category=designers" hasChevron accent>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
           <NavLink href="/browse?category=womenswear" hasChevron>WOMENSWEAR</NavLink>
           <NavLink href="/browse?category=footwear">SNEAKERS</NavLink>
@@ -487,14 +487,14 @@ export default function Navbar() {
   );
 }
 
-function NavLink({ href, children, hasChevron }: { href: string; children: React.ReactNode; hasChevron?: boolean }) {
+function NavLink({ href, children, hasChevron, accent }: { href: string; children: React.ReactNode; hasChevron?: boolean; accent?: boolean }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.1em] text-[#1A1A1A] hover:opacity-60 transition-opacity whitespace-nowrap uppercase"
+      className={`flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.1em] hover:opacity-60 transition-opacity whitespace-nowrap uppercase ${accent ? "text-[#2557D6]" : "text-[#1A1A1A]"}`}
     >
       {children}
-      {hasChevron && <ChevronDown className="w-[11px] h-[11px] ml-0.5" />}
+      {hasChevron && <ChevronDown className={`w-[11px] h-[11px] ml-0.5 ${accent ? "text-[#2557D6]" : ""}`} />}
     </Link>
   );
 }

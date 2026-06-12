@@ -43,7 +43,7 @@ export default function FavoritesPage() {
     <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" }}>
       <Navbar />
 
-      <div className="max-w-[1440px] mx-auto px-8 py-10">
+      <div className="max-w-[1200px] mx-auto px-6 py-10">
         {/* Page title */}
         <div className="text-center mb-8">
           <h1

@@ -37,7 +37,7 @@ export default function ShopByCategory() {
   );
 
   return (
-    <section className="max-w-[1440px] mx-auto px-8 py-10 space-y-10">
+    <section className="max-w-[1200px] mx-auto px-6 py-10 space-y-10">
 
       {/* Shop Menswear */}
       <div>

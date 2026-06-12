@@ -84,7 +84,7 @@ function BrowsePage() {
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       <Navbar />
-      <main className="max-w-[1440px] mx-auto px-6 py-8">
+      <main className="max-w-[1200px] mx-auto px-6 py-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <aside className={"w-[220px] flex-shrink-0 " + (showFilters ? "block" : "hidden lg:block")}>
