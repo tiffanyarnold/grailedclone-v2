@@ -1,40 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useStore } from "@/lib/store-context";
 
-const MENS_FALLBACKS = [
-  "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&q=80",
-  "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80",
-  "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80",
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-  "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80",
+// Curated static mens fashion images — always displayed (consistent catalog feel)
+const MENS_IMAGES = [
+  "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&q=80",
+  "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+  "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80",
+  "https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=600&q=80",
+  "https://images.unsplash.com/photo-1516826957135-700dedea698c?w=600&q=80",
 ];
 
-const WOMENS_FALLBACKS = [
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80",
-  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80",
-  "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80",
-  "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&q=80",
-  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80",
-  "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80",
+const WOMENS_IMAGES = [
+  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
+  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80",
+  "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&q=80",
+  "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
+  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80",
+  "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80",
 ];
 
 export default function ShopByCategory() {
-  const { listings } = useStore();
-
-  const allItems = listings.filter((l) =>
-    ["Tops", "Outerwear", "Bottoms", "Accessories", "Footwear"].includes(l.category)
-  );
-
-  const mensSlots = Array.from({ length: 6 }, (_, i) =>
-    allItems[i] ?? { id: `mens-fb-${i}`, title: "Menswear", image_url: [MENS_FALLBACKS[i]] }
-  );
-
-  const womensSlots = Array.from({ length: 6 }, (_, i) =>
-    allItems[i + 6] ?? { id: `womens-fb-${i}`, title: "Womenswear", image_url: [WOMENS_FALLBACKS[i]] }
-  );
+  const mensSlots = MENS_IMAGES.map((img, i) => ({
+    id: `mens-${i}`,
+    title: "Menswear",
+    href: "/browse?category=menswear",
+    image_url: [img],
+  }));
+  const womensSlots = WOMENS_IMAGES.map((img, i) => ({
+    id: `womens-${i}`,
+    title: "Womenswear",
+    href: "/browse?category=womenswear",
+    image_url: [img],
+  }));
 
   return (
     <section className="max-w-[1200px] mx-auto px-6 py-10 space-y-10">
@@ -49,7 +48,7 @@ export default function ShopByCategory() {
         </h2>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {mensSlots.map((item) => (
-            <Link key={item.id} href={`/listing/${item.id}`} className="group">
+            <Link key={item.id} href={item.href} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center overflow-hidden border border-[#E0E0E0]">
                 <img
                   src={item.image_url[0]}
@@ -72,7 +71,7 @@ export default function ShopByCategory() {
         </h2>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {womensSlots.map((item) => (
-            <Link key={item.id} href={`/listing/${item.id}`} className="group">
+            <Link key={item.id} href={item.href} className="group">
               <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center overflow-hidden border border-[#E0E0E0]">
                 <img
                   src={item.image_url[0]}

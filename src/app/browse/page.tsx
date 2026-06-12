@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
@@ -30,6 +30,16 @@ function BrowsePage() {
   const [sortBy, setSortBy] = useState("newest");
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Sync localSearch when URL search param changes (e.g. from Navbar search submit)
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
+
+  // Sync categoryFilter when URL category param changes
+  useEffect(() => {
+    setCategoryFilter(categoryParam);
+  }, [categoryParam]);
 
   const brands = useMemo(() => Array.from(new Set(listings.map((l) => l.brand))).sort(), [listings]);
   const categories = useMemo(() => Array.from(new Set(listings.map((l) => l.category))).sort(), [listings]);

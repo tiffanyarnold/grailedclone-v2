@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useStore } from "@/lib/store-context";
 import { Search, ChevronDown, MessageCircle, Heart, User, Menu, X } from "lucide-react";
@@ -29,6 +29,7 @@ export default function Navbar() {
   const { user, logout, openLoginModal } = useAuth();
   const { listings } = useStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function Navbar() {
   const avatarRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleFeedClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,7 +74,26 @@ export default function Navbar() {
       setDropdownOpen(false);
       setMobileOpen(false);
       inputRef.current?.blur();
+    } else {
+      router.push("/browse");
+      setDropdownOpen(false);
     }
+  };
+
+  // Debounced live-search: if already on /browse, update URL as user types
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setDropdownOpen(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (pathname === "/browse") {
+        if (value.trim()) {
+          router.replace(`/browse?search=${encodeURIComponent(value.trim())}`);
+        } else {
+          router.replace("/browse");
+        }
+      }
+    }, 250);
   };
 
   const handleSuggestionClick = (query: string) => {
@@ -85,6 +106,7 @@ export default function Navbar() {
   const handleClear = () => {
     setSearchQuery("");
     setDropdownOpen(false);
+    if (pathname === "/browse") router.replace("/browse");
     inputRef.current?.focus();
   };
 
@@ -119,7 +141,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-8 h-[68px]">
+      <div className="relative flex items-center px-0 h-[68px]">
 
         {/* Hamburger — mobile only */}
         <button
@@ -131,7 +153,7 @@ export default function Navbar() {
         </button>
 
         {/* Logo */}
-        <Link href="/" className="flex-shrink-0 mr-6">
+        <Link href="/" className="flex-shrink-0 ml-auto mr-10">
           <span
             className="text-[22px] leading-none text-[#1A1A1A] select-none block"
             style={{
@@ -147,7 +169,7 @@ export default function Navbar() {
         {/* Search — centered, takes remaining space between logo and right actions */}
         <div
           ref={searchRef}
-          className="hidden lg:block flex-1 max-w-[600px] mx-auto relative"
+          className="hidden lg:block flex-1 max-w-[600px] relative"
         >
           <form onSubmit={handleSearch}>
             <div className={`flex items-center bg-white overflow-hidden h-[46px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
@@ -173,8 +195,7 @@ export default function Navbar() {
                 placeholder="Search for anything"
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setDropdownOpen(true);
+                  handleSearchChange(e.target.value);
                 }}
                 onFocus={() => setDropdownOpen(true)}
                 className="flex-1 px-3 text-[13px] outline-none bg-transparent placeholder:text-[#999] h-full"
@@ -262,7 +283,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="ml-auto flex items-center gap-3 lg:gap-6 flex-shrink-0">
+        <div className="ml-10 mr-auto flex items-center gap-3 lg:gap-6 flex-shrink-0">
           {user ? (
             <>
               {/* SELL / ADMIN */}
@@ -406,7 +427,7 @@ export default function Navbar() {
                     type="text"
                     placeholder="Search for anything"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="flex-1 px-3 text-sm outline-none bg-transparent placeholder:text-[#999] h-full"
                   />
                 </div>
