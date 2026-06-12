@@ -90,7 +90,7 @@ export default function FeedPage() {
                   {/* Square image */}
                   <Link
                     href={`/listing/${listing.id}`}
-                    className="block relative overflow-hidden bg-[#F2F2F2]"
+                    className="block relative overflow-hidden bg-[#F2F2F2] border border-[#E0E0E0]"
                     style={{ aspectRatio: "3 / 4" }}
                   >
                     <img

@@ -80,12 +80,12 @@ function CollectionCard({ config, slots }: { config: { brands: string; title: st
           <Link
             key={`${listing.id}-${i}`}
             href={i === 3 ? "/browse" : `/listing/${listing.id}`}
-            className="relative aspect-square overflow-hidden group bg-[#F2F2F2] flex items-center justify-center"
+            className="relative aspect-square overflow-hidden group bg-[#F2F2F2] flex items-center justify-center border border-[#E0E0E0]"
           >
             <img
               src={listing.image_url[0]}
               alt={listing.title}
-              className="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-200"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
             />
             {i === 3 && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

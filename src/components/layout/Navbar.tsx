@@ -119,7 +119,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
       {/* Top Nav */}
-      <div className="relative flex items-center px-6 max-w-[1200px] mx-auto h-[52px]">
+      <div className="relative flex items-center px-8 h-[68px]">
 
         {/* Hamburger — mobile only */}
         <button
@@ -150,7 +150,7 @@ export default function Navbar() {
           className="hidden lg:block flex-1 max-w-[600px] mx-auto relative"
         >
           <form onSubmit={handleSearch}>
-            <div className={`flex items-center bg-white overflow-hidden h-[42px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
+            <div className={`flex items-center bg-white overflow-hidden h-[46px] ${dropdownOpen ? "border border-[#1A1A1A] border-b-0" : "border border-[#1A1A1A]"}`}>
               {/* Left icon — X when typing, search icon otherwise */}
               <div className="flex items-center pl-3.5 pr-1.5 flex-shrink-0">
                 {searchQuery ? (
@@ -371,7 +371,7 @@ export default function Navbar() {
 
       {/* Secondary Nav — desktop only */}
       <nav className="hidden lg:block border-t border-[#E8E8E8]">
-        <div className="flex items-center justify-center gap-10 px-6 h-[40px]">
+        <div className="flex items-center justify-center gap-10 px-6 h-[44px]">
           <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
           <NavLink href="/browse?category=womenswear" hasChevron>WOMENSWEAR</NavLink>

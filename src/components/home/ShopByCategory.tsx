@@ -42,19 +42,19 @@ export default function ShopByCategory() {
       {/* Shop Menswear */}
       <div>
         <h2
-          className="text-[22px] font-bold text-[#1A1A1A] mb-5"
-          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
+          className="text-[16px] font-bold text-[#1A1A1A] mb-4"
+          style={{ fontFamily: "'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
         >
           Shop Menswear
         </h2>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {mensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
-              <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
+              <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center overflow-hidden border border-[#E0E0E0]">
                 <img
                   src={item.image_url[0]}
                   alt={item.title}
-                  className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-200"
+                  className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-200"
                 />
               </div>
             </Link>
@@ -65,19 +65,19 @@ export default function ShopByCategory() {
       {/* Shop Womenswear */}
       <div>
         <h2
-          className="text-[22px] font-bold text-[#1A1A1A] mb-5"
-          style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
+          className="text-[16px] font-bold text-[#1A1A1A] mb-4"
+          style={{ fontFamily: "'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif", fontWeight: 700 }}
         >
           Shop Womenswear
         </h2>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {womensSlots.map((item) => (
             <Link key={item.id} href={`/listing/${item.id}`} className="group">
-              <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center p-4 overflow-hidden">
+              <div className="aspect-square bg-[#EBEBEB] flex items-center justify-center overflow-hidden border border-[#E0E0E0]">
                 <img
                   src={item.image_url[0]}
                   alt={item.title}
-                  className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-200"
+                  className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-200"
                 />
               </div>
             </Link>
