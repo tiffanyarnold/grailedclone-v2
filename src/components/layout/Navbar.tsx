@@ -371,8 +371,8 @@ export default function Navbar() {
 
       {/* Secondary Nav — desktop only */}
       <nav className="hidden lg:block border-t border-[#E8E8E8]">
-        <div className="flex items-center gap-10 px-6 max-w-[1200px] mx-auto h-[38px]">
-          <NavLink href="/browse?category=designers" hasChevron accent>DESIGNERS</NavLink>
+        <div className="flex items-center justify-center gap-10 px-6 h-[40px]">
+          <NavLink href="/browse?category=designers" hasChevron>DESIGNERS</NavLink>
           <NavLink href="/browse?category=menswear" hasChevron>MENSWEAR</NavLink>
           <NavLink href="/browse?category=womenswear" hasChevron>WOMENSWEAR</NavLink>
           <NavLink href="/browse?category=footwear">SNEAKERS</NavLink>
@@ -491,10 +491,10 @@ function NavLink({ href, children, hasChevron, accent }: { href: string; childre
   return (
     <Link
       href={href}
-      className={`flex items-center gap-0.5 text-[11px] font-semibold tracking-[0.1em] hover:opacity-60 transition-opacity whitespace-nowrap uppercase ${accent ? "text-[#2557D6]" : "text-[#1A1A1A]"}`}
+      className={`flex items-center gap-0 text-[12px] font-bold tracking-[0.08em] text-[#1A1A1A] hover:text-[#2557D6] transition-colors whitespace-nowrap`}
     >
       {children}
-      {hasChevron && <ChevronDown className={`w-[11px] h-[11px] ml-0.5 ${accent ? "text-[#2557D6]" : ""}`} />}
+      {hasChevron && <ChevronDown className="w-[12px] h-[12px] ml-[2px] stroke-[2.5] text-current" />}
     </Link>
   );
 }

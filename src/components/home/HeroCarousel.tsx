@@ -119,20 +119,20 @@ export default function HeroCarousel() {
 
       {/* Center content — exactly like Grailed */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4"
-        style={{ zIndex: 2 }}
+        className="absolute inset-0 flex flex-col items-center text-white text-center px-4"
+        style={{ zIndex: 2, justifyContent: "center", paddingBottom: "48px" }}
       >
         {/* Subheadline / brand tags */}
         <p
           style={{
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "10px",
-            fontWeight: 500,
-            letterSpacing: "0.14em",
+            fontSize: "clamp(13px, 1.4vw, 20px)",
+            fontWeight: 600,
+            letterSpacing: "0.07em",
             textTransform: "uppercase",
-            marginBottom: "10px",
-            textShadow: "0 1px 4px rgba(0,0,0,0.6)",
-            opacity: 0.75,
+            marginBottom: "18px",
+            textShadow: "0 1px 6px rgba(0,0,0,0.7)",
+            opacity: 0.95,
           }}
         >
           {slide.subheadline}
@@ -142,11 +142,11 @@ export default function HeroCarousel() {
         <h2
           style={{
             fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
-            fontSize: "clamp(24px, 3vw, 42px)",
-            fontWeight: 600,
+            fontSize: "clamp(28px, 4vw, 56px)",
+            fontWeight: 700,
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
-            marginBottom: "28px",
+            marginBottom: "32px",
             textShadow: "0 2px 8px rgba(0,0,0,0.5)",
             whiteSpace: "nowrap",
           }}
@@ -158,14 +158,18 @@ export default function HeroCarousel() {
         <Link
           href="/browse"
           style={{
-            display: "inline-block",
-            border: "1.5px solid rgba(255,255,255,0.85)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid rgba(255,255,255,0.9)",
             color: "#ffffff",
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "12px",
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            padding: "10px 40px",
+            fontSize: "clamp(13px, 1.1vw, 17px)",
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            padding: "0 48px",
+            height: "58px",
+            minWidth: "190px",
             textTransform: "uppercase",
             textDecoration: "none",
             transition: "background 0.18s ease, color 0.18s ease",
