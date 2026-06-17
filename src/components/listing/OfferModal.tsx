@@ -83,22 +83,22 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
         }
       : "unavailable";
 
-  // Effective asking price (the discounted price if on sale) — offers may not
-  // exceed it. This is the ceiling.
+  // Effective asking price (the discounted price if on sale) — the basis for the
+  // accepted offer window.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
-  const isOverAsking  = offerNum > askingPrice;
 
-  // Minimum acceptable offer (the floor): the seller's configured floor when
-  // present, or 85% of the effective asking price as a client-side fallback
-  // until min_offer_price is seeded in the DB (see 20260618_seed_demo_offers.sql).
-  // Basing the fallback on askingPrice keeps the floor below the ceiling even
-  // for deeply discounted listings.
-  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.85);
+  // Accepted offer window: low (floor) is 75% of the asking price, high (ceiling)
+  // is 95%. The seller's configured min_offer_price overrides the floor when set
+  // (see 20260618_seed_demo_offers.sql). Both fall back to a share of askingPrice
+  // so the window stays coherent for discounted listings.
+  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
+  const maxOffer      = Math.round(askingPrice * 0.95);
   const isTooLow      = offerNum > 0 && offerNum < minOffer;
+  const isTooHigh     = offerNum > maxOffer;
 
-  // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
-  // floor and does not exceed the asking price.
-  const isValidOffer  = offerNum > 1 && !isTooLow && !isOverAsking;
+  // A valid offer is a whole-dollar amount over $1 that falls within the
+  // low/high offer window.
+  const isValidOffer  = offerNum > 1 && !isTooLow && !isTooHigh;
 
   // Field-level error, shown in place of the Competitive/Low box. The empty/zero
   // case only surfaces after the buyer has interacted with the input.
@@ -107,8 +107,8 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
       ? "Please enter a valid dollar amount."
       : isTooLow
         ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
-        : isOverAsking
-          ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
+        : isTooHigh
+          ? `Your offer can't be higher than $${maxOffer.toLocaleString()}.`
           : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
