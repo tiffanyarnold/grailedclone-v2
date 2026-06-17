@@ -196,9 +196,10 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                   {/* Top row: brand + price */}
                   <div className="flex items-start justify-between gap-2 mb-0.5">
                     <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
-                    {/* Price: show sale_price + struck-through original if discounted, else just listed_price */}
+                    {/* Price: show sale_price + struck-through original only when actually
+                        discounted (sale_price below listed_price), else just listed_price */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {listing.sale_price ? (
+                      {listing.sale_price && listing.sale_price < listing.listed_price ? (
                         <>
                           <span className="text-[13px] font-bold text-[#1A1A1A]">${listing.sale_price.toLocaleString()}</span>
                           <span className="text-[12px] text-[#C0392B] line-through">${listing.listed_price.toLocaleString()}</span>
