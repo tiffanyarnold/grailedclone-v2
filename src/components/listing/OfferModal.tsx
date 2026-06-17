@@ -85,21 +85,32 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
       : "unavailable";
 
   // Effective asking price (the discounted price if on sale) — offers may not
-  // exceed it. There is no floor/min-offer gate, only this ceiling.
+  // exceed it. This is the ceiling.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
   const isOverAsking  = offerNum > askingPrice;
 
-  // Validity is independent of the Competitive/Low label: any whole-dollar
-  // amount greater than $1 and no higher than the asking price is acceptable.
-  const isValidOffer  = offerNum > 1 && !isOverAsking;
+  // Minimum acceptable offer (the floor): the seller's configured floor when
+  // present, or 85% of the effective asking price as a client-side fallback
+  // until min_offer_price is seeded in the DB (see 20260618_seed_demo_offers.sql).
+  // Basing the fallback on askingPrice keeps the floor below the ceiling even
+  // for deeply discounted listings.
+  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.85);
+  const isTooLow      = offerNum > 0 && offerNum < minOffer;
 
-  // Field-level error, shown in place of the Competitive/Low box.
+  // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
+  // floor and does not exceed the asking price.
+  const isValidOffer  = offerNum > 1 && !isTooLow && !isOverAsking;
+
+  // Field-level error, shown in place of the Competitive/Low box. The empty/zero
+  // case only surfaces after the buyer has interacted with the input.
   const fieldError =
     touched && offerNum <= 0
       ? "Please enter a valid dollar amount."
-      : isOverAsking
-        ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
-        : "";
+      : isTooLow
+        ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
+        : isOverAsking
+          ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
+          : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
