@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, Shield, CreditCard, Heart, Lock } from "lucide-react";
-import { getOfferLabel, getSellerRating } from "@/lib/data";
+import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
+import { getSellerRating } from "@/lib/data";
 
 interface Listing {
   id: string;
@@ -16,6 +17,7 @@ interface Listing {
   min_offer_price?: number | null;
   competitive_range_min?: number | null;
   competitive_range_max?: number | null;
+  last_sold_price?: number | null;
   watchers_count?: number;
   image_url: string[];
   condition: string;
@@ -26,6 +28,11 @@ interface OfferModalProps {
   listing: Listing;
   buyerName?: string;
   sellerName?: string;
+  // When the price-context fields are fetched lazily (separate from the listing
+  // load), pass `true` while that fetch is in flight to drive the loading path.
+  // Defaults to false: state resolves to has-data or "unavailable" from the
+  // listing fields below.
+  priceContextLoading?: boolean;
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
 }
@@ -39,10 +46,11 @@ const DELIVERY_OPTIONS = [
   { id: "upsnext",  label: "UPS Next Day Air",  sub: "Next business day",   extra: 14.99 },
 ];
 
-export default function OfferModal({ listing, buyerName, sellerName, onClose, onSubmit }: OfferModalProps) {
+export default function OfferModal({ listing, buyerName, sellerName, priceContextLoading = false, onClose, onSubmit }: OfferModalProps) {
   const [mounted, setMounted]       = useState(false);
   const [step, setStep]             = useState<1 | 2>(1);
   const [offerAmount, setOfferAmount] = useState("");
+  const [touched, setTouched]       = useState(false);
   const [delivery, setDelivery]     = useState("standard");
   const [tosAccepted, setTosAccepted] = useState(false);
   const [saveCard, setSaveCard]     = useState(true);
@@ -57,23 +65,30 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Buyer offer is a whole-dollar integer. No floor logic — any valid integer
-  // greater than $1 enables "Review Offer", regardless of the Competitive/Low
-  // label (which is informational only).
-  const offerNum      = parseInt(offerAmount, 10);
-  const hasInput      = offerAmount.trim() !== "";
-  const isNumeric     = hasInput && Number.isFinite(offerNum) && offerNum > 0;
-  // Non-numeric / junk entry (e.g. "." alone) → field error, no label.
-  const showAmountError = hasInput && !isNumeric;
-  const isValidOffer  = isNumeric && offerNum > 1 && offerNum <= 99999;
+  // Integer dollars only — the input strips non-digits, so this is always a
+  // whole number (0 when empty).
+  const offerNum      = parseInt(offerAmount, 10) || 0;
 
-  // Real-time Competitive / Low label, computed from client state (no fetch).
-  // Returns null when the item has no competitive_range_min seeded → no label.
-  const offerLabel    = isNumeric ? getOfferLabel(offerNum, listing.competitive_range_min) : null;
-  const isLow         = offerLabel === "low";
-  const rangeMin      = listing.competitive_range_min ?? null;
-  const rangeMax      = listing.competitive_range_max ?? listing.listed_price;
+  // Tri-state for the Step 1 info box. The flag is resolved here ONCE, explicitly
+  // — never inferred downstream from "is the value null right now". A listing
+  // whose competitive range is genuinely absent settles to "unavailable" so the
+  // box renders nothing instead of an indefinite loading placeholder.
+  const priceContext: PriceContextState = priceContextLoading
+    ? "loading"
+    : typeof listing.competitive_range_min === "number" &&
+      typeof listing.competitive_range_max === "number"
+      ? {
+          min: listing.competitive_range_min,
+          max: listing.competitive_range_max,
+          lastSold: listing.last_sold_price ?? null,
+        }
+      : "unavailable";
 
+  // Validity is independent of the Competitive/Low label: ANY whole-dollar
+  // amount greater than $1 is acceptable. There is no floor/min-offer gate.
+  const isValidOffer  = offerNum > 1 && offerNum <= 99999;
+  // Field-level error only after the buyer has interacted with the input.
+  const showFieldError = touched && offerNum <= 0;
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -125,7 +140,7 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
       <div
         className="relative bg-white w-full shadow-2xl overflow-hidden"
         style={{
-          maxWidth: step === 2 ? "740px" : "520px",
+          maxWidth: step === 2 ? "740px" : "380px",
           maxHeight: "92vh",
           overflowY: "auto",
           fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
@@ -184,47 +199,33 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
               </div>
 
               {/* Offer Price */}
-              <p className="text-[13px] font-semibold text-[#1A1A1A] text-center mb-4 tracking-[0.02em]">
+              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.08em] mb-2">
                 Offer Price
               </p>
 
-              {/* Dollar input — no spinners */}
-              <div className="flex items-center justify-center mb-2">
-                <div
-                  className="relative flex items-center pb-1 px-2"
-                  style={{
-                    minWidth: "200px",
-                    borderBottom: `2px solid ${isLow ? "#C0392B" : "#1A1A1A"}`,
+              {/* Dollar input — left aligned, full-width underline, integer only */}
+              <div
+                className="flex items-center pb-1.5 mb-2"
+                style={{ borderBottom: `2px solid ${showFieldError ? "#CC0000" : "#1A1A1A"}` }}
+              >
+                <span className="text-[26px] font-normal mr-1 select-none text-[#BBBBBB]">$</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={offerAmount}
+                  onChange={(e) => {
+                    setOfferAmount(e.target.value.replace(/[^0-9]/g, ""));
+                    setTouched(true);
                   }}
-                >
-                  <span
-                    className="text-[28px] font-normal mr-1 select-none"
-                    style={{ color: isLow ? "#C0392B" : "#BBBBBB" }}
-                  >
-                    $
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={offerAmount}
-                    onChange={(e) => {
-                      // Whole-dollar amounts only — strip anything non-numeric.
-                      const v = e.target.value.replace(/[^0-9]/g, "");
-                      setOfferAmount(v);
-                    }}
-                    className="text-[32px] font-light outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
-                    style={{
-                      minWidth: "120px",
-                      color: isLow ? "#C0392B" : "#888",
-                    }}
-                    autoFocus
-                  />
-                </div>
+                  onBlur={() => setTouched(true)}
+                  className="text-[30px] font-light outline-none bg-transparent w-full text-[#1A1A1A] placeholder:text-[#CCCCCC]"
+                  autoFocus
+                />
               </div>
 
               {/* "Pro — Coming Soon" badge: buyer sniping threshold (no interaction) */}
-              <div className="flex justify-center mb-4">
+              <div className="mb-3">
                 <span
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
                   title="Pro feature — coming soon"
@@ -234,60 +235,25 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                 </span>
               </div>
 
-              {/* ── Real-time Competitive / Low info box ── */}
-              {/* Reserve consistent vertical space so the box appearing/disappearing
-                  as the buyer types causes no layout shift. */}
-              <div className="min-h-[88px] mb-3">
-                {showAmountError ? (
-                  <p className="text-[12px] text-center" style={{ color: "#C0392B" }}>
-                    Please enter a valid dollar amount.
-                  </p>
-                ) : offerLabel ? (
-                  <div
-                    className="px-4 py-3 rounded-sm"
-                    style={{
-                      backgroundColor: isLow ? "#FBE9E7" : "#E6F4EA",
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className="w-[8px] h-[8px] rounded-full flex-shrink-0"
-                        style={{ backgroundColor: isLow ? "#C0392B" : "#1E7D34" }}
-                      />
-                      <span
-                        className="text-[13px] font-semibold"
-                        style={{ color: isLow ? "#C0392B" : "#1E7D34" }}
-                      >
-                        {isLow ? "Low" : "Competitive"}
-                      </span>
-                    </div>
-                    <p className="text-[12px] leading-snug" style={{ color: isLow ? "#8a3024" : "#2d5a2d" }}>
-                      {isLow
-                        ? "Offers this far below the asking price are rarely accepted on Grailed."
-                        : "Your offer is within the typical accepted range for this item."}
-                    </p>
-                    {rangeMin != null && (
-                      <p className="text-[11px] mt-1.5" style={{ color: isLow ? "#a85a4e" : "#4a8a4a" }}>
-                        Typical accepted range:{" "}
-                        <strong>${rangeMin.toLocaleString()}–${rangeMax.toLocaleString()}</strong>
-                      </p>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Static notes — always visible once a valid amount is entered */}
-              {isValidOffer && (
-                <>
-                  <p className="text-[12px] text-[#888] text-center mb-2">
-                    Shipping and taxes calculated in the next step
-                  </p>
-                  <p className="text-[12px] text-[#888] text-center mb-7">
-                    The seller has 24 hours to accept this offer
-                  </p>
-                </>
+              {/* Field error (empty/invalid) OR Competitive/Low label + box.
+                  These are mutually exclusive — one occupies the slot at a time. */}
+              {showFieldError ? (
+                <p className="text-[12px] mb-3" style={{ color: "#CC0000" }}>
+                  Please enter a valid dollar amount.
+                </p>
+              ) : (
+                <OfferPriceContext state={priceContext} offerAmount={offerNum} />
               )}
-              {!isValidOffer && <div className="mb-7" />}
+
+              {/* Static note — visible once a valid amount is entered */}
+              {isValidOffer && (
+                <p className="text-[12px] text-[#888] text-center mb-2">
+                  Shipping and taxes calculated in the next step
+                </p>
+              )}
+              <p className="text-[12px] text-[#888] text-center mb-7">
+                The seller has 24 hours to accept this offer
+              </p>
 
               <button
                 onClick={handleReviewOffer}
