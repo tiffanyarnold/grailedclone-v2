@@ -107,7 +107,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
     touched && offerNum <= 0
       ? "Please enter a valid dollar amount."
       : isTooLow
-        ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
+        ? "Your offer is too low."
         : isOverAsking
           ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
           : "";
