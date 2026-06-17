@@ -476,14 +476,6 @@ function SellerDashboardInner() {
                             </button>
                           </div>
 
-                          {/* Delete */}
-                          <button
-                            onClick={() => deleteListing(listing.id)}
-                            className="mt-1 w-full py-1 flex items-center justify-center text-[#DC2626] hover:bg-red-50 transition-colors border border-[#FECACA]"
-                            title="Delete listing"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
                         </div>
                       );
                     })}
