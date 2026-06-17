@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, Shield, CreditCard, Heart, Lock } from "lucide-react";
+import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
 import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
 import { getSellerRating } from "@/lib/data";
 
@@ -84,17 +84,17 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
         }
       : "unavailable";
 
-  // Effective asking price (the discounted price if on sale) — offers may not
-  // exceed it. This is the ceiling.
+  // Effective asking price (the discounted price if on sale) — the basis for the
+  // accepted offer window.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
+
+  // Offers may not exceed the asking price — this is the ceiling (100%).
   const isOverAsking  = offerNum > askingPrice;
 
-  // Minimum acceptable offer (the floor): the seller's configured floor when
-  // present, or 85% of the effective asking price as a client-side fallback
-  // until min_offer_price is seeded in the DB (see 20260618_seed_demo_offers.sql).
-  // Basing the fallback on askingPrice keeps the floor below the ceiling even
-  // for deeply discounted listings.
-  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.85);
+  // Minimum acceptable offer (the floor): the seller's configured min_offer_price
+  // overrides when set (see 20260618_seed_demo_offers.sql), otherwise falls back
+  // to 75% of the asking price.
+  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
   const isTooLow      = offerNum > 0 && offerNum < minOffer;
 
   // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
@@ -107,7 +107,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
     touched && offerNum <= 0
       ? "Please enter a valid dollar amount."
       : isTooLow
-        ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
+        ? "Your offer is too low."
         : isOverAsking
           ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
           : "";
@@ -196,9 +196,10 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                   {/* Top row: brand + price */}
                   <div className="flex items-start justify-between gap-2 mb-0.5">
                     <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
-                    {/* Price: show sale_price + struck-through original if discounted, else just listed_price */}
+                    {/* Price: show sale_price + struck-through original only when actually
+                        discounted (sale_price below listed_price), else just listed_price */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {listing.sale_price ? (
+                      {listing.sale_price && listing.sale_price < listing.listed_price ? (
                         <>
                           <span className="text-[13px] font-bold text-[#1A1A1A]">${listing.sale_price.toLocaleString()}</span>
                           <span className="text-[12px] text-[#C0392B] line-through">${listing.listed_price.toLocaleString()}</span>
@@ -244,17 +245,6 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                   className="text-[30px] font-light outline-none bg-transparent w-full text-[#1A1A1A] placeholder:text-[#CCCCCC]"
                   autoFocus
                 />
-              </div>
-
-              {/* "Pro — Coming Soon" badge: buyer sniping threshold (no interaction) */}
-              <div className="mb-3">
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
-                  title="Pro feature — coming soon"
-                >
-                  <Lock className="w-3 h-3" strokeWidth={2} />
-                  PRO · SNIPING THRESHOLD — COMING SOON
-                </span>
               </div>
 
               {/* Field error (empty/invalid) OR Competitive/Low label + box.
