@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, Shield, CreditCard, Heart, Lock } from "lucide-react";
+import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
 import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
 import { getSellerRating } from "@/lib/data";
 
@@ -88,18 +88,18 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   // accepted offer window.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
 
-  // Accepted offer window: low (floor) is 75% of the asking price, high (ceiling)
-  // is 95%. The seller's configured min_offer_price overrides the floor when set
-  // (see 20260618_seed_demo_offers.sql). Both fall back to a share of askingPrice
-  // so the window stays coherent for discounted listings.
-  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
-  const maxOffer      = Math.round(askingPrice * 0.95);
-  const isTooLow      = offerNum > 0 && offerNum < minOffer;
-  const isTooHigh     = offerNum > maxOffer;
+  // Offers may not exceed the asking price — this is the ceiling (100%).
+  const isOverAsking  = offerNum > askingPrice;
 
-  // A valid offer is a whole-dollar amount over $1 that falls within the
-  // low/high offer window.
-  const isValidOffer  = offerNum > 1 && !isTooLow && !isTooHigh;
+  // Minimum acceptable offer (the floor): the seller's configured min_offer_price
+  // overrides when set (see 20260618_seed_demo_offers.sql), otherwise falls back
+  // to 75% of the asking price.
+  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
+  const isTooLow      = offerNum > 0 && offerNum < minOffer;
+
+  // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
+  // floor and does not exceed the asking price.
+  const isValidOffer  = offerNum > 1 && !isTooLow && !isOverAsking;
 
   // Field-level error, shown in place of the Competitive/Low box. The empty/zero
   // case only surfaces after the buyer has interacted with the input.
@@ -108,8 +108,8 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
       ? "Please enter a valid dollar amount."
       : isTooLow
         ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
-        : isTooHigh
-          ? `Your offer can't be higher than $${maxOffer.toLocaleString()}.`
+        : isOverAsking
+          ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
           : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
@@ -244,17 +244,6 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                   className="text-[30px] font-light outline-none bg-transparent w-full text-[#1A1A1A] placeholder:text-[#CCCCCC]"
                   autoFocus
                 />
-              </div>
-
-              {/* "Pro — Coming Soon" badge: buyer sniping threshold (no interaction) */}
-              <div className="mb-3">
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
-                  title="Pro feature — coming soon"
-                >
-                  <Lock className="w-3 h-3" strokeWidth={2} />
-                  PRO · SNIPING THRESHOLD — COMING SOON
-                </span>
               </div>
 
               {/* Field error (empty/invalid) OR Competitive/Low label + box.
