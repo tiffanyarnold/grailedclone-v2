@@ -569,11 +569,11 @@ function SellerDashboardInner() {
                                     >
                                       {/* Thumbnail */}
                                       <Link href={`/listing/${listing.id}`}>
-                                        <div className="h-[140px] bg-[#F2F2F2] overflow-hidden">
+                                        <div className="aspect-[3/4] bg-[#F2F2F2] overflow-hidden">
                                           <img
                                             src={thumb}
                                             alt={listing.title}
-                                            className="w-full h-full object-contain hover:scale-105 transition-transform duration-200"
+                                            className="w-full h-full object-contain hover:opacity-90 transition-opacity"
                                             onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                                           />
                                         </div>
