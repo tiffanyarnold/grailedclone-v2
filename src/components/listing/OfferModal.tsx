@@ -83,17 +83,33 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
         }
       : "unavailable";
 
-  // Minimum acceptable offer: the seller's configured floor when present, or
-  // 85% of the listed price as a client-side fallback until min_offer_price is
-  // seeded in the DB (see 20260618_seed_demo_offers.sql).
-  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.85);
+  // Effective asking price (the discounted price if on sale) — offers may not
+  // exceed it. This is the ceiling.
+  const askingPrice   = listing.sale_price ?? listing.listed_price;
+  const isOverAsking  = offerNum > askingPrice;
+
+  // Minimum acceptable offer (the floor): the seller's configured floor when
+  // present, or 85% of the effective asking price as a client-side fallback
+  // until min_offer_price is seeded in the DB (see 20260618_seed_demo_offers.sql).
+  // Basing the fallback on askingPrice keeps the floor below the ceiling even
+  // for deeply discounted listings.
+  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.85);
   const isTooLow      = offerNum > 0 && offerNum < minOffer;
 
-  // A valid offer is a whole-dollar amount over $1, within the cap, that also
-  // clears the minimum-offer floor.
-  const isValidOffer  = offerNum > 1 && offerNum <= 99999 && !isTooLow;
-  // Field-level error only after the buyer has interacted with the input.
-  const showFieldError = touched && offerNum <= 0;
+  // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
+  // floor and does not exceed the asking price.
+  const isValidOffer  = offerNum > 1 && !isTooLow && !isOverAsking;
+
+  // Field-level error, shown in place of the Competitive/Low box. The empty/zero
+  // case only surfaces after the buyer has interacted with the input.
+  const fieldError =
+    touched && offerNum <= 0
+      ? "Please enter a valid dollar amount."
+      : isTooLow
+        ? `Your offer is too low. Must be $${minOffer.toLocaleString()} or higher.`
+        : isOverAsking
+          ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
+          : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -211,7 +227,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
               {/* Dollar input — left aligned, full-width underline, integer only */}
               <div
                 className="flex items-center pb-1.5 mb-2"
-                style={{ borderBottom: `2px solid ${showFieldError || isTooLow ? "#CC0000" : "#1A1A1A"}` }}
+                style={{ borderBottom: `2px solid ${fieldError ? "#CC0000" : "#1A1A1A"}` }}
               >
                 <span className="text-[26px] font-normal mr-1 select-none text-[#BBBBBB]">$</span>
                 <input
@@ -231,13 +247,9 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
 
               {/* Field error (empty/invalid) OR Competitive/Low label + box.
                   These are mutually exclusive — one occupies the slot at a time. */}
-              {showFieldError ? (
+              {fieldError ? (
                 <p className="text-[12px] mb-3" style={{ color: "#CC0000" }}>
-                  Please enter a valid dollar amount.
-                </p>
-              ) : isTooLow ? (
-                <p className="text-[12px] mb-3" style={{ color: "#CC0000" }}>
-                  Your offer is too low. Must be ${minOffer.toLocaleString()} or higher.
+                  {fieldError}
                 </p>
               ) : (
                 <OfferPriceContext state={priceContext} offerAmount={offerNum} />
