@@ -73,15 +73,20 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   // This is the basis for the competitive range and the ceiling.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
 
-  // Competitive range: 75%–95% of the effective (sale) price.
-  // Always derived from askingPrice so it reflects the current discount.
+  // Competitive range box: only shown when the listing has real price data
+  // (competitive_range_min is set). For new sellers with no data, renders
+  // nothing — no skeleton, no placeholder. When data exists, the displayed
+  // range is always derived from the effective sale/asking price (75%–95%)
+  // so it reflects the current discount rather than a stale DB value.
   const priceContext: PriceContextState = priceContextLoading
     ? "loading"
-    : {
-        min: Math.round(askingPrice * 0.75),
-        max: Math.round(askingPrice * 0.95),
-        lastSold: listing.last_sold_price ?? null,
-      };
+    : listing.competitive_range_min == null
+      ? "unavailable"
+      : {
+          min: Math.round(askingPrice * 0.75),
+          max: Math.round(askingPrice * 0.95),
+          lastSold: listing.last_sold_price ?? null,
+        };
 
   // Offers may not exceed the asking price — hard ceiling.
   const isOverAsking  = offerNum > askingPrice;
