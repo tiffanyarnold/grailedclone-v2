@@ -109,22 +109,16 @@ export default function OfferPriceContext({
         className="px-3 py-2.5 border"
         style={{ borderColor: cfg.border, backgroundColor: cfg.bg }}
       >
-        {isCompetitive ? (
-          <div className="space-y-0.5" style={{ color: cfg.helperColor }}>
-            <p className="text-[12px] leading-relaxed">
-              Typical accepted range: <span className="font-semibold">${state.min.toLocaleString()}–${state.max.toLocaleString()}</span>
-            </p>
-            {typeof state.lastSold === "number" && (
-              <p className="text-[12px] leading-relaxed">
-                Last sold for <span className="font-semibold">${state.lastSold.toLocaleString()}</span>
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-[12px] leading-relaxed" style={{ color: cfg.helperColor }}>
-            {cfg.helper}
+        <div className="space-y-0.5" style={{ color: cfg.helperColor }}>
+          <p className="text-[12px] leading-relaxed">
+            Typical accepted range: <span className="font-semibold">${state.min.toLocaleString()}–${state.max.toLocaleString()}</span>
           </p>
-        )}
+          {typeof state.lastSold === "number" && (
+            <p className="text-[12px] leading-relaxed">
+              Last sold for <span className="font-semibold">${state.lastSold.toLocaleString()}</span>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
