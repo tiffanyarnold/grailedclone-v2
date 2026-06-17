@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
+import { X, ChevronLeft, Shield, CreditCard, Heart, Lock } from "lucide-react";
+import { getOfferLabel, getSellerRating } from "@/lib/data";
 
 interface Listing {
   id: string;
@@ -13,6 +14,8 @@ interface Listing {
   sale_price?: number | null;
   discount?: number | null;
   min_offer_price?: number | null;
+  competitive_range_min?: number | null;
+  competitive_range_max?: number | null;
   watchers_count?: number;
   image_url: string[];
   condition: string;
@@ -54,12 +57,23 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const offerNum      = parseFloat(offerAmount) || 0;
-  // TEMP STUB — replace with item.min_offer_price once seeded in DB (see 20260618_seed_demo_offers.sql)
-  // Uses listing.min_offer_price when available; falls back to 70% of listed_price client-side
-  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
-  const isTooLow      = offerAmount !== "" && offerNum > 0 && offerNum < minOffer;
-  const isValidOffer  = offerNum > 0 && offerNum <= 99999 && !isTooLow;
+  // Buyer offer is a whole-dollar integer. No floor logic — any valid integer
+  // greater than $1 enables "Review Offer", regardless of the Competitive/Low
+  // label (which is informational only).
+  const offerNum      = parseInt(offerAmount, 10);
+  const hasInput      = offerAmount.trim() !== "";
+  const isNumeric     = hasInput && Number.isFinite(offerNum) && offerNum > 0;
+  // Non-numeric / junk entry (e.g. "." alone) → field error, no label.
+  const showAmountError = hasInput && !isNumeric;
+  const isValidOffer  = isNumeric && offerNum > 1 && offerNum <= 99999;
+
+  // Real-time Competitive / Low label, computed from client state (no fetch).
+  // Returns null when the item has no competitive_range_min seeded → no label.
+  const offerLabel    = isNumeric ? getOfferLabel(offerNum, listing.competitive_range_min) : null;
+  const isLow         = offerLabel === "low";
+  const rangeMin      = listing.competitive_range_min ?? null;
+  const rangeMax      = listing.competitive_range_max ?? listing.listed_price;
+
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -180,49 +194,100 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                   className="relative flex items-center pb-1 px-2"
                   style={{
                     minWidth: "200px",
-                    borderBottom: `2px solid ${isTooLow ? "#CC0000" : "#1A1A1A"}`,
+                    borderBottom: `2px solid ${isLow ? "#C0392B" : "#1A1A1A"}`,
                   }}
                 >
                   <span
                     className="text-[28px] font-normal mr-1 select-none"
-                    style={{ color: isTooLow ? "#CC0000" : "#BBBBBB" }}
+                    style={{ color: isLow ? "#C0392B" : "#BBBBBB" }}
                   >
                     $
                   </span>
                   <input
                     type="text"
-                    inputMode="decimal"
+                    inputMode="numeric"
                     placeholder="0"
                     value={offerAmount}
                     onChange={(e) => {
-                      const v = e.target.value.replace(/[^0-9.]/g, "");
+                      // Whole-dollar amounts only — strip anything non-numeric.
+                      const v = e.target.value.replace(/[^0-9]/g, "");
                       setOfferAmount(v);
                     }}
                     className="text-[32px] font-light outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
                     style={{
                       minWidth: "120px",
-                      color: isTooLow ? "#CC0000" : "#888",
+                      color: isLow ? "#C0392B" : "#888",
                     }}
                     autoFocus
                   />
                 </div>
               </div>
 
-              {/* Red "too low" error — shown exactly like OG Grailed screenshot */}
-              {isTooLow ? (
-                <p className="text-[12px] text-center mb-3" style={{ color: "#CC0000" }}>
-                  Your offer is too low. Must be ${minOffer.toLocaleString()} or higher.
-                </p>
-              ) : (
-                <div className="mb-3" style={{ height: "18px" }} />
-              )}
+              {/* "Pro — Coming Soon" badge: buyer sniping threshold (no interaction) */}
+              <div className="flex justify-center mb-4">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
+                  title="Pro feature — coming soon"
+                >
+                  <Lock className="w-3 h-3" strokeWidth={2} />
+                  PRO · SNIPING THRESHOLD — COMING SOON
+                </span>
+              </div>
 
-              <p className="text-[12px] text-[#888] text-center mb-2">
-                Shipping and taxes calculated in the next step
-              </p>
-              <p className="text-[12px] text-[#888] text-center mb-7">
-                The seller has 24 hours to accept this offer
-              </p>
+              {/* ── Real-time Competitive / Low info box ── */}
+              {/* Reserve consistent vertical space so the box appearing/disappearing
+                  as the buyer types causes no layout shift. */}
+              <div className="min-h-[88px] mb-3">
+                {showAmountError ? (
+                  <p className="text-[12px] text-center" style={{ color: "#C0392B" }}>
+                    Please enter a valid dollar amount.
+                  </p>
+                ) : offerLabel ? (
+                  <div
+                    className="px-4 py-3 rounded-sm"
+                    style={{
+                      backgroundColor: isLow ? "#FBE9E7" : "#E6F4EA",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className="w-[8px] h-[8px] rounded-full flex-shrink-0"
+                        style={{ backgroundColor: isLow ? "#C0392B" : "#1E7D34" }}
+                      />
+                      <span
+                        className="text-[13px] font-semibold"
+                        style={{ color: isLow ? "#C0392B" : "#1E7D34" }}
+                      >
+                        {isLow ? "Low" : "Competitive"}
+                      </span>
+                    </div>
+                    <p className="text-[12px] leading-snug" style={{ color: isLow ? "#8a3024" : "#2d5a2d" }}>
+                      {isLow
+                        ? "Offers this far below the asking price are rarely accepted on Grailed."
+                        : "Your offer is within the typical accepted range for this item."}
+                    </p>
+                    {rangeMin != null && (
+                      <p className="text-[11px] mt-1.5" style={{ color: isLow ? "#a85a4e" : "#4a8a4a" }}>
+                        Typical accepted range:{" "}
+                        <strong>${rangeMin.toLocaleString()}–${rangeMax.toLocaleString()}</strong>
+                      </p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Static notes — always visible once a valid amount is entered */}
+              {isValidOffer && (
+                <>
+                  <p className="text-[12px] text-[#888] text-center mb-2">
+                    Shipping and taxes calculated in the next step
+                  </p>
+                  <p className="text-[12px] text-[#888] text-center mb-7">
+                    The seller has 24 hours to accept this offer
+                  </p>
+                </>
+              )}
+              {!isValidOffer && <div className="mb-7" />}
 
               <button
                 onClick={handleReviewOffer}
@@ -359,11 +424,17 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
                       <span className="text-[11px] text-[#888]">Seller:</span>
                       <span className="text-[11px] text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
                       <span className="flex items-center" style={{ lineHeight: 1 }}>
-                        {[1,2,3,4,5].map((i) => (
-                          <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill="#F5A623" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
-                          </svg>
-                        ))}
+                        {(() => {
+                          // Same rating as the seller's public card / dashboard.
+                          const filled = listing.seller_id
+                            ? Math.round(getSellerRating(listing.seller_id).rating)
+                            : 5;
+                          return [1, 2, 3, 4, 5].map((i) => (
+                            <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill={i <= filled ? "#F5A623" : "#E0E0E0"} xmlns="http://www.w3.org/2000/svg">
+                              <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
+                            </svg>
+                          ));
+                        })()}
                       </span>
                     </div>
                   </div>

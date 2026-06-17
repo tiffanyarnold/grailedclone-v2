@@ -7,8 +7,10 @@ import Footer from "@/components/layout/Footer";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
-import { Heart, Bookmark, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Heart, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import OfferModal from "@/components/listing/OfferModal";
+import StarRating from "@/components/ui/StarRating";
+import { getSellerRating } from "@/lib/data";
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -341,19 +343,13 @@ export default function ListingDetailPage() {
                     >
                       {seller?.name || "Unknown Seller"}
                     </a>
-                    {/* Star rating row */}
-                    <div className="flex items-center gap-1 mt-0.5">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star
-                          key={star}
-                          className="w-3 h-3"
-                          fill={star <= 4 ? "#f59e0b" : "none"}
-                          stroke="#f59e0b"
-                          strokeWidth={1.5}
-                        />
-                      ))}
-                      <span className="text-[11px] text-[#888] ml-0.5">2 Reviews</span>
-                    </div>
+                    {/* Star rating row — shared component keeps this in sync with
+                        the seller dashboard header for the same seller */}
+                    <StarRating
+                      className="mt-0.5"
+                      size={12}
+                      {...getSellerRating(listing.seller_id)}
+                    />
                     <p className="text-[11px] text-[#888] mt-0.5">
                       {seller?.transaction_count ?? 11} Transactions ·{" "}
                       <a href="#" onClick={(e) => e.preventDefault()} className="underline hover:text-[#1A1A1A]">
