@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
+import { X, ChevronLeft, Shield, CreditCard, Heart, Lock } from "lucide-react";
 import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
+import { getSellerRating } from "@/lib/data";
 
 interface Listing {
   id: string;
@@ -234,6 +235,17 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                 />
               </div>
 
+              {/* "Pro — Coming Soon" badge: buyer sniping threshold (no interaction) */}
+              <div className="mb-3">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
+                  title="Pro feature — coming soon"
+                >
+                  <Lock className="w-3 h-3" strokeWidth={2} />
+                  PRO · SNIPING THRESHOLD — COMING SOON
+                </span>
+              </div>
+
               {/* Field error (empty/invalid) OR Competitive/Low label + box.
                   These are mutually exclusive — one occupies the slot at a time. */}
               {fieldError ? (
@@ -389,11 +401,17 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                       <span className="text-[11px] text-[#888]">Seller:</span>
                       <span className="text-[11px] text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
                       <span className="flex items-center" style={{ lineHeight: 1 }}>
-                        {[1,2,3,4,5].map((i) => (
-                          <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill="#F5A623" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
-                          </svg>
-                        ))}
+                        {(() => {
+                          // Same rating as the seller's public card / dashboard.
+                          const filled = listing.seller_id
+                            ? Math.round(getSellerRating(listing.seller_id).rating)
+                            : 5;
+                          return [1, 2, 3, 4, 5].map((i) => (
+                            <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill={i <= filled ? "#F5A623" : "#E0E0E0"} xmlns="http://www.w3.org/2000/svg">
+                              <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
+                            </svg>
+                          ));
+                        })()}
                       </span>
                     </div>
                   </div>

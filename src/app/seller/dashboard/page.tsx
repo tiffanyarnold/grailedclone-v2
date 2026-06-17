@@ -7,9 +7,11 @@ import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star,
+  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Eye, Lock,
 } from "lucide-react";
 import { createPortal } from "react-dom";
+import StarRating from "@/components/ui/StarRating";
+import { getOfferLabel, getSellerRating } from "@/lib/data";
 
 // ── Accept Offer Confirmation Modal ───────────────────────────────────────────
 function AcceptOfferModal({
@@ -295,13 +297,9 @@ function SellerDashboardInner() {
                 {sellerProfile?.transaction_count ?? 0} Transactions · Joined in {new Date().getFullYear()}
               </p>
 
-              {/* Stars */}
-              <div className="flex items-center gap-1 mb-2">
-                <span className="text-[12px] text-[#888]">0.0</span>
-                {[1,2,3,4,5].map((i) => (
-                  <Star key={i} className="w-3 h-3 text-[#CCCCCC]" strokeWidth={1.5} />
-                ))}
-                <span className="text-[11px] text-[#888] ml-1">No Reviews</span>
+              {/* Stars — shared component, consistent with the public seller card */}
+              <div className="mb-2">
+                <StarRating size={12} {...getSellerRating(user.id)} />
               </div>
 
               {/* Following / Followers / Location */}
@@ -481,81 +479,164 @@ function SellerDashboardInner() {
             {activeTab === "offers" && (
               <div className="space-y-10">
 
-                {/* ── RECEIVED offers (seller view) ── */}
+                {/* ── RECEIVED offers (seller view) — grouped by item ── */}
                 <div>
-                  <h2 className="text-[15px] font-bold text-[#1A1A1A] mb-5">
-                    Offers
-                  </h2>
+                  <div className="flex flex-wrap items-center gap-3 mb-5">
+                    <h2 className="text-[15px] font-bold text-[#1A1A1A]">Offers</h2>
+                    {/* "Pro — Coming Soon" badge: seller auto-responder (no interaction) */}
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F2F2F2] text-[#999] text-[10px] font-semibold tracking-[0.04em] rounded-sm select-none cursor-default"
+                      title="Pro feature — coming soon"
+                    >
+                      <Lock className="w-3 h-3" strokeWidth={2} />
+                      PRO · AUTO-RESPONDER — COMING SOON
+                    </span>
+                  </div>
 
                   {myOffers.length === 0 ? (
                     <div className="py-16 text-center">
                       <p className="text-[13px] text-[#888]">No offers pending</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {myOffers.map((offer) => {
-                        const listing = listings.find((l) => l.id === offer.listing_id);
-                        const buyer = getProfileById(offer.buyer_id);
-                        const thumb = listing?.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
-                        return (
-                          <div
-                            key={offer.id}
-                            className={`flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 ${
-                              offer.status !== "pending" ? "opacity-60" : ""
-                            }`}
-                          >
-                            {/* Thumbnail */}
-                            <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
-                              <img src={thumb} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing?.title || "Listing removed"}</p>
-                              <p className="text-[11px] text-[#888] mt-0.5">
-                                From: {buyer?.name || "Buyer"} · {listing ? `Listed at $${listing.listed_price.toLocaleString()}` : ""}
-                              </p>
-                            </div>
-
-                            {/* Amount */}
-                            <div className="text-right flex-shrink-0">
-                              <p className="text-[14px] font-bold text-[#1A1A1A]">${offer.amount.toLocaleString()}</p>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              {offer.status === "pending" ? (
-                                <>
-                                  <button
-                                    onClick={() => setAcceptingOffer(offer)}
-                                    className="px-3 py-1.5 bg-[#1A1A1A] text-white text-[11px] font-bold tracking-[0.06em] hover:bg-black transition-colors"
-                                  >
-                                    Accept
-                                  </button>
-                                  <button
-                                    onClick={() => updateOfferStatus(offer.id, "declined")}
-                                    className="px-3 py-1.5 border border-[#D4D4D4] text-[#888] text-[11px] font-bold tracking-[0.06em] hover:border-[#888] hover:text-[#1A1A1A] transition-colors"
-                                  >
-                                    Pass
-                                  </button>
-                                  <button
-                                    onClick={() => {/* non-functional for demo */}}
-                                    className="px-3 py-1.5 text-[11px] font-normal text-[#2557D6] hover:underline transition-colors"
-                                  >
-                                    Message Buyer
-                                  </button>
-                                </>
-                              ) : (
-                                <span className={`text-[11px] font-medium px-3 py-1.5 ${
-                                  offer.status === "accepted" ? "text-green-600 bg-green-50" : "text-[#888] bg-[#F7F7F7]"
-                                }`}>
-                                  {offer.status === "accepted" ? "Accepted ✓" : "Passed"}
+                    <div className="space-y-8">
+                      {myListings
+                        .map((listing) => ({
+                          listing,
+                          items: myOffers.filter((o) => o.listing_id === listing.id),
+                        }))
+                        .filter((g) => g.items.length > 0)
+                        .map(({ listing, items }) => {
+                          const watchers = listing.watchers_count ?? 0;
+                          const rMin = listing.competitive_range_min ?? null;
+                          const rMax = listing.competitive_range_max ?? listing.listed_price;
+                          const single = items.length === 1;
+                          return (
+                            <div key={listing.id} style={{ maxWidth: single ? 340 : 680 }}>
+                              {/* Item group title */}
+                              <p className="text-[14px] font-semibold text-[#555] mb-2.5">
+                                {listing.title}{" "}
+                                <span className="text-[#999] font-normal">
+                                  · Listed at ${listing.listed_price.toLocaleString()}
                                 </span>
+                              </p>
+
+                              {/* Watcher nudge card — spans the item's offer row */}
+                              {(watchers > 0 || rMin != null) && (
+                                <div className="flex items-center gap-2 bg-[#F0F7F0] border-l-[3px] border-[#4A8A4A] rounded-sm px-3.5 py-2.5 mb-2.5">
+                                  <Eye className="w-4 h-4 text-[#2D5A2D] flex-shrink-0" strokeWidth={1.8} />
+                                  <p className="text-[12px] text-[#2D5A2D] leading-snug">
+                                    {watchers > 0 ? (
+                                      <>
+                                        <strong>{watchers} buyer{watchers > 1 ? "s" : ""}</strong>{" "}
+                                        {watchers > 1 ? "are" : "is"} watching this item
+                                      </>
+                                    ) : (
+                                      <>This item is live</>
+                                    )}
+                                    {rMin != null && (
+                                      <>
+                                        {" "}· Consider an offer between{" "}
+                                        <strong>${rMin.toLocaleString()}–${rMax.toLocaleString()}</strong>
+                                      </>
+                                    )}
+                                  </p>
+                                </div>
                               )}
+
+                              {/* Offer cards */}
+                              <div className={`grid gap-3 ${single ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+                                {items.map((offer) => {
+                                  const buyer = getProfileById(offer.buyer_id);
+                                  const thumb = listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
+                                  // Same logic as buyer-side: no tag when the item
+                                  // has no competitive_range_min seeded.
+                                  const label = getOfferLabel(offer.amount, listing.competitive_range_min);
+                                  return (
+                                    <div
+                                      key={offer.id}
+                                      className={`bg-white border border-[#E5E5E5] rounded-sm overflow-hidden ${
+                                        offer.status !== "pending" ? "opacity-60" : ""
+                                      }`}
+                                    >
+                                      {/* Thumbnail */}
+                                      <Link href={`/listing/${listing.id}`}>
+                                        <div className="h-[140px] bg-[#F2F2F2] overflow-hidden">
+                                          <img
+                                            src={thumb}
+                                            alt={listing.title}
+                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
+                                          />
+                                        </div>
+                                      </Link>
+
+                                      <div className="p-3">
+                                        {/* Top row: buyer + Competitive/Low tag */}
+                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                          <span className="text-[12px] text-[#333] truncate">
+                                            From: <strong>{buyer?.name || "Buyer"}</strong>
+                                          </span>
+                                          {label && (
+                                            <span
+                                              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                                label === "competitive"
+                                                  ? "bg-[#E6F4EA] text-[#1E7D34]"
+                                                  : "bg-[#FBE9E7] text-[#C0392B]"
+                                              }`}
+                                            >
+                                              {label === "competitive" ? "Competitive" : "Low"}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        {/* Amount */}
+                                        <p className="text-[16px] font-bold text-[#111] mb-2.5">
+                                          ${offer.amount.toLocaleString()}
+                                        </p>
+
+                                        {/* Actions */}
+                                        {offer.status === "pending" ? (
+                                          <>
+                                            <div className="flex gap-2">
+                                              <button
+                                                onClick={() => setAcceptingOffer(offer)}
+                                                className="flex-1 py-[7px] bg-[#111] text-white text-[12px] font-semibold rounded-sm hover:bg-black transition-colors"
+                                              >
+                                                Accept
+                                              </button>
+                                              <button
+                                                onClick={() => updateOfferStatus(offer.id, "declined")}
+                                                className="flex-1 py-[7px] border border-[#DDD] text-[#999] text-[12px] rounded-sm hover:border-[#999] hover:text-[#1A1A1A] transition-colors"
+                                              >
+                                                Decline
+                                              </button>
+                                            </div>
+                                            <button
+                                              onClick={() => {/* non-functional for demo */}}
+                                              className="mt-2 w-full text-[11px] text-[#2557D6] hover:underline transition-colors"
+                                            >
+                                              Message buyer
+                                            </button>
+                                          </>
+                                        ) : (
+                                          <span
+                                            className={`inline-block text-[11px] font-medium px-3 py-1.5 rounded-sm ${
+                                              offer.status === "accepted"
+                                                ? "text-green-600 bg-green-50"
+                                                : "text-[#888] bg-[#F7F7F7]"
+                                            }`}
+                                          >
+                                            {offer.status === "accepted" ? "Accepted ✓" : "Passed"}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                     </div>
                   )}
                 </div>
