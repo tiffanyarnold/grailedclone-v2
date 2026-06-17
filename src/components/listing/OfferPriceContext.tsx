@@ -87,7 +87,8 @@ export default function OfferPriceContext({
   // No label until the buyer enters a positive amount.
   if (offerAmount <= 0) return null;
 
-  const cfg = offerAmount >= state.min ? COMPETITIVE : LOW;
+  const isCompetitive = offerAmount >= state.min;
+  const cfg = isCompetitive ? COMPETITIVE : LOW;
 
   return (
     <div className="mb-3" style={{ minHeight: RESERVED_MIN_HEIGHT }}>
@@ -102,14 +103,22 @@ export default function OfferPriceContext({
         </span>
       </div>
 
-      {/* Helper copy box */}
+      {/* Helper box: Competitive shows the accepted range + last sold; Low shows
+          the advisory helper copy. */}
       <div
         className="px-3 py-2.5 border"
         style={{ borderColor: cfg.border, backgroundColor: cfg.bg }}
       >
-        <p className="text-[12px] leading-relaxed" style={{ color: cfg.helperColor }}>
-          {cfg.helper}
-        </p>
+        <div className="space-y-0.5" style={{ color: cfg.helperColor }}>
+          <p className="text-[12px] leading-relaxed">
+            Typical accepted range: <span className="font-semibold">${state.min.toLocaleString()}–${state.max.toLocaleString()}</span>
+          </p>
+          {typeof state.lastSold === "number" && (
+            <p className="text-[12px] leading-relaxed">
+              Last sold for <span className="font-semibold">${state.lastSold.toLocaleString()}</span>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
