@@ -49,6 +49,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   const [mounted, setMounted]       = useState(false);
   const [step, setStep]             = useState<1 | 2>(1);
   const [offerAmount, setOfferAmount] = useState("");
+  const [touched, setTouched]       = useState(false);
   const [delivery, setDelivery]     = useState("standard");
   const [tosAccepted, setTosAccepted] = useState(false);
   const [saveCard, setSaveCard]     = useState(true);
@@ -63,7 +64,9 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const offerNum      = parseFloat(offerAmount) || 0;
+  // Integer dollars only — the input strips non-digits, so this is always a
+  // whole number (0 when empty).
+  const offerNum      = parseInt(offerAmount, 10) || 0;
 
   // Tri-state for the Step 1 info box. The flag is resolved here ONCE, explicitly
   // — never inferred downstream from "is the value null right now". A listing
@@ -79,11 +82,12 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
           lastSold: listing.last_sold_price ?? null,
         }
       : "unavailable";
-  // TEMP STUB — replace with item.min_offer_price once seeded in DB (see 20260618_seed_demo_offers.sql)
-  // Uses listing.min_offer_price when available; falls back to 70% of listed_price client-side
-  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
-  const isTooLow      = offerAmount !== "" && offerNum > 0 && offerNum < minOffer;
-  const isValidOffer  = offerNum > 0 && offerNum <= 99999 && !isTooLow;
+
+  // Validity is independent of the Competitive/Low label: ANY whole-dollar
+  // amount greater than $1 is acceptable. There is no floor/min-offer gate.
+  const isValidOffer  = offerNum > 1 && offerNum <= 99999;
+  // Field-level error only after the buyer has interacted with the input.
+  const showFieldError = touched && offerNum <= 0;
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -135,7 +139,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
       <div
         className="relative bg-white w-full shadow-2xl overflow-hidden"
         style={{
-          maxWidth: step === 2 ? "740px" : "520px",
+          maxWidth: step === 2 ? "740px" : "380px",
           maxHeight: "92vh",
           overflowY: "auto",
           fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
@@ -194,59 +198,47 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
               </div>
 
               {/* Offer Price */}
-              <p className="text-[13px] font-semibold text-[#1A1A1A] text-center mb-4 tracking-[0.02em]">
+              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.08em] mb-2">
                 Offer Price
               </p>
 
-              {/* Dollar input — no spinners */}
-              <div className="flex items-center justify-center mb-2">
-                <div
-                  className="relative flex items-center pb-1 px-2"
-                  style={{
-                    minWidth: "200px",
-                    borderBottom: `2px solid ${isTooLow ? "#CC0000" : "#1A1A1A"}`,
+              {/* Dollar input — left aligned, full-width underline, integer only */}
+              <div
+                className="flex items-center pb-1.5 mb-2"
+                style={{ borderBottom: `2px solid ${showFieldError ? "#CC0000" : "#1A1A1A"}` }}
+              >
+                <span className="text-[26px] font-normal mr-1 select-none text-[#BBBBBB]">$</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={offerAmount}
+                  onChange={(e) => {
+                    setOfferAmount(e.target.value.replace(/[^0-9]/g, ""));
+                    setTouched(true);
                   }}
-                >
-                  <span
-                    className="text-[28px] font-normal mr-1 select-none"
-                    style={{ color: isTooLow ? "#CC0000" : "#BBBBBB" }}
-                  >
-                    $
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="0"
-                    value={offerAmount}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/[^0-9.]/g, "");
-                      setOfferAmount(v);
-                    }}
-                    className="text-[32px] font-light outline-none bg-transparent w-full text-center placeholder:text-[#BBBBBB]"
-                    style={{
-                      minWidth: "120px",
-                      color: isTooLow ? "#CC0000" : "#888",
-                    }}
-                    autoFocus
-                  />
-                </div>
+                  onBlur={() => setTouched(true)}
+                  className="text-[30px] font-light outline-none bg-transparent w-full text-[#1A1A1A] placeholder:text-[#CCCCCC]"
+                  autoFocus
+                />
               </div>
 
-              {/* Red "too low" error — shown exactly like OG Grailed screenshot */}
-              {isTooLow ? (
-                <p className="text-[12px] text-center mb-3" style={{ color: "#CC0000" }}>
-                  Your offer is too low. Must be ${minOffer.toLocaleString()} or higher.
+              {/* Field error (empty/invalid) OR Competitive/Low label + box.
+                  These are mutually exclusive — one occupies the slot at a time. */}
+              {showFieldError ? (
+                <p className="text-[12px] mb-3" style={{ color: "#CC0000" }}>
+                  Please enter a valid dollar amount.
                 </p>
               ) : (
-                <div className="mb-3" style={{ height: "18px" }} />
+                <OfferPriceContext state={priceContext} offerAmount={offerNum} />
               )}
 
-              {/* Step 1 info box — Competitive/Low label + range (tri-state) */}
-              <OfferPriceContext state={priceContext} offerAmount={offerNum} />
-
-              <p className="text-[12px] text-[#888] text-center mb-2">
-                Shipping and taxes calculated in the next step
-              </p>
+              {/* Static note — visible once a valid amount is entered */}
+              {isValidOffer && (
+                <p className="text-[12px] text-[#888] text-center mb-2">
+                  Shipping and taxes calculated in the next step
+                </p>
+              )}
               <p className="text-[12px] text-[#888] text-center mb-7">
                 The seller has 24 hours to accept this offer
               </p>
