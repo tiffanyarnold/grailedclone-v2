@@ -389,7 +389,7 @@ function SellerDashboardInner() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-x-3 gap-y-6">
+                  <div className="grid grid-cols-2 gap-x-6">
                     {myListings.map((listing) => {
                       const offerCount = myOffers.filter(
                         (o) => o.listing_id === listing.id && o.status === "pending"
@@ -406,76 +406,76 @@ function SellerDashboardInner() {
                         return `${days} days ago`;
                       })();
                       return (
-                        <div key={listing.id} className="flex flex-col">
-                          {/* Timestamp */}
-                          <p className="text-[10px] text-[#888] mb-1">{timeAgo}</p>
-
-                          {/* Thumbnail */}
-                          <Link href={`/listing/${listing.id}`} className="block relative mb-1.5">
-                            <div className="aspect-[3/4] bg-[#F2F2F2] overflow-hidden">
-                              <img
-                                src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
-                                alt={listing.title}
-                                className="w-full h-full object-contain hover:opacity-90 transition-opacity"
-                                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
-                              />
-                            </div>
-                            {offerCount > 0 && (
-                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#E85D00] text-white text-[9px] font-bold tracking-[0.06em]">
-                                {offerCount} OFFER{offerCount > 1 ? "S" : ""}
-                              </span>
-                            )}
-                          </Link>
-
-                          {/* Info */}
-                          <div className="flex-1">
-                            <div className="flex items-baseline justify-between gap-1 mb-0.5">
-                              <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
-                              <p className="text-[11px] text-[#888] flex-shrink-0">{listing.size}</p>
-                            </div>
-                            <Link href={`/listing/${listing.id}`}>
-                              <p className="text-[11px] text-[#555] truncate hover:underline mb-1">{listing.title}</p>
+                        <div key={listing.id} className="border-b border-[#E8E8E8] pb-3 mb-1">
+                          {/* Image + Info row */}
+                          <div className="flex gap-3 mb-2">
+                            {/* Thumbnail */}
+                            <Link href={`/listing/${listing.id}`} className="relative flex-shrink-0">
+                              <div className="w-[110px] h-[110px] bg-[#F2F2F2] overflow-hidden">
+                                <img
+                                  src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
+                                  alt={listing.title}
+                                  className="w-full h-full object-contain hover:opacity-90 transition-opacity"
+                                  onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
+                                />
+                              </div>
+                              {offerCount > 0 && (
+                                <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-[#E85D00] text-white text-[9px] font-bold">
+                                  {offerCount} OFFER{offerCount > 1 ? "S" : ""}
+                                </span>
+                              )}
                             </Link>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {hasSale ? (
-                                  <>
-                                    <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.sale_price!.toLocaleString()}</span>
-                                    <span className="text-[11px] text-[#888] line-through">${listing.listed_price.toLocaleString()}</span>
-                                    <span className="text-[10px] text-[#888]">{discountPct}% off</span>
-                                  </>
-                                ) : (
-                                  <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <p className="text-[10px] text-[#888] mb-0.5">{timeAgo}</p>
+                              <div className="flex items-baseline justify-between gap-1 mb-0.5">
+                                <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
+                                <p className="text-[11px] text-[#888] flex-shrink-0">{listing.size}</p>
+                              </div>
+                              <Link href={`/listing/${listing.id}`}>
+                                <p className="text-[11px] text-[#555] truncate hover:underline mb-1">{listing.title}</p>
+                              </Link>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {hasSale ? (
+                                    <>
+                                      <span className="text-[12px] font-bold text-[#C0392B]">${listing.sale_price!.toLocaleString()}</span>
+                                      <span className="text-[11px] text-[#888] line-through">${listing.listed_price.toLocaleString()}</span>
+                                      <span className="text-[10px] text-[#888]">{discountPct}% off</span>
+                                    </>
+                                  ) : (
+                                    <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
+                                  )}
+                                </div>
+                                {(listing.watchers_count ?? 0) > 0 && (
+                                  <span className="text-[11px] text-[#888] flex-shrink-0">{listing.watchers_count}♡</span>
                                 )}
                               </div>
-                              {(listing.watchers_count ?? 0) > 0 && (
-                                <span className="text-[11px] text-[#888] flex-shrink-0">{listing.watchers_count}♡</span>
-                              )}
                             </div>
                           </div>
 
                           {/* Action buttons */}
-                          <div className="grid grid-cols-3 border border-[#E8E8E8] mt-2">
+                          <div className="grid grid-cols-3 border border-[#D4D4D4]">
                             <button
                               onClick={() => alert("Price Drop — Demo")}
-                              className="py-2 text-[9px] font-bold tracking-[0.04em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#E8E8E8]"
+                              className="py-2 text-[10px] font-semibold text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#D4D4D4]"
                             >
                               PRICE DROP
                             </button>
                             <button
                               onClick={() => alert("Bump — Demo")}
-                              className="py-2 text-[9px] font-bold tracking-[0.04em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#E8E8E8]"
+                              className="py-2 text-[10px] font-semibold text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#D4D4D4]"
                             >
                               BUMP
                             </button>
                             <button
                               onClick={() => alert("Send Offer — Demo")}
-                              className="py-2 text-[9px] font-bold tracking-[0.04em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                              className="py-2 text-[10px] font-semibold text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                             >
                               SEND OFFER
                             </button>
                           </div>
-
                         </div>
                       );
                     })}
