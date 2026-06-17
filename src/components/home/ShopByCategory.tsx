@@ -12,13 +12,16 @@ const MENS_IMAGES = [
   "https://images.unsplash.com/photo-1516826957135-700dedea698c?w=600&q=80",
 ];
 
+// Real women's listing photos pulled from the catalog — guaranteed womenswear
+// (Celine shirt, Acne skirt, Margiela blouse, D&G tank, Acne ruffle shirt,
+// Margiela bra top). Replaces the previous mixed set that included menswear.
 const WOMENS_IMAGES = [
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
-  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80",
-  "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&q=80",
-  "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
-  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80",
-  "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80",
+  "https://media-assets.grailed.com/prd/listing/temp/e3139801ad97446b8fa5571a1e5ce764?w=600", // Vintage Celine Paris women's shirt
+  "https://media-assets.grailed.com/prd/listing/temp/5c1bc026551e446fbf656c924d3170ae?w=600", // Acne Studios zip mini skirt
+  "https://media-assets.grailed.com/prd/listing/temp/908b613338594e839b885a738e82b9a6?w=600", // Maison Margiela playing card silk blouse
+  "https://media-assets.grailed.com/prd/listing/temp/f4bc4d9bca17451a9fddf6967ba6b317?w=600", // Dolce & Gabbana mesh sheer tank top
+  "https://media-assets.grailed.com/prd/listing/temp/2b27700789734460aa4c19cb28d06825?w=600", // Acne Studios ruffle sleeved shirt
+  "https://media-assets.grailed.com/prd/listing/temp/2c851d4682d249da900d38fbf990e6e3?w=600", // Maison Margiela inverted double bra top
 ];
 
 export default function ShopByCategory() {
