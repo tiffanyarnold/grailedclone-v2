@@ -412,11 +412,11 @@ function SellerDashboardInner() {
 
                           {/* Thumbnail */}
                           <Link href={`/listing/${listing.id}`} className="block relative mb-1.5">
-                            <div className="aspect-square bg-[#F2F2F2] overflow-hidden">
+                            <div className="aspect-[3/4] bg-[#F2F2F2] overflow-hidden">
                               <img
                                 src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
                                 alt={listing.title}
-                                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                                className="w-full h-full object-contain hover:opacity-90 transition-opacity"
                                 onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                               />
                             </div>
@@ -476,14 +476,6 @@ function SellerDashboardInner() {
                             </button>
                           </div>
 
-                          {/* Delete */}
-                          <button
-                            onClick={() => deleteListing(listing.id)}
-                            className="mt-1 w-full py-1 flex items-center justify-center text-[#DC2626] hover:bg-red-50 transition-colors border border-[#FECACA]"
-                            title="Delete listing"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
                         </div>
                       );
                     })}
@@ -577,11 +569,11 @@ function SellerDashboardInner() {
                                     >
                                       {/* Thumbnail */}
                                       <Link href={`/listing/${listing.id}`}>
-                                        <div className="h-[140px] bg-[#F2F2F2] overflow-hidden">
+                                        <div className="aspect-[3/4] bg-[#F2F2F2] overflow-hidden">
                                           <img
                                             src={thumb}
                                             alt={listing.title}
-                                            className="w-full h-full object-contain hover:scale-105 transition-transform duration-200"
+                                            className="w-full h-full object-contain hover:opacity-90 transition-opacity"
                                             onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                                           />
                                         </div>
