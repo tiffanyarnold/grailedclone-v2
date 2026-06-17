@@ -69,49 +69,36 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   // whole number (0 when empty).
   const offerNum      = parseInt(offerAmount, 10) || 0;
 
-  // Tri-state for the Step 1 info box. The flag is resolved here ONCE, explicitly
-  // — never inferred downstream from "is the value null right now". A listing
-  // whose competitive range is genuinely absent settles to "unavailable" so the
-  // box renders nothing instead of an indefinite loading placeholder.
-  const priceContext: PriceContextState = priceContextLoading
-    ? "loading"
-    : typeof listing.competitive_range_min === "number" &&
-      typeof listing.competitive_range_max === "number"
-      ? {
-          min: listing.competitive_range_min,
-          max: listing.competitive_range_max,
-          lastSold: listing.last_sold_price ?? null,
-        }
-      : "unavailable";
-
-  // Effective asking price (the discounted price if on sale) — the basis for the
-  // accepted offer window.
+  // Effective price — sale price when discounted, otherwise listed price.
+  // This is the basis for the competitive range and the ceiling.
   const askingPrice   = listing.sale_price ?? listing.listed_price;
 
-  // Offers may not exceed the asking price — this is the ceiling (100%).
+  // Competitive range: 75%–95% of the effective (sale) price.
+  // Always derived from askingPrice so it reflects the current discount.
+  const priceContext: PriceContextState = priceContextLoading
+    ? "loading"
+    : {
+        min: Math.round(askingPrice * 0.75),
+        max: Math.round(askingPrice * 0.95),
+        lastSold: listing.last_sold_price ?? null,
+      };
+
+  // Offers may not exceed the asking price — hard ceiling.
   const isOverAsking  = offerNum > askingPrice;
 
-  // Minimum acceptable offer (the floor): the seller's configured min_offer_price
-  // overrides when set (see 20260618_seed_demo_offers.sql), otherwise falls back
-  // to 75% of the asking price.
-  const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
-  const isTooLow      = offerNum > 0 && offerNum < minOffer;
-
-  // A valid offer is a whole-dollar amount over $1 that does not exceed the
-  // asking price. The minimum-offer floor is advisory only — buyers may still
-  // submit an offer below it (they just see the "too low" warning).
+  // Valid = any whole-dollar amount over $1 up to the asking price.
+  // Below-range offers are advisory only (shown via the Low indicator in the
+  // price-context box) and do not block submission.
   const isValidOffer  = offerNum > 1 && !isOverAsking;
 
-  // Field-level error, shown in place of the Competitive/Low box. The empty/zero
-  // case only surfaces after the buyer has interacted with the input.
+  // Field-level error replaces the price-context box only for blank input or
+  // over-ceiling offers. Below-range offers show the Low indicator instead.
   const fieldError =
     touched && offerNum <= 0
       ? "Please enter a valid dollar amount."
-      : isTooLow
-        ? "Your offer is too low."
-        : isOverAsking
-          ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
-          : "";
+      : isOverAsking
+        ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
+        : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
