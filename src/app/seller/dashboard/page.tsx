@@ -389,7 +389,7 @@ function SellerDashboardInner() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-x-6">
+                  <div className="grid grid-cols-3 gap-x-6">
                     {myListings.map((listing) => {
                       const offerCount = myOffers.filter(
                         (o) => o.listing_id === listing.id && o.status === "pending"
