@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
+import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
 
 interface Listing {
   id: string;
@@ -13,6 +14,9 @@ interface Listing {
   sale_price?: number | null;
   discount?: number | null;
   min_offer_price?: number | null;
+  competitive_range_min?: number | null;
+  competitive_range_max?: number | null;
+  last_sold_price?: number | null;
   watchers_count?: number;
   image_url: string[];
   condition: string;
@@ -23,6 +27,11 @@ interface OfferModalProps {
   listing: Listing;
   buyerName?: string;
   sellerName?: string;
+  // When the price-context fields are fetched lazily (separate from the listing
+  // load), pass `true` while that fetch is in flight to drive the loading path.
+  // Defaults to false: state resolves to has-data or "unavailable" from the
+  // listing fields below.
+  priceContextLoading?: boolean;
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
 }
@@ -36,7 +45,7 @@ const DELIVERY_OPTIONS = [
   { id: "upsnext",  label: "UPS Next Day Air",  sub: "Next business day",   extra: 14.99 },
 ];
 
-export default function OfferModal({ listing, buyerName, sellerName, onClose, onSubmit }: OfferModalProps) {
+export default function OfferModal({ listing, buyerName, sellerName, priceContextLoading = false, onClose, onSubmit }: OfferModalProps) {
   const [mounted, setMounted]       = useState(false);
   const [step, setStep]             = useState<1 | 2>(1);
   const [offerAmount, setOfferAmount] = useState("");
@@ -55,6 +64,21 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
   }, []);
 
   const offerNum      = parseFloat(offerAmount) || 0;
+
+  // Tri-state for the Step 1 info box. The flag is resolved here ONCE, explicitly
+  // — never inferred downstream from "is the value null right now". A listing
+  // whose competitive range is genuinely absent settles to "unavailable" so the
+  // box renders nothing instead of an indefinite loading placeholder.
+  const priceContext: PriceContextState = priceContextLoading
+    ? "loading"
+    : typeof listing.competitive_range_min === "number" &&
+      typeof listing.competitive_range_max === "number"
+      ? {
+          min: listing.competitive_range_min,
+          max: listing.competitive_range_max,
+          lastSold: listing.last_sold_price ?? null,
+        }
+      : "unavailable";
   // TEMP STUB — replace with item.min_offer_price once seeded in DB (see 20260618_seed_demo_offers.sql)
   // Uses listing.min_offer_price when available; falls back to 70% of listed_price client-side
   const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
@@ -216,6 +240,9 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
               ) : (
                 <div className="mb-3" style={{ height: "18px" }} />
               )}
+
+              {/* Step 1 info box — Competitive/Low label + range (tri-state) */}
+              <OfferPriceContext state={priceContext} offerAmount={offerNum} />
 
               <p className="text-[12px] text-[#888] text-center mb-2">
                 Shipping and taxes calculated in the next step
