@@ -575,3 +575,41 @@ export function getUserById(id: string): User | undefined {
 export function isOfferCompetitive(offerAmount: number, listingPrice: number): boolean {
   return offerAmount >= listingPrice * 0.85;
 }
+
+/**
+ * Competitive / Low label, shared by the buyer offer modal and the seller inbox.
+ *
+ * Single source of truth for the "data-availability" rule: when an item has no
+ * `competitive_range_min` seeded, we return `null` so the UI shows NO label
+ * (not a placeholder). Once seeding lands, items with a range light up.
+ *
+ * We intentionally compute from `competitive_range_min` rather than the
+ * `offers.is_competitive` column, which can be stale (it is only set by a DB
+ * trigger at insert time and won't reflect ranges seeded afterwards).
+ */
+export type OfferLabel = "competitive" | "low";
+
+export function getOfferLabel(
+  amount: number,
+  competitiveRangeMin?: number | null,
+): OfferLabel | null {
+  if (competitiveRangeMin == null) return null;
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return amount >= competitiveRangeMin ? "competitive" : "low";
+}
+
+/**
+ * Deterministic seller rating + review count derived from the seller id, so the
+ * SAME seller shows the SAME stars everywhere (listing seller card, seller
+ * dashboard header, offer cards). Keeps demo ratings consistent across screens
+ * without a reviews table.
+ */
+export function getSellerRating(sellerId: string): { rating: number; reviews: number } {
+  let h = 0;
+  for (let i = 0; i < sellerId.length; i++) {
+    h = (h * 31 + sellerId.charCodeAt(i)) >>> 0;
+  }
+  const reviews = 2 + (h % 28); // 2–29 reviews
+  const rating = 4.2 + ((h >> 5) % 8) / 10; // 4.2–4.9
+  return { rating: Math.round(rating * 10) / 10, reviews };
+}
