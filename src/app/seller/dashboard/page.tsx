@@ -389,7 +389,7 @@ function SellerDashboardInner() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {myListings.map((listing) => {
                       const offerCount = myOffers.filter(
                         (o) => o.listing_id === listing.id && o.status === "pending"
@@ -397,11 +397,11 @@ function SellerDashboardInner() {
                       return (
                         <div
                           key={listing.id}
-                          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 hover:border-[#C8C8C8] transition-colors"
+                          className="bg-white border border-[#E8E8E8] hover:border-[#C8C8C8] transition-colors"
                         >
                           {/* Thumbnail */}
-                          <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
-                            <div className="w-[72px] h-[72px] bg-[#F2F2F2] overflow-hidden">
+                          <Link href={`/listing/${listing.id}`} className="block relative">
+                            <div className="aspect-square bg-[#F2F2F2] overflow-hidden">
                               <img
                                 src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
                                 alt={listing.title}
@@ -409,62 +409,55 @@ function SellerDashboardInner() {
                                 onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                               />
                             </div>
+                            {offerCount > 0 && (
+                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#E85D00] text-white text-[9px] font-bold tracking-[0.06em]">
+                                {offerCount} OFFER{offerCount > 1 ? "S" : ""}
+                              </span>
+                            )}
                           </Link>
 
                           {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#888] mb-0.5">
-                              {listing.brand}
-                            </p>
-                            <Link href={`/listing/${listing.id}`}>
-                              <p className="text-[13px] font-semibold text-[#1A1A1A] truncate hover:underline">
-                                {listing.title}
-                              </p>
-                            </Link>
-                            <div className="flex flex-wrap items-center gap-3 mt-1">
-                              <span className="text-[13px] font-bold text-[#1A1A1A]">
-                                ${listing.listed_price.toLocaleString()}
-                              </span>
-                              <span className="text-[11px] text-[#888]">
-                                Size {listing.size} · {listing.condition}
-                              </span>
-                              {offerCount > 0 && (
-                                <span className="px-2 py-0.5 bg-[#FFF0E8] text-[#E85D00] text-[10px] font-bold tracking-[0.06em]">
-                                  {offerCount} OFFER{offerCount > 1 ? "S" : ""}
-                                </span>
-                              )}
+                          <div className="px-2 pt-2 pb-1">
+                            <div className="flex items-baseline justify-between gap-1 mb-0.5">
+                              <p className="text-[11px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
+                              <p className="text-[10px] text-[#888] flex-shrink-0">{listing.size}</p>
                             </div>
+                            <Link href={`/listing/${listing.id}`}>
+                              <p className="text-[11px] text-[#555] truncate hover:underline mb-1">{listing.title}</p>
+                            </Link>
+                            <p className="text-[13px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</p>
                           </div>
 
                           {/* Action buttons */}
-                          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                          <div className="grid grid-cols-3 border-t border-[#E8E8E8]">
                             <button
                               onClick={() => alert("Price Drop — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
+                              className="py-2 text-[9px] font-bold tracking-[0.06em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#E8E8E8] truncate px-1"
                             >
-                              <TrendingDown className="w-3 h-3" />
                               PRICE DROP
                             </button>
                             <button
                               onClick={() => alert("Bump — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                              className="py-2 text-[9px] font-bold tracking-[0.06em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors border-r border-[#E8E8E8]"
                             >
-                              <Zap className="w-3 h-3" />
                               BUMP
                             </button>
                             <button
                               onClick={() => alert("Send Offer — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
+                              className="py-2 text-[9px] font-bold tracking-[0.06em] text-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors truncate px-1"
                             >
-                              <Tag className="w-3 h-3" />
                               SEND OFFER
                             </button>
+                          </div>
+
+                          {/* Delete */}
+                          <div className="border-t border-[#E8E8E8]">
                             <button
                               onClick={() => deleteListing(listing.id)}
-                              className="p-2 text-[#DC2626] border border-[#FECACA] hover:bg-red-50 transition-colors"
+                              className="w-full py-1.5 flex items-center justify-center text-[#DC2626] hover:bg-red-50 transition-colors"
                               title="Delete listing"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
