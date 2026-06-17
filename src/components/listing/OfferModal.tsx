@@ -97,9 +97,10 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   const minOffer      = listing.min_offer_price ?? Math.round(askingPrice * 0.75);
   const isTooLow      = offerNum > 0 && offerNum < minOffer;
 
-  // A valid offer is a whole-dollar amount over $1 that clears the minimum-offer
-  // floor and does not exceed the asking price.
-  const isValidOffer  = offerNum > 1 && !isTooLow && !isOverAsking;
+  // A valid offer is a whole-dollar amount over $1 that does not exceed the
+  // asking price. The minimum-offer floor is advisory only — buyers may still
+  // submit an offer below it (they just see the "too low" warning).
+  const isValidOffer  = offerNum > 1 && !isOverAsking;
 
   // Field-level error, shown in place of the Competitive/Low box. The empty/zero
   // case only surfaces after the buyer has interacted with the input.
