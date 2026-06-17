@@ -56,8 +56,8 @@ export default function OfferModal({ listing, buyerName, sellerName, onClose, on
 
   const offerNum      = parseFloat(offerAmount) || 0;
   // TEMP STUB — replace with item.min_offer_price once seeded in DB (see 20260618_seed_demo_offers.sql)
-  // Uses listing.min_offer_price when available; falls back to 70% of listed_price client-side
-  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.7);
+  // Uses listing.min_offer_price when available; falls back to 85% of listed_price client-side
+  const minOffer      = listing.min_offer_price ?? Math.round(listing.listed_price * 0.85);
   const isTooLow      = offerAmount !== "" && offerNum > 0 && offerNum < minOffer;
   const isValidOffer  = offerNum > 0 && offerNum <= 99999 && !isTooLow;
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
