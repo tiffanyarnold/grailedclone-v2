@@ -83,11 +83,22 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
         }
       : "unavailable";
 
-  // Validity is independent of the Competitive/Low label: ANY whole-dollar
-  // amount greater than $1 is acceptable. There is no floor/min-offer gate.
-  const isValidOffer  = offerNum > 1 && offerNum <= 99999;
-  // Field-level error only after the buyer has interacted with the input.
-  const showFieldError = touched && offerNum <= 0;
+  // Effective asking price (the discounted price if on sale) — offers may not
+  // exceed it. There is no floor/min-offer gate, only this ceiling.
+  const askingPrice   = listing.sale_price ?? listing.listed_price;
+  const isOverAsking  = offerNum > askingPrice;
+
+  // Validity is independent of the Competitive/Low label: any whole-dollar
+  // amount greater than $1 and no higher than the asking price is acceptable.
+  const isValidOffer  = offerNum > 1 && !isOverAsking;
+
+  // Field-level error, shown in place of the Competitive/Low box.
+  const fieldError =
+    touched && offerNum <= 0
+      ? "Please enter a valid dollar amount."
+      : isOverAsking
+        ? `Your offer can't be higher than the asking price of $${askingPrice.toLocaleString()}.`
+        : "";
   const deliveryExtra = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.extra ?? 0;
   const shipping      = BASE_SHIPPING + deliveryExtra;
   const estimatedTax  = isValidOffer ? Math.round(offerNum * TAX_RATE * 100) / 100 : 0;
@@ -205,7 +216,7 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
               {/* Dollar input — left aligned, full-width underline, integer only */}
               <div
                 className="flex items-center pb-1.5 mb-2"
-                style={{ borderBottom: `2px solid ${showFieldError ? "#CC0000" : "#1A1A1A"}` }}
+                style={{ borderBottom: `2px solid ${fieldError ? "#CC0000" : "#1A1A1A"}` }}
               >
                 <span className="text-[26px] font-normal mr-1 select-none text-[#BBBBBB]">$</span>
                 <input
@@ -225,9 +236,9 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
 
               {/* Field error (empty/invalid) OR Competitive/Low label + box.
                   These are mutually exclusive — one occupies the slot at a time. */}
-              {showFieldError ? (
+              {fieldError ? (
                 <p className="text-[12px] mb-3" style={{ color: "#CC0000" }}>
-                  Please enter a valid dollar amount.
+                  {fieldError}
                 </p>
               ) : (
                 <OfferPriceContext state={priceContext} offerAmount={offerNum} />
