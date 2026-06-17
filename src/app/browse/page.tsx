@@ -26,6 +26,8 @@ function BrowsePage() {
 
   const [brandFilter, setBrandFilter] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>(categoryParam);
+  const [sizeFilter, setSizeFilter] = useState<string[]>([]);
+  const [conditionFilter, setConditionFilter] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [sortBy, setSortBy] = useState("newest");
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -43,6 +45,8 @@ function BrowsePage() {
 
   const brands = useMemo(() => Array.from(new Set(listings.map((l) => l.brand))).sort(), [listings]);
   const categories = useMemo(() => Array.from(new Set(listings.map((l) => l.category))).sort(), [listings]);
+  const sizes = useMemo(() => Array.from(new Set(listings.map((l) => l.size).filter(Boolean))).sort(), [listings]);
+  const conditions = useMemo(() => Array.from(new Set(listings.map((l) => l.condition).filter(Boolean))).sort(), [listings]);
 
   const filteredListings = useMemo(() => {
     let result = [...listings];
@@ -76,6 +80,16 @@ function BrowsePage() {
       }
     }
 
+    // Size filter
+    if (sizeFilter.length > 0) {
+      result = result.filter((l) => sizeFilter.includes(l.size));
+    }
+
+    // Condition filter
+    if (conditionFilter.length > 0) {
+      result = result.filter((l) => conditionFilter.includes(l.condition));
+    }
+
     // Price range
     result = result.filter((l) => l.listed_price >= priceRange[0] && l.listed_price <= priceRange[1]);
 
@@ -89,7 +103,7 @@ function BrowsePage() {
     }
 
     return result;
-  }, [listings, localSearch, brandFilter, categoryFilter, priceRange, sortBy]);
+  }, [listings, localSearch, brandFilter, categoryFilter, sizeFilter, conditionFilter, priceRange, sortBy]);
 
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
@@ -153,6 +167,30 @@ function BrowsePage() {
               </div>
             </div>
 
+            {/* Size Filter */}
+            <div className="mb-6">
+              <h3 className="text-xs font-bold uppercase tracking-wide mb-2">Size</h3>
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                {sizes.map((size) => (
+                  <label key={size} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={sizeFilter.includes(size)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSizeFilter([...sizeFilter, size]);
+                        } else {
+                          setSizeFilter(sizeFilter.filter((s) => s !== size));
+                        }
+                      }}
+                      className="w-3.5 h-3.5 accent-black"
+                    />
+                    <span className="text-xs text-gray-700">{size}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="text-xs font-bold uppercase tracking-wide mb-2">Price</h3>
@@ -179,9 +217,20 @@ function BrowsePage() {
             <div className="mb-6">
               <h3 className="text-xs font-bold uppercase tracking-wide mb-2">Condition</h3>
               <div className="space-y-1.5">
-                {["New/Never Worn", "Gently Used"].map((cond) => (
+                {conditions.map((cond) => (
                   <label key={cond} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="w-3.5 h-3.5 accent-black" />
+                    <input
+                      type="checkbox"
+                      checked={conditionFilter.includes(cond)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setConditionFilter([...conditionFilter, cond]);
+                        } else {
+                          setConditionFilter(conditionFilter.filter((c) => c !== cond));
+                        }
+                      }}
+                      className="w-3.5 h-3.5 accent-black"
+                    />
                     <span className="text-xs text-gray-700">{cond}</span>
                   </label>
                 ))}
@@ -215,7 +264,7 @@ function BrowsePage() {
             </div>
 
             {/* Active Filters */}
-            {(brandFilter.length > 0 || categoryFilter) && (
+            {(brandFilter.length > 0 || categoryFilter || sizeFilter.length > 0 || conditionFilter.length > 0) && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {brandFilter.map((b) => (
                   <button
@@ -234,6 +283,24 @@ function BrowsePage() {
                     {categoryFilter} ✕
                   </button>
                 )}
+                {sizeFilter.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSizeFilter(sizeFilter.filter((x) => x !== s))}
+                    className="px-2 py-1 text-[10px] bg-gray-200 hover:bg-gray-300 font-medium"
+                  >
+                    Size {s} ✕
+                  </button>
+                ))}
+                {conditionFilter.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setConditionFilter(conditionFilter.filter((x) => x !== c))}
+                    className="px-2 py-1 text-[10px] bg-gray-200 hover:bg-gray-300 font-medium"
+                  >
+                    {c} ✕
+                  </button>
+                ))}
               </div>
             )}
 
@@ -251,9 +318,9 @@ function BrowsePage() {
             ) : filteredListings.length === 0 ? (
               <div className="py-20 text-center">
                 <p className="text-[14px] text-[#888] mb-3">No listings found.</p>
-                {(localSearch || brandFilter.length > 0 || categoryFilter) && (
+                {(localSearch || brandFilter.length > 0 || categoryFilter || sizeFilter.length > 0 || conditionFilter.length > 0) && (
                   <button
-                    onClick={() => { setLocalSearch(""); setBrandFilter([]); setCategoryFilter(""); }}
+                    onClick={() => { setLocalSearch(""); setBrandFilter([]); setCategoryFilter(""); setSizeFilter([]); setConditionFilter([]); }}
                     className="text-[12px] text-[#1A1A1A] underline hover:opacity-60"
                   >
                     Clear filters
