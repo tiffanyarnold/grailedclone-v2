@@ -8,22 +8,24 @@ const COLLECTIONS = [
     brands: "CHROME HEARTS, VIVIENNE WESTWOOD +MORE",
     title: "Chromed Out",
     categories: ["Accessories"],
+    forceStatic: true,
     fallbacks: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
-      "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80",
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
-      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80",
+      "https://media-assets.grailed.com/prd/listing/temp/aa15878df7314eccbdca98f758af1f9a?w=1600",
+      "https://media-assets.grailed.com/prd/listing/temp/f67eea646ba4414bac71fae449902513?w=800",
+      "https://media-assets.grailed.com/prd/listing/temp/6214f1ae6afc43a89fcaf87f850fdefb?w=1600",
+      "https://media-assets.grailed.com/prd/listing/temp/74a5f775eaf64004a048daf50b7e2ce2?w=1600",
     ],
   },
   {
     brands: "RICK OWENS, CELINE, JAPANESE BRAND +MORE",
     title: "Dark Luxury",
     categories: ["Outerwear"],
+    forceStatic: true,
     fallbacks: [
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80",
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80",
-      "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80",
-      "https://images.unsplash.com/photo-1520975954732-35dd22299614?w=800&q=80",
+      "https://media-assets.grailed.com/prd/listing/temp/5c5b20dc0cea4897bfbeded3d054bfaf?w=1600",
+      "https://media-assets.grailed.com/prd/listing/temp/611c0d40c81746f29dc5d84d30f2a8a6?w=1600",
+      "https://media-assets.grailed.com/prd/listing/temp/1a02a5d316b040babdec5c82daa32c15?w=1600",
+      "https://media-assets.grailed.com/prd/listing/temp/bca8b65f5c474813940f373eea94466c?w=800",
     ],
   },
   {
@@ -42,7 +44,14 @@ const COLLECTIONS = [
 export default function SecondaryCollections() {
   const { listings } = useStore();
 
-  const getSlots = (cats: string[], fallbacks: string[]) => {
+  const getSlots = (cats: string[], fallbacks: string[], forceStatic?: boolean) => {
+    if (forceStatic) {
+      return Array.from({ length: 4 }, (_, i) => ({
+        id: `fb-sec-${i}`,
+        title: "",
+        image_url: [fallbacks[i]],
+      }));
+    }
     const found = listings.filter((l) => cats.includes(l.category)).slice(0, 4);
     return Array.from({ length: 4 }, (_, i) =>
       found[i] ?? { id: `fb-sec-${i}`, title: "", image_url: [fallbacks[i]] }
@@ -53,7 +62,7 @@ export default function SecondaryCollections() {
     <section className="max-w-[1200px] mx-auto px-6 py-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {COLLECTIONS.map((col) => {
-          const slots = getSlots(col.categories, col.fallbacks);
+          const slots = getSlots(col.categories, col.fallbacks, (col as any).forceStatic);
           return (
             <div key={col.title}>
               <p

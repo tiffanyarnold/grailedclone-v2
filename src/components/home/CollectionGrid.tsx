@@ -20,12 +20,12 @@ const ROW_ONE = [
     brands: "From Grailed",
     title: "Get In Your Bag",
     categories: ["Accessories"],
-    forceStatic: false,
+    forceStatic: true,
     fallbacks: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
-      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80",
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80",
-      "https://images.unsplash.com/photo-1573408301185-9519f94f8b81?w=800&q=80",
+      "https://media-assets.grailed.com/prd/listing/temp/4383538a57124639ac52ee16d1cfc0f4?w=800",
+      "https://media-assets.grailed.com/prd/listing/temp/afa01f860a104e83a923a2961fb1e12e?w=800",
+      "https://media-assets.grailed.com/prd/listing/temp/42e1a1c77d4240dc8eddeb7d791a69f9?w=800",
+      "https://media-assets.grailed.com/prd/listing/47279145/bd322463ed3d4dd4ad7e62cdc78315c3?w=800",
     ],
   },
   {
