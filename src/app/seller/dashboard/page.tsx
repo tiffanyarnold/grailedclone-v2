@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star, Lock,
+  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star, Lock, Eye, Heart,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 
@@ -391,82 +391,142 @@ function SellerDashboardInner() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-[10px] gap-y-6">
                     {myListings.map((listing) => {
                       const offerCount = myOffers.filter(
                         (o) => o.listing_id === listing.id && o.status === "pending"
                       ).length;
+                      const watcherCount = (listing as any).watchers_count ?? 0;
+                      const hasSalePrice = (listing as any).sale_price && (listing as any).sale_price < listing.listed_price;
+                      const hasOriginalDiscount = (listing as any).original_price && (listing as any).original_price > listing.listed_price;
+                      const hasDiscount = hasSalePrice || hasOriginalDiscount;
+                      const discountPct = (listing as any).discount
+                        ? Math.round((listing as any).discount)
+                        : hasSalePrice
+                          ? Math.round((1 - (listing as any).sale_price / listing.listed_price) * 100)
+                          : hasOriginalDiscount
+                            ? Math.round((1 - listing.listed_price / (listing as any).original_price) * 100)
+                            : null;
+                      const displayPrice = hasSalePrice ? (listing as any).sale_price : listing.listed_price;
+                      const strikethroughPrice = hasSalePrice ? listing.listed_price : (listing as any).original_price;
+
                       return (
-                        <div
-                          key={listing.id}
-                          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white border border-[#E8E8E8] p-4 hover:border-[#C8C8C8] transition-colors"
-                        >
-                          {/* Thumbnail */}
-                          <Link href={`/listing/${listing.id}`} className="flex-shrink-0">
-                            <div className="w-[72px] h-[72px] bg-[#F2F2F2] overflow-hidden">
-                              <img
-                                src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
-                                alt={listing.title}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
-                              />
-                            </div>
+                        <div key={listing.id} className="group flex flex-col">
+
+                          {/* Image — 3/4 aspect ratio, same pattern as feed page */}
+                          <Link
+                            href={`/listing/${listing.id}`}
+                            className="block relative overflow-hidden bg-[#F2F2F2] border border-[#E0E0E0]"
+                            style={{ aspectRatio: "3 / 4" }}
+                          >
+                            <img
+                              src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60"}
+                              alt={listing.title}
+                              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
+                              onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=60"; }}
+                            />
+                            {offerCount > 0 && (
+                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#E85D00] text-white text-[9px] font-bold tracking-[0.04em]">
+                                {offerCount} OFFER{offerCount > 1 ? "S" : ""}
+                              </span>
+                            )}
                           </Link>
 
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#888] mb-0.5">
-                              {listing.brand}
+                          {/* Card info */}
+                          <div className="pt-[5px]">
+
+                            {/* Row 1: BRAND (bold) + SIZE (gray) */}
+                            <div className="flex items-baseline justify-between gap-1 leading-none mb-[2px]">
+                              <span
+                                className="text-[11px] font-bold text-[#1A1A1A] uppercase truncate"
+                                style={{ letterSpacing: "0.05em" }}
+                              >
+                                {listing.brand}
+                              </span>
+                              <span
+                                className="text-[11px] text-[#888] uppercase flex-shrink-0"
+                                style={{ letterSpacing: "0.04em" }}
+                              >
+                                {listing.size}
+                              </span>
+                            </div>
+
+                            {/* Row 2: title */}
+                            <p className="text-[12px] text-[#1A1A1A] leading-snug line-clamp-1 mb-[3px]">
+                              {listing.title}
                             </p>
-                            <Link href={`/listing/${listing.id}`}>
-                              <p className="text-[13px] font-semibold text-[#1A1A1A] truncate hover:underline">
-                                {listing.title}
-                              </p>
-                            </Link>
-                            <div className="flex flex-wrap items-center gap-3 mt-1">
-                              <span className="text-[13px] font-bold text-[#1A1A1A]">
-                                ${listing.listed_price.toLocaleString()}
-                              </span>
-                              <span className="text-[11px] text-[#888]">
-                                Size {listing.size} · {listing.condition}
-                              </span>
-                              {offerCount > 0 && (
-                                <span className="px-2 py-0.5 bg-[#FFF0E8] text-[#E85D00] text-[10px] font-bold tracking-[0.06em]">
-                                  {offerCount} OFFER{offerCount > 1 ? "S" : ""}
+
+                            {/* Row 3: price (+ strikethrough + % off if discounted) */}
+                            <div className="flex items-center gap-1 flex-wrap leading-none mb-[3px]">
+                              {hasDiscount ? (
+                                <>
+                                  <span className="text-[12px] font-bold text-[#CC0000]">
+                                    ${displayPrice.toLocaleString()}
+                                  </span>
+                                  {strikethroughPrice && (
+                                    <span className="text-[11px] text-[#888] line-through">
+                                      ${strikethroughPrice.toLocaleString()}
+                                    </span>
+                                  )}
+                                  {discountPct && (
+                                    <span className="text-[11px] text-[#888]">
+                                      {discountPct}% off
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-[12px] font-bold text-[#1A1A1A]">
+                                  ${listing.listed_price.toLocaleString()}
                                 </span>
                               )}
                             </div>
+
+                            {/* Row 4: location + watcher/heart metadata */}
+                            <div className="flex items-center justify-between">
+                              <p className="text-[11px] text-[#888]">United States</p>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {watcherCount > 0 && (
+                                  <span className="flex items-center gap-[3px] text-[#888]">
+                                    <Eye className="w-[13px] h-[13px]" strokeWidth={1.5} />
+                                    <span className="text-[11px]">{watcherCount}</span>
+                                  </span>
+                                )}
+                                <span className="flex items-center gap-[3px] text-[#AAAAAA]">
+                                  <Heart className="w-[13px] h-[13px]" fill="none" strokeWidth={1.5} />
+                                </span>
+                              </div>
+                            </div>
                           </div>
 
-                          {/* Action buttons */}
-                          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                          {/* Action buttons — equal width, full row */}
+                          <div className="flex items-center gap-[4px] mt-2.5">
                             <button
                               onClick={() => alert("Price Drop — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
+                              className="flex-1 flex items-center justify-center gap-1 py-[7px] text-[9px] font-bold tracking-[0.06em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                             >
-                              <TrendingDown className="w-3 h-3" />
-                              PRICE DROP
+                              <TrendingDown className="w-[11px] h-[11px]" />
+                              DROP
                             </button>
                             <button
                               onClick={() => alert("Bump — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
+                              className="flex-1 flex items-center justify-center gap-1 py-[7px] text-[9px] font-bold tracking-[0.06em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                             >
-                              <Zap className="w-3 h-3" />
+                              <Zap className="w-[11px] h-[11px]" />
                               BUMP
                             </button>
                             <button
                               onClick={() => alert("Send Offer — Demo")}
-                              className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold tracking-[0.08em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors whitespace-nowrap"
+                              className="flex-1 flex items-center justify-center gap-1 py-[7px] text-[9px] font-bold tracking-[0.06em] border border-[#D4D4D4] text-[#1A1A1A] hover:border-[#1A1A1A] hover:bg-[#F7F7F7] transition-colors"
                             >
-                              <Tag className="w-3 h-3" />
-                              SEND OFFER
+                              <Tag className="w-[11px] h-[11px]" />
+                              OFFER
                             </button>
                             <button
                               onClick={() => deleteListing(listing.id)}
-                              className="p-2 text-[#DC2626] border border-[#FECACA] hover:bg-red-50 transition-colors"
+                              className="py-[7px] px-2 text-[#DC2626] border border-[#FECACA] hover:bg-red-50 transition-colors flex-shrink-0"
                               title="Delete listing"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-[11px] h-[11px]" />
                             </button>
                           </div>
                         </div>
