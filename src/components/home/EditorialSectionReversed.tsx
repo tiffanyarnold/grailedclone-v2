@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store-context";
 
 const SECTION = {
   brands: "RICK OWENS, LEVI'S, JAPANESE BRAND +MORE",
-  title: "Leatherwork Mastery",
+  title: "The Outer Game",
   categories: ["Outerwear"],
   editorial: {
     categoryLabel: "Trending Now",

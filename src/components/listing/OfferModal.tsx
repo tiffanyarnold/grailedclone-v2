@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, Shield, CreditCard, Heart } from "lucide-react";
 import OfferPriceContext, { PriceContextState } from "./OfferPriceContext";
+import { getSellerRating } from "@/lib/data";
 
 interface Listing {
   id: string;
@@ -68,31 +69,35 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
   // whole number (0 when empty).
   const offerNum      = parseInt(offerAmount, 10) || 0;
 
-  // Tri-state for the Step 1 info box. The flag is resolved here ONCE, explicitly
-  // — never inferred downstream from "is the value null right now". A listing
-  // whose competitive range is genuinely absent settles to "unavailable" so the
-  // box renders nothing instead of an indefinite loading placeholder.
+  // Effective price — sale price when discounted, otherwise listed price.
+  // This is the basis for the competitive range and the ceiling.
+  const askingPrice   = listing.sale_price ?? listing.listed_price;
+
+  // Competitive range box: only shown when the listing has real price data
+  // (competitive_range_min is set). For new sellers with no data, renders
+  // nothing — no skeleton, no placeholder. When data exists, the displayed
+  // range is always derived from the effective sale/asking price (75%–95%)
+  // so it reflects the current discount rather than a stale DB value.
   const priceContext: PriceContextState = priceContextLoading
     ? "loading"
-    : typeof listing.competitive_range_min === "number" &&
-      typeof listing.competitive_range_max === "number"
-      ? {
-          min: listing.competitive_range_min,
-          max: listing.competitive_range_max,
+    : listing.competitive_range_min == null
+      ? "unavailable"
+      : {
+          min: Math.round(askingPrice * 0.75),
+          max: Math.round(askingPrice * 0.95),
           lastSold: listing.last_sold_price ?? null,
-        }
-      : "unavailable";
+        };
 
-  // Effective asking price (the discounted price if on sale) — offers may not
-  // exceed it. There is no floor/min-offer gate, only this ceiling.
-  const askingPrice   = listing.sale_price ?? listing.listed_price;
+  // Offers may not exceed the asking price — hard ceiling.
   const isOverAsking  = offerNum > askingPrice;
 
-  // Validity is independent of the Competitive/Low label: any whole-dollar
-  // amount greater than $1 and no higher than the asking price is acceptable.
+  // Valid = any whole-dollar amount over $1 up to the asking price.
+  // Below-range offers are advisory only (shown via the Low indicator in the
+  // price-context box) and do not block submission.
   const isValidOffer  = offerNum > 1 && !isOverAsking;
 
-  // Field-level error, shown in place of the Competitive/Low box.
+  // Field-level error replaces the price-context box only for blank input or
+  // over-ceiling offers. Below-range offers show the Low indicator instead.
   const fieldError =
     touched && offerNum <= 0
       ? "Please enter a valid dollar amount."
@@ -184,9 +189,10 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                   {/* Top row: brand + price */}
                   <div className="flex items-start justify-between gap-2 mb-0.5">
                     <p className="text-[12px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
-                    {/* Price: show sale_price + struck-through original if discounted, else just listed_price */}
+                    {/* Price: show sale_price + struck-through original only when actually
+                        discounted (sale_price below listed_price), else just listed_price */}
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {listing.sale_price ? (
+                      {listing.sale_price && listing.sale_price < listing.listed_price ? (
                         <>
                           <span className="text-[13px] font-bold text-[#1A1A1A]">${listing.sale_price.toLocaleString()}</span>
                           <span className="text-[12px] text-[#C0392B] line-through">${listing.listed_price.toLocaleString()}</span>
@@ -389,11 +395,17 @@ export default function OfferModal({ listing, buyerName, sellerName, priceContex
                       <span className="text-[11px] text-[#888]">Seller:</span>
                       <span className="text-[11px] text-[#2557D6] underline cursor-pointer">{sellerName || "Seller"}</span>
                       <span className="flex items-center" style={{ lineHeight: 1 }}>
-                        {[1,2,3,4,5].map((i) => (
-                          <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill="#F5A623" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
-                          </svg>
-                        ))}
+                        {(() => {
+                          // Same rating as the seller's public card / dashboard.
+                          const filled = listing.seller_id
+                            ? Math.round(getSellerRating(listing.seller_id).rating)
+                            : 5;
+                          return [1, 2, 3, 4, 5].map((i) => (
+                            <svg key={i} viewBox="0 0 12 12" width="10" height="10" fill={i <= filled ? "#F5A623" : "#E0E0E0"} xmlns="http://www.w3.org/2000/svg">
+                              <polygon points="6,1 7.5,4.5 11,4.8 8.5,7 9.3,10.5 6,8.5 2.7,10.5 3.5,7 1,4.8 4.5,4.5" />
+                            </svg>
+                          ));
+                        })()}
                       </span>
                     </div>
                   </div>
