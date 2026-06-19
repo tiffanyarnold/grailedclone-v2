@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star,
+  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Star, Lock,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 
@@ -483,8 +483,14 @@ function SellerDashboardInner() {
 
                 {/* ── RECEIVED offers (seller view) ── */}
                 <div>
-                  <h2 className="text-[15px] font-bold text-[#1A1A1A] mb-5">
+                  <h2 className="text-[15px] font-bold text-[#1A1A1A] mb-5 flex items-center gap-3">
                     Offers
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F2F2F2] rounded-full">
+                      <Lock className="w-3 h-3 text-[#888]" strokeWidth={2} />
+                      <span className="text-[10px] font-bold tracking-[0.08em] text-[#888] uppercase">
+                        PRO · AUTO-RESPONDER — COMING SOON
+                      </span>
+                    </span>
                   </h2>
 
                   {myOffers.length === 0 ? (
