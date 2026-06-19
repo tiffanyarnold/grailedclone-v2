@@ -303,6 +303,11 @@ export default function ListingDetailPage() {
               )}
             </div>
 
+            {/* Grailed Pro teaser — buyer side */}
+            <p className="text-[11px] text-center text-[#888]">
+              <span className="font-semibold text-[#1A1A1A]">Grailed Pro</span> — coming soon
+            </p>
+
             {/* Seller Description */}
             {listing.description && (
               <div className="border-t border-[#E8E8E8] pt-4">
