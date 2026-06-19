@@ -570,8 +570,11 @@ function SellerDashboardInner() {
                               offer.status !== "pending" ? "opacity-60" : ""
                             }`}
                           >
-                            {/* Thumbnail */}
-                            <div className="w-[64px] h-[64px] bg-[#F2F2F2] flex-shrink-0 overflow-hidden">
+                            {/* Thumbnail — 3/4 portrait ratio, same as feed page */}
+                            <div
+                              className="relative overflow-hidden bg-[#F2F2F2] border border-[#E0E0E0] flex-shrink-0"
+                              style={{ width: "64px", aspectRatio: "3 / 4" }}
+                            >
                               <img src={thumb} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }} />
                             </div>
 
