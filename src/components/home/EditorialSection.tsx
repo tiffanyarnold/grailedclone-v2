@@ -82,8 +82,8 @@ export default function EditorialSection() {
           </div>
         </div>
 
-        {/* Right — tall editorial image */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(300px, 50vw, 620px)" }}>
+        {/* Right — editorial image, height matched to adjacent grid */}
+        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(260px, 38vw, 480px)" }}>
           <img
             src={section.image}
             alt={section.title}

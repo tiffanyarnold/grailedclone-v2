@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
-import { Heart, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Bookmark, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import OfferModal from "@/components/listing/OfferModal";
 import StarRating from "@/components/ui/StarRating";
 import { getSellerRating } from "@/lib/data";
@@ -303,6 +303,16 @@ export default function ListingDetailPage() {
               {!user && (
                 <p className="text-[11px] text-center text-[#888]">Log in to buy or make an offer</p>
               )}
+            </div>
+
+            {/* Grailed Pro teaser — buyer side */}
+            <div className="flex justify-center">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F2F2F2] rounded-full">
+                <Lock className="w-3 h-3 text-[#888]" strokeWidth={2} />
+                <span className="text-[10px] font-bold tracking-[0.08em] text-[#888] uppercase">
+                  PRO · AUTO-SNIPE — COMING SOON
+                </span>
+              </span>
             </div>
 
             {/* Seller Description */}

@@ -415,7 +415,7 @@ function SellerDashboardInner() {
                                 <img
                                   src={listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"}
                                   alt={listing.title}
-                                  className="w-full h-full object-contain hover:opacity-90 transition-opacity"
+                                  className="w-full h-full object-cover hover:opacity-90 transition-opacity"
                                   onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                                 />
                               </div>
@@ -449,7 +449,10 @@ function SellerDashboardInner() {
                                   )}
                                 </div>
                                 {(listing.watchers_count ?? 0) > 0 && (
-                                  <span className="text-[11px] text-[#888] flex-shrink-0">{listing.watchers_count}♡</span>
+                                  <span className="flex items-center gap-[3px] text-[#888] flex-shrink-0">
+                                    <Eye className="w-[13px] h-[13px]" strokeWidth={1.5} />
+                                    <span className="text-[11px]">{listing.watchers_count}</span>
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -573,7 +576,7 @@ function SellerDashboardInner() {
                                           <img
                                             src={thumb}
                                             alt={listing.title}
-                                            className="w-full h-full object-contain hover:opacity-90 transition-opacity"
+                                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
                                             onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
                                           />
                                         </div>

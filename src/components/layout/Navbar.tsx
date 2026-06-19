@@ -25,6 +25,26 @@ const MOCK_DESIGNERS = [
   "Human Made",
 ];
 
+// Static Unsplash portrait avatars (no Supabase). A stable one is picked per
+// user from this pool so each buyer/seller keeps a consistent profile image.
+const AVATARS = [
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=faces&q=80",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=faces&q=80",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=faces&q=80",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=faces&q=80",
+  "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=120&h=120&fit=crop&crop=faces&q=80",
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop&crop=faces&q=80",
+];
+
+// Deterministic pick so the same user always gets the same avatar.
+function avatarFor(user?: { id?: string; name?: string } | null): string | undefined {
+  if (!user) return undefined;
+  const key = user.id || user.name || "";
+  let sum = 0;
+  for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
+  return AVATARS[sum % AVATARS.length];
+}
+
 export default function Navbar() {
   const { user, logout, openLoginModal } = useAuth();
   const { listings } = useStore();
@@ -137,6 +157,7 @@ export default function Navbar() {
   const designers = matchingDesigners();
   const popular = matchingPopular();
   const showDropdown = dropdownOpen;
+  const avatarSrc = avatarFor(user);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#D4D4D4]">
@@ -319,18 +340,25 @@ export default function Navbar() {
               <div className="relative" ref={avatarRef}>
                 <button
                   onClick={() => setAvatarOpen((o) => !o)}
-                  className="w-[30px] h-[30px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] flex items-center justify-center hover:opacity-80 transition-opacity overflow-hidden flex-shrink-0 relative"
+                  className="relative w-[30px] h-[30px] flex-shrink-0 hover:opacity-80 transition-opacity"
                 >
-                  <User className="w-[15px] h-[15px] text-[#666]" strokeWidth={1.5} />
+                  <span className="flex items-center justify-center w-full h-full rounded-full bg-[#E8E8E8] border border-[#D4D4D4] overflow-hidden">
+                    <NavAvatar src={avatarSrc} name={user.name} />
+                  </span>
                   {/* Red dot */}
                   <span className="absolute -top-[2px] -right-[2px] w-[8px] h-[8px] rounded-full bg-[#E53935] border-[1.5px] border-white" />
                 </button>
 
                 {avatarOpen && (
                   <div className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#E8E8E8] shadow-lg z-50 py-1">
-                    <div className="px-4 py-3 border-b border-[#E8E8E8]">
-                      <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{user.name}</p>
-                      <p className="text-[11px] text-[#888] truncate">{user.email}</p>
+                    <div className="px-4 py-3 border-b border-[#E8E8E8] flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] overflow-hidden flex-shrink-0">
+                        <NavAvatar src={avatarSrc} name={user.name} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{user.name}</p>
+                        <p className="text-[11px] text-[#888] truncate">{user.email}</p>
+                      </div>
                     </div>
                     <Link
                       href="/seller/dashboard"
@@ -490,8 +518,15 @@ export default function Navbar() {
             )}
             {user && (
               <div className="px-5 py-5 border-t border-[#E8E8E8]">
-                <p className="text-[13px] font-semibold text-[#1A1A1A] truncate mb-0.5">{user.name}</p>
-                <p className="text-[11px] text-[#888] truncate mb-3">{user.email}</p>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="flex items-center justify-center w-[38px] h-[38px] rounded-full bg-[#E8E8E8] border border-[#D4D4D4] overflow-hidden flex-shrink-0">
+                    <NavAvatar src={avatarSrc} name={user.name} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-[#1A1A1A] truncate mb-0.5">{user.name}</p>
+                    <p className="text-[11px] text-[#888] truncate">{user.email}</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => { logout(); setMobileOpen(false); }}
                   className="text-[12px] font-bold tracking-[0.08em] text-[#888] hover:text-[#1A1A1A] transition-colors"
@@ -505,6 +540,23 @@ export default function Navbar() {
       )}
 
     </header>
+  );
+}
+
+// Renders the profile image, falling back to the generic User icon if the
+// image is missing or fails to load.
+function NavAvatar({ src, name }: { src?: string; name?: string }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    return <User className="w-[15px] h-[15px] text-[#666]" strokeWidth={1.5} />;
+  }
+  return (
+    <img
+      src={src}
+      alt={name || "Profile"}
+      onError={() => setErr(true)}
+      className="w-full h-full object-cover"
+    />
   );
 }
 

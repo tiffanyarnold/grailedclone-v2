@@ -5,21 +5,22 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store-context";
 
-// Seeded stub items — used as fallback when store listings aren't available
+// Curated daily picks — static so the same items always show regardless of
+// which listings happen to be newest in the DB.
 const STUB_PICKS = [
   {
     id: "stub-1",
-    title: "Vintage 80s Adidas Sweatpants",
-    brand: "Adidas",
-    listed_price: 41,
-    image_url: ["https://storage.googleapis.com/tempo-image-previews/user_342dbn8Ny9Wjw4RsL8HHW4GAVYL-1781283172313-image.png"],
+    title: "Archive Silk Blouse",
+    brand: "Maison Margiela",
+    listed_price: 285,
+    image_url: ["https://media-assets.grailed.com/prd/listing/temp/3f6ceff009f54f9db777a332ba755663?w=800"],
   },
   {
     id: "stub-2",
-    title: "Undercover SS04 Tee",
-    brand: "Undercover",
-    listed_price: 185,
-    image_url: ["https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&q=80"],
+    title: "Zip Mini Skirt",
+    brand: "Acne Studios",
+    listed_price: 165,
+    image_url: ["https://media-assets.grailed.com/prd/listing/temp/90215ad01688466294b89cb18db90445?w=800"],
   },
   {
     id: "stub-3",
@@ -62,13 +63,8 @@ export default function DailyPicks() {
   const { listings } = useStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Use real listings if available (shuffle-ish: take newest first, limit 7), else stubs
-  const picks =
-    listings.length >= 4
-      ? [...listings]
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 7)
-      : STUB_PICKS;
+  // Always show curated picks so the same quality images appear every visit.
+  const picks = STUB_PICKS;
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;

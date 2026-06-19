@@ -44,8 +44,8 @@ export default function EditorialSectionReversed() {
       {/* Row: tall image on left, label+title+grid on right — items-start */}
       <div className="flex flex-col-reverse lg:flex-row gap-6 items-end">
 
-        {/* Left — tall editorial image */}
-        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(300px, 50vw, 620px)" }}>
+        {/* Left — editorial image, height matched to adjacent grid */}
+        <div className="flex-1 relative overflow-hidden" style={{ height: "clamp(260px, 38vw, 480px)" }}>
           <img
             src={SECTION.editorial.image}
             alt={SECTION.editorial.title}
