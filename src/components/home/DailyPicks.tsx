@@ -17,9 +17,9 @@ const STUB_PICKS = [
   },
   {
     id: "stub-2",
-    title: "Zip Mini Skirt",
-    brand: "Acne Studios",
-    listed_price: 165,
+    title: "Natrix Bag",
+    brand: "Balenciaga",
+    listed_price: 323,
     image_url: ["https://media-assets.grailed.com/prd/listing/temp/90215ad01688466294b89cb18db90445?w=800"],
   },
   {
@@ -27,14 +27,14 @@ const STUB_PICKS = [
     title: "Rick Owens DRKSHDW Cargo Pants",
     brand: "Rick Owens",
     listed_price: 290,
-    image_url: ["https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=600&q=80"],
+    image_url: ["https://media-assets.grailed.com/prd/listing/temp/20853a38d16943289d87cdd656a8c2fa?w=2200"],
   },
   {
     id: "stub-4",
     title: "Supreme Box Logo Hoodie FW20",
     brand: "Supreme",
     listed_price: 265,
-    image_url: ["https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80"],
+    image_url: ["https://media-assets.grailed.com/prd/listing/temp/4a280a6a13b34e69b540d0a653a524a0?w=1000"],
   },
   {
     id: "stub-5",

@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { useProfiles } from "@/lib/use-profiles";
 import {
-  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Eye, Lock,
+  Plus, Trash2, X, TrendingDown, Zap, Tag, Menu, MapPin, Eye, Heart, Lock,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import StarRating from "@/components/ui/StarRating";
@@ -389,7 +389,7 @@ function SellerDashboardInner() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-x-6">
+                  <div className="grid grid-cols-3 gap-x-6 gap-y-5">
                     {myListings.map((listing) => {
                       const offerCount = myOffers.filter(
                         (o) => o.listing_id === listing.id && o.status === "pending"
@@ -398,6 +398,8 @@ function SellerDashboardInner() {
                       const discountPct = hasSale
                         ? Math.round((1 - listing.sale_price! / listing.listed_price) * 100)
                         : null;
+                      const watchersCount = listing.watchers_count ?? 0;
+                      const likesCount = listing.likes_count ?? 0;
                       const timeAgo = (() => {
                         const diff = Date.now() - new Date(listing.created_at).getTime();
                         const days = Math.floor(diff / 86400000);
@@ -406,7 +408,7 @@ function SellerDashboardInner() {
                         return `${days} days ago`;
                       })();
                       return (
-                        <div key={listing.id} className="border-b border-[#E8E8E8] pb-3 mb-1">
+                        <div key={listing.id} className="border-b border-[#E8E8E8] pb-4 mb-1">
                           {/* Image + Info row */}
                           <div className="flex gap-3 mb-2">
                             {/* Thumbnail */}
@@ -427,34 +429,46 @@ function SellerDashboardInner() {
                             </Link>
 
                             {/* Info */}
-                            <div className="flex-1 min-w-0 pt-0.5">
-                              <p className="text-[10px] text-[#888] mb-0.5">{timeAgo}</p>
-                              <div className="flex items-baseline justify-between gap-1 mb-0.5">
+                            <div className="flex-1 min-w-0 pt-1.5">
+                              <p className="text-[10px] text-[#888] mb-1.5">{timeAgo}</p>
+                              <div className="flex items-baseline justify-between gap-1 mb-1">
                                 <p className="text-[13px] font-semibold text-[#1A1A1A] truncate">{listing.brand}</p>
                                 <p className="text-[11px] text-[#888] flex-shrink-0">{listing.size}</p>
                               </div>
                               <Link href={`/listing/${listing.id}`}>
-                                <p className="text-[11px] text-[#555] truncate hover:underline mb-1">{listing.title}</p>
+                                <p className="text-[11px] text-[#555] truncate hover:underline mb-1.5">{listing.title}</p>
                               </Link>
+
+                              {/* Price row: price left, icons right */}
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {hasSale ? (
-                                    <>
-                                      <span className="text-[12px] font-bold text-[#C0392B]">${listing.sale_price!.toLocaleString()}</span>
-                                      <span className="text-[11px] text-[#888] line-through">${listing.listed_price.toLocaleString()}</span>
-                                      <span className="text-[10px] text-[#888]">{discountPct}% off</span>
-                                    </>
-                                  ) : (
-                                    <span className="text-[12px] font-bold text-[#1A1A1A]">${listing.listed_price.toLocaleString()}</span>
-                                  )}
-                                </div>
-                                {(listing.watchers_count ?? 0) > 0 && (
-                                  <span className="flex items-center gap-[3px] text-[#888] flex-shrink-0">
-                                    <Eye className="w-[13px] h-[13px]" strokeWidth={1.5} />
-                                    <span className="text-[11px]">{listing.watchers_count}</span>
+                                <span className={`text-[12px] font-bold ${hasSale ? "text-[#C0392B]" : "text-[#1A1A1A]"}`}>
+                                  ${(hasSale ? listing.sale_price! : listing.listed_price).toLocaleString()}
+                                </span>
+                                {(watchersCount > 0 || likesCount > 0) && (
+                                  <span className="flex items-center gap-2 flex-shrink-0">
+                                    {watchersCount > 0 && (
+                                      <span className="flex items-center gap-[3px] text-[#888]">
+                                        <Eye className="w-[13px] h-[13px]" strokeWidth={1.5} />
+                                        <span className="text-[11px]">{watchersCount}</span>
+                                      </span>
+                                    )}
+                                    {likesCount > 0 && (
+                                      <span className="flex items-center gap-[3px] text-[#888]">
+                                        <Heart className="w-[13px] h-[13px]" strokeWidth={1.5} />
+                                        <span className="text-[11px]">{likesCount}</span>
+                                      </span>
+                                    )}
                                   </span>
                                 )}
                               </div>
+
+                              {/* Discount row: own line, only if sale */}
+                              {hasSale && (
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  <span className="text-[11px] text-[#888] line-through">${listing.listed_price.toLocaleString()}</span>
+                                  <span className="text-[10px] text-[#888]">{discountPct}% off</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -521,9 +535,8 @@ function SellerDashboardInner() {
                           const watchers = listing.watchers_count ?? 0;
                           const rMin = listing.competitive_range_min ?? null;
                           const rMax = listing.competitive_range_max ?? listing.listed_price;
-                          const single = items.length === 1;
                           return (
-                            <div key={listing.id} style={{ maxWidth: single ? 340 : 680 }}>
+                            <div key={listing.id} style={{ maxWidth: 480 }}>
                               {/* Item group title */}
                               <p className="text-[14px] font-semibold text-[#555] mb-2.5">
                                 {listing.title}{" "}
@@ -556,34 +569,36 @@ function SellerDashboardInner() {
                               )}
 
                               {/* Offer cards */}
-                              <div className={`grid gap-3 ${single ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+                              <div className="space-y-3">
                                 {items.map((offer) => {
                                   const buyer = getProfileById(offer.buyer_id);
                                   const thumb = listing.image_url?.[0] || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60";
-                                  // Same logic as buyer-side: no tag when the item
-                                  // has no competitive_range_min seeded.
                                   const label = getOfferLabel(offer.amount, listing.competitive_range_min);
+                                  const offerListingHasSale = listing.sale_price && listing.sale_price < listing.listed_price;
                                   return (
                                     <div
                                       key={offer.id}
-                                      className={`bg-white border border-[#E5E5E5] rounded-sm overflow-hidden ${
+                                      className={`bg-white border border-[#E5E5E5] rounded-sm overflow-hidden flex ${
                                         offer.status !== "pending" ? "opacity-60" : ""
                                       }`}
                                     >
-                                      {/* Thumbnail */}
-                                      <Link href={`/listing/${listing.id}`}>
-                                        <div className="aspect-[3/4] bg-[#F2F2F2] overflow-hidden">
-                                          <img
-                                            src={thumb}
-                                            alt={listing.title}
-                                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
-                                          />
-                                        </div>
+                                      {/* Image — left column, 33% width, portrait ratio */}
+                                      <Link
+                                        href={`/listing/${listing.id}`}
+                                        className="block relative overflow-hidden bg-[#F2F2F2] border-r border-[#E0E0E0] flex-shrink-0"
+                                        style={{ width: "33%", aspectRatio: "3 / 4" }}
+                                      >
+                                        <img
+                                          src={thumb}
+                                          alt={listing.title}
+                                          className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                                          onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&q=60"; }}
+                                        />
                                       </Link>
 
-                                      <div className="p-3">
-                                        {/* Top row: buyer + Competitive/Low tag */}
+                                      {/* Right column — flex col, buttons pinned to bottom */}
+                                      <div className="flex-1 p-3 flex flex-col min-w-0">
+                                        {/* Buyer name + tag */}
                                         <div className="flex items-center justify-between gap-2 mb-1.5">
                                           <span className="text-[12px] text-[#333] truncate">
                                             From: <strong>{buyer?.name || "Buyer"}</strong>
@@ -601,46 +616,57 @@ function SellerDashboardInner() {
                                           )}
                                         </div>
 
-                                        {/* Amount */}
-                                        <p className="text-[16px] font-bold text-[#111] mb-2.5">
+                                        {/* Offer amount */}
+                                        <p className="text-[16px] font-bold text-[#111] mb-1">
                                           ${offer.amount.toLocaleString()}
                                         </p>
 
-                                        {/* Actions */}
-                                        {offer.status === "pending" ? (
-                                          <>
-                                            <div className="flex gap-2">
-                                              <button
-                                                onClick={() => setAcceptingOffer(offer)}
-                                                className="flex-1 py-[7px] bg-[#111] text-white text-[12px] font-semibold rounded-sm hover:bg-black transition-colors"
-                                              >
-                                                Accept
-                                              </button>
-                                              <button
-                                                onClick={() => updateOfferStatus(offer.id, "declined")}
-                                                className="flex-1 py-[7px] border border-[#DDD] text-[#999] text-[12px] rounded-sm hover:border-[#999] hover:text-[#1A1A1A] transition-colors"
-                                              >
-                                                Decline
-                                              </button>
-                                            </div>
-                                            <button
-                                              onClick={() => {/* non-functional for demo */}}
-                                              className="mt-2 w-full text-[11px] text-[#2557D6] hover:underline transition-colors"
-                                            >
-                                              Message buyer
-                                            </button>
-                                          </>
-                                        ) : (
-                                          <span
-                                            className={`inline-block text-[11px] font-medium px-3 py-1.5 rounded-sm ${
-                                              offer.status === "accepted"
-                                                ? "text-green-600 bg-green-50"
-                                                : "text-[#888] bg-[#F7F7F7]"
-                                            }`}
-                                          >
-                                            {offer.status === "accepted" ? "Accepted ✓" : "Passed"}
-                                          </span>
+                                        {/* Sale info — only if listing is discounted */}
+                                        {offerListingHasSale && (
+                                          <p className="text-[11px] text-[#888] mb-1">
+                                            Item on sale:{" "}
+                                            <span className="line-through">${listing.listed_price.toLocaleString()}</span>{" "}
+                                            ${listing.sale_price!.toLocaleString()}
+                                          </p>
                                         )}
+
+                                        {/* Actions — pinned to bottom */}
+                                        <div style={{ marginTop: "auto" }}>
+                                          {offer.status === "pending" ? (
+                                            <>
+                                              <div className="flex gap-2 mb-2">
+                                                <button
+                                                  onClick={() => setAcceptingOffer(offer)}
+                                                  className="flex-1 py-[7px] bg-[#111] text-white text-[12px] font-semibold rounded-sm hover:bg-black transition-colors"
+                                                >
+                                                  Accept
+                                                </button>
+                                                <button
+                                                  onClick={() => updateOfferStatus(offer.id, "declined")}
+                                                  className="flex-1 py-[7px] border border-[#DDD] text-[#999] text-[12px] rounded-sm hover:border-[#999] hover:text-[#1A1A1A] transition-colors"
+                                                >
+                                                  Decline
+                                                </button>
+                                              </div>
+                                              <button
+                                                onClick={() => {/* non-functional for demo */}}
+                                                className="w-full text-[11px] text-[#2557D6] hover:underline transition-colors text-center"
+                                              >
+                                                Message buyer
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <span
+                                              className={`inline-block text-[11px] font-medium px-3 py-1.5 rounded-sm ${
+                                                offer.status === "accepted"
+                                                  ? "text-green-600 bg-green-50"
+                                                  : "text-[#888] bg-[#F7F7F7]"
+                                              }`}
+                                            >
+                                              {offer.status === "accepted" ? "Accepted ✓" : "Passed"}
+                                            </span>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   );
