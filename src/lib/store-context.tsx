@@ -26,6 +26,7 @@ export interface Listing {
   lowest_ask?: number | null;
   offer_acceptance_rate?: number | null;
   watchers_count?: number;
+  likes_count?: number;
   created_at: string;
   image_url: string[];
 }
